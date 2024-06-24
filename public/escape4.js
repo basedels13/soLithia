@@ -10,9 +10,10 @@
 //同じスートのエースは7としても扱うことができる
 
 //ドラッグ＆ドロップ　https://ics.media/tutorial-createjs/mouse_drag/
-//1回戻るボタン？
 
-//next　赤Kの下に黒Qを置けない？
+//next　アニメーション中の操作禁止 上げたカードを降ろす　ダブルクリックで上げる
+//未定→ 1回戻るボタン スマホ対応　破片強打（カードを左上に飛ばす）
+
 window.onload = function(){
 main();
 };
@@ -210,73 +211,6 @@ for(var i=0;i<hands.length;i++){
   newCard.addEventListener("pressmove", {card:HashCard,handleEvent:handleMove});
   newCard.addEventListener("pressup", {card:HashCard,handleEvent:handleUp});
   }
-};
-function DeckReset(p=0,point=0){
-switch(p){
-case 0:
-  deckmap.removeAllChildren();
-  decksNow=0;
-  DeckFacelists=[];
-  if(!decks.length){
-  decks=deckfaces.concat();
-  }
-  for(var i=0;i<decks.length;i++){
-    //ウラ
-    var newCard = new createjs.Bitmap(Card_src[0]);
-    newCard.x=50;
-    newCard.y=5;
-    deckmap.addChild(newCard);
-    Decklists.push(newCard); 
-  }
-  for(var i=0;i<decks.length;i++){
-    //オモテ
-    //山札のカードは負+カード数としてみる
-    var newCard = new createjs.Bitmap(Card_src[decks[i]]);
-    newCard.x=50;
-    newCard.y=5;
-    newCard.alpha=0;
-    deckmap.addChild(newCard);
-    DeckFacelists.push(newCard); 
-    var HashCard=-decks[i];
-    newCard.addEventListener("mousedown", {card:HashCard,handleEvent:handleDown});
-    newCard.addEventListener("pressmove", {card:HashCard,handleEvent:handleMove});
-    newCard.addEventListener("pressup", {card:HashCard,handleEvent:handleUp});
-  }
-  drawbuttom(10,50,decks.length,1,50,40);
-  break;
-default:
-  //p枚だけめくる
-  //decks->数字が格納された配列
-  //decklists->createが格納された配列
-  if(p>decks.length){
-    return false;
-  }
-  var TT=decks.shift();
-  deckfaces.push(TT);
-  var T=Decklists.pop();
-  var S=DeckFacelists[decksNow];
-  createjs.Tween.get(T)
-  .to({x:105,y:-10,scaleX:0.05,scaleY:1.2},70)
-  .to({alpha:0},10);
-  createjs.Tween.get(S)
-  .to({scaleX:0.05},70)
-  .to({scaleX:1,alpha:1},70)
-  .to({x:140},100)
-  .call(step);
-  function step(){
-    point+=1;
-    decksNow+=1;
-    if(point>=p){
-      //end
-      drawbuttom(10,50,decks.length,1,50,40);
-      return true;
-    }else{
-      DeckReset(p,point);
-    }
-    //次のカードへ
-  }
-  break;
-}
 };
 stage.addChild(Cstar); // 表示リストに追加
 //アップデートする
@@ -606,7 +540,7 @@ function emitParticles() {
     particle.graphics
             .beginFill(createjs.Graphics.getHSL(count, 50, 50))
             .drawCircle(0, 0, 30 * Math.random());
-    stage.addChild(particle);
+    yakumap.addChild(particle);
     particle.compositeOperation = "lighter";
     particle.alpha=0.25;
     // パーティクルの発生場所
@@ -648,7 +582,7 @@ function updateParticles() {
     // 寿命の判定
     if (particle.life <= 0) {
       // ステージから削除
-      stage.removeChild(particle);
+      yakumap.removeChild(particle);
       // 配列からも削除
       particles.splice(i, 1);
     }
@@ -662,7 +596,9 @@ arwD.addEventListener("mousedown", {card:'arwD',handleEvent:handleDown});
 arwD.addEventListener("pressmove", {card:'arwD',handleEvent:handleMove});
 arwD.addEventListener("pressup", {card:'arwD',handleEvent:handleUp});
 function ruleButton(event){
+  if(cLock){
   //ルール画像を表示/格納
+  cLock=false;
   switch(this.rule){
     default:
       if(opLock==0){
@@ -678,9 +614,82 @@ function ruleButton(event){
   }
 function step(){
   if(opLock==0){opLock=1}else{opLock=0};
+  cLock=true;
 }
-}
+}};
+function DeckReset(p=0,point=0){
+  cLock=false;
+  switch(p){
+  case 0:
+    deckmap.removeAllChildren();
+    decksNow=0;
+    DeckFacelists=[];
+    if(!decks.length){
+    decks=deckfaces.concat();
+    deckfaces=[];
+    }
+    for(var i=0;i<decks.length;i++){
+      //ウラ
+      var newCard = new createjs.Bitmap(Card_src[0]);
+      newCard.x=50;
+      newCard.y=5;
+      deckmap.addChild(newCard);
+      Decklists.push(newCard); 
+    }
+    for(var i=0;i<decks.length;i++){
+      //オモテ
+      //山札のカードは負+カード数としてみる
+      var newCard = new createjs.Bitmap(Card_src[decks[i]]);
+      newCard.x=50;
+      newCard.y=5;
+      newCard.alpha=0;
+      deckmap.addChild(newCard);
+      DeckFacelists.push(newCard); 
+      var HashCard=-decks[i];
+      newCard.addEventListener("mousedown", {card:HashCard,handleEvent:handleDown});
+      newCard.addEventListener("pressmove", {card:HashCard,handleEvent:handleMove});
+      newCard.addEventListener("pressup", {card:HashCard,handleEvent:handleUp});
+    }
+    drawbuttom(10,50,decks.length,1,50,40);
+    cLock=true;
+    break;
+  default:
+    //p枚だけめくる
+    //decks->数字が格納された配列
+    //decklists->createが格納された配列
+    if(p>decks.length){
+      return false;
+    }
+    var TT=decks.shift();
+    deckfaces.push(TT);
+    var T=Decklists.pop();
+    var S=DeckFacelists[decksNow];
+    createjs.Tween.get(T)
+    .to({x:105,y:-10,scaleX:0.05,scaleY:1.2},70)
+    .to({alpha:0},10);
+    createjs.Tween.get(S)
+    .to({scaleX:0.05},70)
+    .to({scaleX:1,alpha:1},70)
+    .to({x:140},100)
+    .call(step);
+    function step(){
+      point+=1;
+      decksNow+=1;
+      if(point>=p){
+        //end
+        drawbuttom(10,50,decks.length,1,50,40);
+        cLock=true;
+        return true;
+      }else{
+        DeckReset(p,point);
+      }
+      //次のカードへ
+    }
+    break;
+  }
+  };
 function handleDown(event) {
+  if(cLock && opLock==0){
   switch(this.card){
     case "arwD":
   dragPointX = stage.mouseX - arwD.x;
@@ -734,8 +743,9 @@ function handleDown(event) {
     }
     return false;
   }
-}
+}};
 function handleMove(event) {
+  if(cLock && opLock==0){
   switch(this.card){
     case "arwD":
       arwD.x = stage.mouseX-dragPointX;
@@ -770,7 +780,7 @@ function handleMove(event) {
           return false;
         }
       }
-      var X=0;
+      var X=1-hands[I].length+J;
       for(var i=J;i<hands[I].length;i++){
         var T=Cardlists[I][i];
         T.x = stage.mouseX-dragPointX;
@@ -782,9 +792,10 @@ function handleMove(event) {
         T.y = stage.mouseY-dragPointY;
       }
   break;
-}};
+}}};
 function handleUp(event) {
   //console.log(stage.mouseX,stage.mouseY);
+  if(cLock && opLock==0){
   switch(this.card){
     case "arwD":
       arwD.alpha=1;
@@ -792,6 +803,7 @@ function handleUp(event) {
   default:
     if(this.card<0){
       //デッキのカード
+      cLock=false;
       var X=-1*this.card
       console.log(deckfaces[deckfaces.length-1],X);
       if(deckfaces[deckfaces.length-1]==X){
@@ -816,7 +828,9 @@ function handleUp(event) {
             newCard.y=T.y
             field.addChild(newCard);
             //extraへ追加
-            createjs.Tween.get(newCard).to({x:50+(TX+3)*(cardWidth+cardgapX),y:5},70);
+            createjs.Tween.get(newCard)
+            .to({x:50+(TX+3)*(cardWidth+cardgapX),y:5},70)
+            .call(endPhase);
             Exlists[TX].push(newCard);
             //cardlistから消去
             deckmap.removeChild(T);
@@ -863,7 +877,9 @@ function handleUp(event) {
               newCard.addEventListener("mousedown", {card:HashCard,handleEvent:handleDown});
               newCard.addEventListener("pressmove", {card:HashCard,handleEvent:handleMove});
               newCard.addEventListener("pressup", {card:HashCard,handleEvent:handleUp});
-              createjs.Tween.get(newCard).to({x:50+TX*(cardWidth+cardgapX),y:150+(hands[TX].length-1)*cardgapY},70);
+              createjs.Tween.get(newCard)
+              .to({x:50+TX*(cardWidth+cardgapX),y:150+(hands[TX].length-1)*cardgapY},70)
+              .call(endPhase);
               //cardlistから消去
               deckmap.removeChild(T);
               DeckFacelists.splice(decksNow-1,1);
@@ -881,6 +897,7 @@ function handleUp(event) {
       return true;
     }
     //一般のカード
+    cLock=false;
     var I=Math.floor(this.card/100);
     var J=this.card%100;
     var T=Cardlists[I][J];
@@ -904,7 +921,9 @@ function handleUp(event) {
             newCard.y=T.y
             field.addChild(newCard);
             //extraへ追加
-            createjs.Tween.get(newCard).to({x:50+(TX+3)*(cardWidth+cardgapX),y:5},70);
+            createjs.Tween.get(newCard)
+            .to({x:50+(TX+3)*(cardWidth+cardgapX),y:5},70)
+            .call(endPhase);
             Exlists[TX].push(newCard);
             //cardlistから消去
             field.removeChild(T);
@@ -955,7 +974,9 @@ function handleUp(event) {
               newCard.addEventListener("mousedown", {card:HashCard,handleEvent:handleDown});
               newCard.addEventListener("pressmove", {card:HashCard,handleEvent:handleMove});
               newCard.addEventListener("pressup", {card:HashCard,handleEvent:handleUp});
-              createjs.Tween.get(newCard).to({x:50+TX*(cardWidth+cardgapX),y:150+(hands[TX].length-1)*cardgapY},70);
+              createjs.Tween.get(newCard)
+              .to({x:50+TX*(cardWidth+cardgapX),y:150+(hands[TX].length-1)*cardgapY},70)
+              .call(endPhase);
               //cardlistから消去
               field.removeChild(T)
               X+=1;
@@ -971,19 +992,24 @@ function handleUp(event) {
         ExitCard();
       }
     };
+    //Yes
+    function endPhase(){
+      cLock=true;
+    }
     //No
     function ExitCard(t=0){
       if(t==-1){
         //山札
         var T=DeckFacelists[decksNow-1];
         createjs.Tween.get(T)
-        .to({x:50+cardWidth+cardgapX,y:5},90);
+        .to({x:50+cardWidth+cardgapX,y:5},90)
+        .call(endPhase);
         T.alpha=1;  
         return true; 
       }
       if(J < hands[I].length){
         for(var i=J;i<hands[I].length-1;i++){
-          console.log(i,J,hands[I][i])
+          //console.log(i,J,hands[I][i])
           var A=hands[I][i]%13;
           var B=hands[I][i+1]%13;
           if(A==0){A+=13};
@@ -991,6 +1017,7 @@ function handleUp(event) {
           var C=Math.floor((hands[I][i]-1)/13);
           var D=Math.floor((hands[I][i+1]-1)/13);
           if(A-B!==1 || (C+D)%2==0){
+            cLock=true;
             return false;
           }
         }
@@ -998,18 +1025,20 @@ function handleUp(event) {
         for(var i=J;i<hands[I].length;i++){
           var T=Cardlists[I][i];
           createjs.Tween.get(T)
-          .to({x:50+I*(cardWidth+cardgapX),y:150+(J+X)*cardgapY},90);
+          .to({x:50+I*(cardWidth+cardgapX),y:150+(J+X)*cardgapY},90)
+          .call(endPhase);
           T.alpha=1;
           X+=1;
           }
     }else{
       createjs.Tween.get(T)
-      .to({x:50+I*(cardWidth+cardgapX),y:150+J*cardgapY},90);
+      .to({x:50+I*(cardWidth+cardgapX),y:150+J*cardgapY},90)
+      .call(endPhase);
       T.alpha=1;    
       }
     }
   }
-};
+}};
 canvas5.onmousedown = mouseDownListener;
 function mouseDownListener(e) {
   createjs.Ticker.addEventListener("tick", MouseCircle);
@@ -1102,6 +1131,7 @@ function onMouseOut() {
   return false;
         }};
     if(gamestate==0){
+      if(cLock){
         if(mouseX>70 && mouseX <150){
           if(mouseY>4 && mouseY<134){
             //デッキのカードをめくる
@@ -1111,7 +1141,7 @@ function onMouseOut() {
             DeckReset();
           }
           }}
-    }
+    }};
 if(gamestate==10 && loadstate >=loadmax){
   //メニュー画面へ
   if(pagestate==-1){
