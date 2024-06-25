@@ -11,8 +11,8 @@
 
 //ドラッグ＆ドロップ　https://ics.media/tutorial-createjs/mouse_drag/
 
-//next　アニメーション中の操作禁止 上げたカードを降ろす　ダブルクリックで上げる
-//未定→ 1回戻るボタン スマホ対応　破片強打（カードを左上に飛ばす）
+//next　上げたカードを降ろす　ダブルクリックで上げる 1回戻るボタン リセットボタン 
+//未定→ スマホ対応　破片強打（カードを左上に飛ばす）
 
 window.onload = function(){
 main();
@@ -88,7 +88,7 @@ arwD.scale=1;
 arwL.alpha=0;
 arwR.alpha=1;
 arwD.alpha=1;
-stage.addChild(arwD);
+//stage.addChild(arwD);
 //データベース
 var chrimg_src= new Array("VSB_baondot.png","VSB_elsdot.png","VSB_baonpf.png","VSB_elspf.png","VSB_garekidot.png");
 var Card_src= new Array('Card_images/BackColor_Black.png','Card_images/Spade01.png','Card_images/Spade02.png','Card_images/Spade03.png','Card_images/Spade04.png','Card_images/Spade05.png','Card_images/Spade06.png','Card_images/Spade07.png','Card_images/Spade08.png','Card_images/Spade09.png','Card_images/Spade10.png','Card_images/Spade11.png','Card_images/Spade12.png','Card_images/Spade13.png','Card_images/Heart01.png','Card_images/Heart02.png','Card_images/Heart03.png','Card_images/Heart04.png','Card_images/Heart05.png','Card_images/Heart06.png','Card_images/Heart07.png','Card_images/Heart08.png','Card_images/Heart09.png','Card_images/Heart10.png','Card_images/Heart11.png','Card_images/Heart12.png','Card_images/Heart13.png','Card_images/Club01.png','Card_images/Club02.png','Card_images/Club03.png','Card_images/Club04.png','Card_images/Club05.png','Card_images/Club06.png','Card_images/Club07.png','Card_images/Club08.png','Card_images/Club09.png','Card_images/Club10.png','Card_images/Club11.png','Card_images/Club12.png','Card_images/Club13.png','Card_images/Diamond01.png','Card_images/Diamond02.png','Card_images/Diamond03.png','Card_images/Diamond04.png','Card_images/Diamond05.png','Card_images/Diamond06.png','Card_images/Diamond07.png','Card_images/Diamond08.png','Card_images/Diamond09.png','Card_images/Diamond10.png','Card_images/Diamond11.png','Card_images/Diamond12.png','Card_images/Diamond13.png')
@@ -107,6 +107,8 @@ var cardWidth=80;//トランプの横幅
 var cardHeight=128;//トランプの縦幅
 var cardgapY=20;//トランプを重ねる時の
 var cardgapX=10;//行同士の隙間
+var duelLog=[];//アンドゥ用
+var handsLog=[];//リセット用
 switch(playMode[0]){
   case 1:
   //クロンダイク
@@ -130,14 +132,13 @@ switch(playMode[0]){
     cards = new Array(104);
     for (var i = 0;  i < cards.length;  i++  ) {cards[i]=Math.floor(i/13)+1}
     shuffle();
-    //console.log(cards[0],cards[51]);
     break;
   case 3:
     break;
 }
 yakumap_hint.addEventListener("click", {rule:playMode[0],handleEvent:ruleButton});
 
-//カード画像の読込
+//カード画像の読込（嘘）
 var cardback = new createjs.Bitmap('Card_images/BackColor_Black.png');
 var spa1 = new createjs.Bitmap('Card_images/Spade01.png');
 var spa2 = new createjs.Bitmap('Card_images/Spade02.png');
@@ -197,6 +198,7 @@ var diaK = new createjs.Bitmap('Card_images/Diamond13.png');
 
 //クロンダイク
 Cardlists=[[],[],[],[],[],[],[]]
+duelLog=[];
 for(var i=0;i<hands.length;i++){
   for(var j=0;j<hands[i].length;j++){
   var newCard = new createjs.Bitmap(Card_src[hands[i][j]]);
@@ -212,7 +214,7 @@ for(var i=0;i<hands.length;i++){
   newCard.addEventListener("pressup", {card:HashCard,handleEvent:handleUp});
   }
 };
-stage.addChild(Cstar); // 表示リストに追加
+//stage.addChild(Cstar); // 表示リストに追加
 //アップデートする
 createjs.Ticker.timingMode = createjs.Ticker.RAF;
 createjs.Ticker.addEventListener("tick",function(){
@@ -261,7 +263,7 @@ var pagetemp=-1;
 var msgstate=1;
 var msglength=2;
 var msgtemp=1;
-var gamestate =10;
+var gamestate =0;
 var startT = 0;
 var clearT = 0;
 var hour = 0;
@@ -464,37 +466,23 @@ var loadmax=1;
 function loadgraph(){
   cx3.fillStyle = "#e4e4e4";
   var A=loadstate/loadmax*600;
-    cx3.fillRect(100, 200, A, 50);
-    createjs.Tween.get(Cstar)
-    .to({x:A+100},300);
+    //cx3.fillRect(100, 200, A, 50);
+    //createjs.Tween.get(Cstar).to({x:A+100},300);
   loadstate+=1;
   console.log(loadstate,loadmax);
   if(loadstate>=loadmax){
-    createjs.Tween.get(Cstar)
-.to({x:700},300);
+    //createjs.Tween.get(Cstar).to({x:700},300);
     load2();
   }
 }
 img.src='Don_bg1.png';
 img.onload=function(){loadgraph();
 };
-cx3.fillStyle = "rgb(0,0,0)";
-cx3.fillRect(0, 0, 800, 600);
-cx3.font = "24px 'Century Gothic'";
-cx3.fillStyle = "#e4e4e4";
-cx3.fillText( "Now Loading…",300,360)
 
 function load2(){
   loadstate+=1;
   //saveUP();
   console.log(loadstate,loadmax);
-cx3.fillStyle = "rgb(0,0,0)";
-cx3.fillRect(0, 0, 800, 600);
-cx3.fillStyle = "#007fd9";
-cx3.fillRect(100, 200, 600, 50);
-cx3.font = "24px 'Century Gothic'";
-cx3.fillStyle = "#e4e4e4";
-cx3.fillText( "Click to Start",320,300)
 		cx.fillStyle = 'rgba(0, 0, 0, 0.5)';
 		cx.fillRect(710,0,90,510);
 		cx.beginPath();
@@ -513,7 +501,13 @@ var grad  = cx.createLinearGradient(0,510,0,600);
   cx.fillRect(0,60,800,450);
   cx.fillStyle ='rgba(100, 100, 100, 1)';
 	cx.fillRect(720,75,60,60);
+  cx.fillRect(720,140,60,60);
+  cx.fillRect(720,205,60,60);
+  cx.fillStyle ='rgba(0, 0, 0, 1)'
+  //cx.fillText('UNDO',727,180)
+  //cx.fillText('RESET',722,240)
   yakumap_hint.alpha=1;
+  Gamestart();
 }
 createjs.Ticker.addEventListener("tick", UpdateParticles);
 function UpdateParticles(event){
