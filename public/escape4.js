@@ -19,7 +19,7 @@ main();
 };
 
 function main(){
-	const canvas = document.getElementById("canvas0");//ベースレイヤ。背景、置物
+	var canvas = document.getElementById("canvas0");//ベースレイヤ。背景、置物
   var canvas1 = document.getElementById("canvas1");//
   var canvas2 = document.getElementById("canvas2");//
 	var canvas3 = document.getElementById("canvas3");//カーソル
@@ -34,6 +34,7 @@ function main(){
   var cx4 = canvas4.getContext("2d");
   var cx5 = canvas5.getContext("2d");
 var stage = new createjs.Stage("canvas5");//Stage
+createjs.Touch.enable(stage);//タップに対応する
 var graphics;
 graphics=new createjs.Graphics();
 graphics
