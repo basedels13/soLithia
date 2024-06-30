@@ -23,8 +23,7 @@ function main(){
   var canvas1 = document.getElementById("canvas1");//
   var canvas2 = document.getElementById("canvas2");//
 	var canvas3 = document.getElementById("canvas3");//カーソル
-  var canvas7 = document.getElementById("canvas7");//createアニメーション用
-  var canvas4 = document.getElementById("canvas4");//createよりも上に書きたいもの
+  var canvas4 = document.getElementById("canvas4");//
   var canvas5 = document.getElementById("canvas5");//イベントキャッチ/カーソル/create
 	if ( ! canvas || ! canvas.getContext ) { return false; }
 	var cx = canvas.getContext("2d");
@@ -34,7 +33,31 @@ function main(){
   var cx4 = canvas4.getContext("2d");
   var cx5 = canvas5.getContext("2d");
 var stage = new createjs.Stage("canvas5");//Stage
+//canvasの拡大率を変更する
+//window.addEventListener('resize', onResize);
+//onResize();
+function onResize(e){
+  if(document.documentElement.clientWidth<800){
+    canvas.width=800;
+    canvas5.width=800;
+    stage.canvas.width=800;
+    cx.scale(document.documentElement.clientWidth/800,document.documentElement.clientWidth/800)
+    cx3.scale(document.documentElement.clientWidth/800,document.documentElement.clientWidth/800)
+    cx5.scale(document.documentElement.clientWidth/800,document.documentElement.clientWidth/800)
+    stage.scale=(document.documentElement.clientWidth/800,document.documentElement.clientWidth/800);
+  }else{
+    canvas.width=800;
+    canvas5.width=800;
+    stage.canvas.width=800;
+    cx.scale(document.documentElement.clientWidth/800,document.documentElement.clientWidth/800)
+    cx3.scale(document.documentElement.clientWidth/800,document.documentElement.clientWidth/800)
+    cx5.scale(document.documentElement.clientWidth/800,document.documentElement.clientWidth/800)
+    stage.scale=(document.documentElement.clientWidth/800,document.documentElement.clientWidth/800);
+  }
+}
+if (createjs.Touch.isSupported() == true) {
 createjs.Touch.enable(stage);//タップに対応する
+}
 var graphics;
 graphics=new createjs.Graphics();
 graphics
@@ -54,19 +77,38 @@ CorsorC.graphics
 //yakumap.addChild(rect);
 var Cnext = new createjs.Container();//コンテナ
 var deckmap = new createjs.Container();
+var Backyard = new createjs.Container();//背景
 var field = new createjs.Container();//field
 var yakumap = new createjs.Container();//config
 var Tempmap = new createjs.Container();
+var clearBG = new createjs.Container();//clear
+stage.addChild(Backyard);
 stage.addChild(field);
-field.addChild(deckmap);
+stage.addChild(deckmap);
 stage.addChild(Tempmap);
 stage.addChild(yakumap);
+stage.addChild(clearBG);
+var BG = new createjs.Bitmap("soL_back.png");
+BG.alpha=0.4;
+Backyard.addChild(BG);
 var yakumap_hint = new createjs.Bitmap("soL_hint.png");
 yakumap_hint.alpha=0;
 yakumap_hint.scale=0.6;
 yakumap_hint.x=720;
 yakumap_hint.y=75;
+var yakumap_undo = new createjs.Bitmap("soL_undo.png");
+yakumap_undo.alpha=0;
+yakumap_undo.scale=0.6;
+yakumap_undo.x=720;
+yakumap_undo.y=140;
+var yakumap_reset = new createjs.Bitmap("soL_hint.png");
+yakumap_reset.alpha=0;
+yakumap_reset.scale=0.6;
+yakumap_reset.x=720;
+yakumap_reset.y=205;
 yakumap.addChild(yakumap_hint);
+yakumap.addChild(yakumap_undo);
+yakumap.addChild(yakumap_reset);
 var yakumap_rule = new createjs.Bitmap("soL_rule1.png");
 yakumap_rule.alpha=0;
 yakumap_rule.x=800;
@@ -74,6 +116,9 @@ yakumap_rule.y=70;
 yakumap.addChild(yakumap_rule)
 var Msgwindow = new createjs.Bitmap("window_ds.png");
 Msgwindow.scale=100/128;
+var clear_1 = new createjs.Bitmap("soL_clear_1.png");
+var clear_2 = new createjs.Bitmap("soL_clear_2.png");
+var clear_3 = new createjs.Bitmap("soL_clear_3.png");
 var arwL = new createjs.Bitmap('Winedom_arrowleft.png');
 var arwR = new createjs.Bitmap('Winedom_arrowright.png');
 var arwD = new createjs.Bitmap('Winedom_arrowdown.png');
@@ -110,35 +155,10 @@ var cardgapY=20;//トランプを重ねる時の
 var cardgapX=10;//行同士の隙間
 var duelLog=[];//アンドゥ用
 var handsLog=[];//リセット用
-switch(playMode[0]){
-  case 1:
-  //クロンダイク
-  cards = new Array(52);
-  for (var i = 0;  i < cards.length;  i++  ) {cards[i]=i+1}
-  shuffle();
-  //console.log(cards[0],cards[51]);
-  hands = [
-    cards.splice(0, 1),
-    cards.splice(0, 2),
-    cards.splice(0, 3),
-    cards.splice(0, 4),
-    cards.splice(0, 5),
-    cards.splice(0, 6),
-    cards.splice(0, 7),
-  ]
-  decks = cards.concat();
-  //console.log(decks,decks.length);
-    break;
-  case 2:
-    cards = new Array(104);
-    for (var i = 0;  i < cards.length;  i++  ) {cards[i]=Math.floor(i/13)+1}
-    shuffle();
-    break;
-  case 3:
-    break;
-}
-yakumap_hint.addEventListener("click", {rule:playMode[0],handleEvent:ruleButton});
 
+yakumap_hint.addEventListener("click", {rule:playMode[0],handleEvent:ruleButton});
+yakumap_reset.addEventListener("click", {rule:playMode[0],handleEvent:resetButton});
+yakumap_undo.addEventListener("click", {rule:playMode[0],handleEvent:undoButton});
 //カード画像の読込（嘘）
 var cardback = new createjs.Bitmap('Card_images/BackColor_Black.png');
 var spa1 = new createjs.Bitmap('Card_images/Spade01.png');
@@ -197,25 +217,6 @@ var diaJ = new createjs.Bitmap('Card_images/Diamond11.png');
 var diaQ = new createjs.Bitmap('Card_images/Diamond12.png');
 var diaK = new createjs.Bitmap('Card_images/Diamond13.png');
 
-//クロンダイク
-Cardlists=[[],[],[],[],[],[],[]]
-duelLog=[];
-for(var i=0;i<hands.length;i++){
-  for(var j=0;j<hands[i].length;j++){
-  var newCard = new createjs.Bitmap(Card_src[hands[i][j]]);
-  newCard.x=50+i*(cardWidth+cardgapX);
-  newCard.y=150+j*cardgapY;
-  field.addChild(newCard);
-  Cardlists[i].push(newCard);
-  //アニメーションを用意しておく
-  //i列目のj行目でアクセスする
-  var HashCard=i*100+j;
-  newCard.addEventListener("mousedown", {card:HashCard,handleEvent:handleDown});
-  newCard.addEventListener("pressmove", {card:HashCard,handleEvent:handleMove});
-  newCard.addEventListener("pressup", {card:HashCard,handleEvent:handleUp});
-  }
-};
-//stage.addChild(Cstar); // 表示リストに追加
 //アップデートする
 createjs.Ticker.timingMode = createjs.Ticker.RAF;
 createjs.Ticker.addEventListener("tick",function(){
@@ -252,7 +253,6 @@ var mute="ON"
 var alpha = 0;
 var debugmode=true;//座標の表示を管理
 var loadstate=0;
-var view = 0
 var cLock=true;//true->操作可能
 var opLock=0;
 var mLock=0;//1->メッセージ送りもーど
@@ -271,7 +271,6 @@ var hour = 0;
 var min = 0;
 var sec = 0;
 var datet =0;
-var Hand = "0";
 
 //保存するデータ
 var vBar=1;
@@ -513,6 +512,7 @@ var grad  = cx.createLinearGradient(0,510,0,600);
 createjs.Ticker.addEventListener("tick", UpdateParticles);
 function UpdateParticles(event){
   updateParticles();
+  if(duelLog.length){yakumap_undo.alpha=1;}else{yakumap_undo.alpha=0;}
 }
 function MouseCircle(event){
   //クリックした場所を教える
@@ -539,8 +539,10 @@ function emitParticles() {
     particle.compositeOperation = "lighter";
     particle.alpha=0.25;
     // パーティクルの発生場所
-    particle.x = stage.mouseX;
-    particle.y = stage.mouseY;
+    //particle.x = stage.mouseX;
+    //particle.y = stage.mouseY;
+    particle.x = stage.mouseX*(1/stage.scaleX);
+    particle.y = stage.mouseY*(1/stage.scaleY);
     // 動的にプロパティーを追加します。
     // 速度
     particle.vx = 6 * (Math.random() - 0.5);
@@ -583,13 +585,9 @@ function updateParticles() {
     }
   }
 }
-//ドラッグアンドドロップの実験
+//ドラッグアンドドロップ
 var dragPointX;
 var dragPointY;
-
-arwD.addEventListener("mousedown", {card:'arwD',handleEvent:handleDown});
-arwD.addEventListener("pressmove", {card:'arwD',handleEvent:handleMove});
-arwD.addEventListener("pressup", {card:'arwD',handleEvent:handleUp});
 function ruleButton(event){
   if(cLock){
   //ルール画像を表示/格納
@@ -612,6 +610,125 @@ function step(){
   cLock=true;
 }
 }};
+function undoButton(event){
+  if(cLock){
+  cLock=false;
+  switch(this.rule){
+    default:
+      if(!duelLog.length){
+        cLock=true;
+        return false};
+      var Ary=duelLog.pop();
+      console.log(Ary);
+      console.log(Ary.card,Ary.card[0]);
+      //-1 Deck 10- Ex
+          for(var i=0;i<Ary.card.length;i++){
+            var T=Ary.card[i];
+            switch(Ary.from){
+              case -1:
+                //deck
+                  //ウラ
+                  var newCard = new createjs.Bitmap(Card_src[0]);
+                  newCard.x=50;
+                  newCard.y=5;
+                  deckmap.addChild(newCard);
+                  Decklists.push(newCard); 
+                  //オモテ
+                  var newCard = new createjs.Bitmap(Card_src[T]);
+                  decks.push(T)
+                  deckmap.addChild(newCard);
+                  DeckFacelists.push(newCard); 
+                  var HashCard=-T;
+                  newCard.addEventListener("mousedown", {card:HashCard,handleEvent:handleDown});
+                  newCard.addEventListener("pressmove", {card:HashCard,handleEvent:handleMove});
+                  newCard.addEventListener("pressup", {card:HashCard,handleEvent:handleUp});
+                  switch(Ary.to){
+                    case 10:
+                      case 11:
+                        case 12:
+                          case 13:
+                  newCard.x=230+(Ary.to-10)*(cardWidth+cardgapX);
+                  newCard.y=5;
+                  newCard.alpha=1;
+                  createjs.Tween.get(newCard)
+                    .to({x:50,y:5},150)
+                    .to({alpha:0},70)
+                    .call(step);
+                    break;
+                    default:
+                  newCard.x=50+(Ary.to)*(cardWidth+cardgapX);
+                  newCard.y=150+(hands[Ary.to].length-1)*cardgapY;
+                  createjs.Tween.get(newCard)
+                  .to({x:50,y:5},150)
+                  .to({alpha:0},70)
+                  .call(step);
+                  }
+              break;
+              case 10:
+                case 11:
+                  case 12:
+                    case 13:
+                      break;
+              default:
+                var newCard = new createjs.Bitmap(Card_src[T]);
+                switch(Ary.to){
+                  case 10:
+                    case 11:
+                      case 12:
+                        case 13:
+                newCard.x=230+(Ary.to-10)*(cardWidth+cardgapX);
+                newCard.y=5;
+                  break;
+                  default:
+                newCard.x=50+(Ary.to)*(cardWidth+cardgapX);
+                newCard.y=150+(hands[Ary.to].length-1)*cardgapY;
+                }
+                field.addChild(newCard);
+                hands[Ary.from].push(T);
+                Cardlists[Ary.from].push(newCard);
+                var HashCard=Ary.from*100+hands[Ary.from].length-1;
+                newCard.addEventListener("mousedown", {card:HashCard,handleEvent:handleDown});
+                newCard.addEventListener("pressmove", {card:HashCard,handleEvent:handleMove});
+                newCard.addEventListener("pressup", {card:HashCard,handleEvent:handleUp});
+                createjs.Tween.get(newCard)
+                .to({x:50+Ary.from*(cardWidth+cardgapX),y:150+(hands[Ary.from].length-1)*cardgapY},70)
+                console.log(hands[Ary.from]);
+              break;
+            }
+            switch(Ary.to){
+              case 10:
+                case 11:
+                  case 12:
+                    case 13:
+                      //Ex
+                      var TX=Ary.to -10;
+                        Extras[TX]-=1;
+                        var T=Exlists[TX].pop();
+                        field.removeChild(T);
+                        step()
+                      break;
+              default:
+                var T=Cardlists[Ary.to].pop();
+                field.removeChild(T)
+                hands[Ary.to].pop();
+                step()
+                break;
+            }
+          }
+    break;
+  }
+function step(){
+  drawbuttom(10,50,decks.length,1,50,40);
+  cLock=true;
+}
+}};
+function resetButton(event){
+  //解決する
+  //handsの値が全て昇順の時のみ？
+  if(debugmode){
+  Gameover();
+  }
+}
 function DeckReset(p=0,point=0){
   cLock=false;
   switch(p){
@@ -686,11 +803,6 @@ function DeckReset(p=0,point=0){
 function handleDown(event) {
   if(cLock && opLock==0){
   switch(this.card){
-    case "arwD":
-  dragPointX = stage.mouseX - arwD.x;
-  dragPointY = stage.mouseY - arwD.y;
-  arwD.alpha=0.5;
-  break;
   default:
     console.log(this.card,DeckFacelists);
     if(this.card<0){
@@ -789,7 +901,6 @@ function handleMove(event) {
   break;
 }}};
 function handleUp(event) {
-  //console.log(stage.mouseX,stage.mouseY);
   if(cLock && opLock==0){
   switch(this.card){
     case "arwD":
@@ -832,9 +943,11 @@ function handleUp(event) {
             DeckFacelists.splice(decksNow-1,1);
             decksNow-=1;
             deckfaces.pop();
+            duelLog.push({card:[X],from:-1,to:10+TX});
+            console.log(duelLog);
             //クリア条件
             if(Extras[0]==13 && Extras[1]==26 && Extras[2]==39 && Extras[3]==52){
-              console.log('gameover')
+              Gameover();
             }
           }else{
             ExitCard(-1);            
@@ -880,6 +993,7 @@ function handleUp(event) {
               DeckFacelists.splice(decksNow-1,1);
               decksNow-=1;
               deckfaces.pop();
+              duelLog.push({card:[X],from:-1,to:TX});
         }else{
           ExitCard(-1);          
         }
@@ -910,6 +1024,7 @@ function handleUp(event) {
             case 2:
               case 3:
           if(hands[I][J]==Extras[TX]+1){
+            var C=hands[I][J];
             Extras[TX]+=1;
             var newCard = new createjs.Bitmap(Card_src[hands[I][J]]);
             newCard.x=T.x
@@ -924,9 +1039,10 @@ function handleUp(event) {
             field.removeChild(T);
             Cardlists[I].splice(J,1);
             hands[I].splice(J,1);
+            duelLog.push({card:[C],from:I,to:10+TX});
             //クリア条件
             if(Extras[0]==13 && Extras[1]==26 && Extras[2]==39 && Extras[3]==52){
-              console.log('gameover')
+              Gameover();
             }
           }else{
             ExitCard();            
@@ -977,8 +1093,9 @@ function handleUp(event) {
               X+=1;
               }
               Cardlists[I].splice(J,X);
-              hands[I].splice(J,X);
-              console.log(hands[TX]);
+              var Ary=hands[I].splice(J,X);
+              duelLog.push({card:Ary,from:I,to:TX});
+              console.log(duelLog);
         }else{
           ExitCard();          
         }
@@ -1051,8 +1168,8 @@ function mouseMoveListener(e) {
   cx3.fillStyle = "black";
 cx3.font = "12px Arial";
 if(debugmode){
-cx3.fillText("X座標：" + mouseX, 714, 22);
-cx3.fillText("Y座標：" + mouseY, 714, 34);
+cx3.fillText("X座標：" + Math.floor(mouseX*(1/stage.scaleX)), 714, 22);
+cx3.fillText("Y座標：" + Math.floor(mouseY*(1/stage.scaleY)), 714, 34);
 cx3.fillText("Lock：" + cLock, 714, 46);
 }else{
 cx3.font = "12px Arial";
@@ -1060,8 +1177,6 @@ cx3.fillText("SOUND", 715, 22);
 cx3.font = "Bold 24px Arial";
 cx3.fillText( mute, 730, 42);
 }
-if(view > 0 && view < 5){
-disp();}
 }
 canvas5.addEventListener('mouseout', onMouseOut, false);
 function onMouseOut() {
@@ -1137,6 +1252,16 @@ function onMouseOut() {
           }
           }}
     }};
+    if(gamestate==1 && cLock){
+      //次のゲームへ
+      clearBG.removeAllChildren();
+      //deckmap.removeAllChildren();
+      field.removeAllChildren();
+      //var Backyard = new createjs.Container();//背景
+      //var yakumap = new createjs.Container();//config
+      //var Tempmap = new createjs.Container();
+      Gamestart();
+    }
 if(gamestate==10 && loadstate >=loadmax){
   //メニュー画面へ
   if(pagestate==-1){
@@ -1158,9 +1283,68 @@ function Gamestart(){
     cx3.clearRect(0,0,800,600)
     cx4.clearRect(0,0,800,600)
     cx5.clearRect(0,0,800,450);
-    msgstate =0
-    view = 1;
     startT = Date.now();
+    switch(playMode[0]){
+      case 1:
+      //クロンダイク
+      cards = new Array(52);
+      for (var i = 0;  i < cards.length;  i++  ) {cards[i]=i+1}
+      shuffle();
+      //console.log(cards[0],cards[51]);
+      duelLog=[];
+      Cardlists=[[],[],[],[],[],[],[]]
+      handsLog=cards.concat();
+      hands = [
+        cards.splice(0, 1),
+        cards.splice(0, 2),
+        cards.splice(0, 3),
+        cards.splice(0, 4),
+        cards.splice(0, 5),
+        cards.splice(0, 6),
+        cards.splice(0, 7),
+      ]
+      decks = cards.concat();
+      //console.log(decks,decks.length);
+    for(var i=0;i<hands.length;i++){
+      for(var j=0;j<hands[i].length;j++){
+      var newCard = new createjs.Bitmap(Card_src[hands[i][j]]);
+      newCard.x=50+i*(cardWidth+cardgapX);
+      newCard.y=150+j*cardgapY;
+      field.addChild(newCard);
+      Cardlists[i].push(newCard);
+      //アニメーションを用意しておく
+      //i列目のj行目でアクセスする
+      var HashCard=i*100+j;
+      newCard.addEventListener("mousedown", {card:HashCard,handleEvent:handleDown});
+      newCard.addEventListener("pressmove", {card:HashCard,handleEvent:handleMove});
+      newCard.addEventListener("pressup", {card:HashCard,handleEvent:handleUp});
+      }
+    };
+        break;
+      case 2:
+        cards = new Array(104);
+        for (var i = 0;  i < cards.length;  i++  ) {cards[i]=Math.floor(i/13)+1}
+        shuffle();
+        break;
+      case 3:
+      //エルドリッチ
+      cards = new Array(52);
+      for (var i = 0;  i < cards.length;  i++  ) {cards[i]=i+1}
+      shuffle();
+      //console.log(cards[0],cards[51]);
+      duelLog=[];
+      handsLog=cards.concat();
+      hands = [
+        cards.splice(0, 13),
+        cards.splice(0, 13),
+        cards.splice(0, 13),
+        cards.splice(0, 13),
+      ]
+      //decks = cards.concat();
+      //console.log(decks,decks.length);
+        break;
+    }
+    
     printView();
     console.log('デュエル開始')  
   };
@@ -1304,119 +1488,6 @@ function compareFunc(a,b){return a-b;}
         cx2.fillText(word,x+10,y+25)
       }
       }
-    var MessageMng = function(ts=0,context=cx4){
-      //ts 0 開始　1 終了
-      console.log('MessageMng',ts);
-      if(ts==0){
-        mLock=1;
-        yakumap.removeAllChildren();
-        yakumap.alpha=1;
-        Msgwindow.x=0;
-        Msgwindow.y=300;
-        yakumap.addChild(Msgwindow);
-        createjs.Tween.get(Msgwindow)
-        .to({y:0},50);
-      }
-      if(ts==1){
-        mLock=-1;
-        createjs.Tween.get(Msgwindow)
-        .to({y:300},75);
-        yakumap.removeAllChildren();
-        yakumap.alpha=0;
-        context.clearRect(10,340,780,260);
-        switch(nowtalking){
-          case "アーリオ":
-            createjs.Tween.get(Elsdot, {override: true})
-            .to({x: 0, alpha:0}, 200, createjs.Ease.cubicInOut);
-            break;
-          case "カンラン":
-            createjs.Tween.get(Baondot, {override: true})
-            .to({x: 0, alpha:0}, 200, createjs.Ease.cubicInOut);
-            break;
-          default:
-            nowtalking=0;
-        }
-        return false;
-      }
-      Message(MessageLog[0]);
-    }
-  function Message(word,t=0,lx=60,ly=480,context=cx4){
-    console.log('Message',word)
-  //一文字ずつ表示して最後にぺちぺちさせる
-  switch(MessageLog[0]){
-  case "Alio":
-    nowtalking="アーリオ";
-    MessageLog.shift();
-    word=MessageLog.shift();
-    Baondot.alpha=0;//グラ削除は一括化予定
-    Elsdot.x=0;
-    Elsdot.alpha=1;
-    createjs.Tween.get(Elsdot, {override: true})
-    .to({x: 60}, 200, createjs.Ease.cubicInOut);
-    break;
-  case "Olive":
-    nowtalking="カンラン";
-    MessageLog.shift();
-    word=MessageLog.shift();
-    Elsdot.alpha=0;
-    Baondot.x=0;
-    Baondot.alpha=1;
-    createjs.Tween.get(Baondot, {override: true})
-    .to({x: 60}, 200, createjs.Ease.cubicInOut);
-    break;
-  case "None":
-    nowtalking=0;
-    MessageLog.shift();
-    word=MessageLog.shift();
-    Elsdot.alpha=0;
-    Baondot.alpha=0;
-    break;
-  }
-  ///mLock=1;
-  var x=lx;
-  var y=ly;
-  var textx=0;
-  var texty=0;
-  var lines = word.split('&');
-  context.textAlign = "start";
-  context.font="bold 32px 'メイリオ'"
-  context.fillStyle="white";
-  context.clearRect(10,340,780,260);
-var tflame=2;//メッセージ送りのスピード
-var texti=0;
-var line=lines[0];
-if(nowtalking){
-context.fillText(nowtalking,20,410);
-}
-console.log(lines);
-window.requestAnimationFrame((ts)=>MsgSplit(ts,0));
-return false;
-function MsgSplit(ts,T=0){
-  T+=1;
-  if(line == ''){
-  texti+=1;
-  texty+=35;
-  textx-=textx;
-  if(texti >= lines.length){
-    setTimeout(() => {
-      context.font="bold 22px 'メイリオ'"
-      context.fillText("▼",690,570)
-      window.requestAnimationFrame((ts)=>MsgEffect(ts));  
-    }, 150);
-    return false;
-  }
-  line=lines[texti]
-  };
-  if(T>tflame){
-    var c = line.slice(0, 1);
-    context.fillText(c,lx+textx,ly+texty);
-    line = line.slice(1);
-    textx+=32;
-    T=0;
-  }
-  window.requestAnimationFrame((ts)=>MsgSplit(ts,T));
-  }
-};
     function createRoundRect(x, y, width, height, radius,context){
           context.beginPath();
           context.moveTo(x + radius, y);
@@ -1513,4 +1584,48 @@ function MsgSplit(ts,T=0){
         break;
 }
     }
+    function Gameover(){
+      console.log('gameover');
+      if(gamestate==0){
+        cLock=false;
+      gamestate=1;
+      //createjs.Tween.get(field).to({alpha:0.5},1000)
+      clear_1.x=800;
+      clear_1.y=0;
+      clearBG.addChild(clear_1);
+      createjs.Tween.get(clear_1)
+      .to({x:0,alpha:1},300)
+      clear_2.x=-100;
+      clear_2.y=0;
+      clear_2.alpha=0;
+      clearBG.addChild(clear_2);
+      createjs.Tween.get(clear_2)
+      .to({x:0,alpha:1},300)
+      .wait(1000)
+      .call(nextgame)
+      Msgwindow.alpha=1;
+      Msgwindow.x=0;
+      Msgwindow.y=300;
+      clearBG.addChild(Msgwindow);
+      createjs.Tween.get(Msgwindow)
+      .to({y:0},50);
+      var t=new createjs.Text("リティア","28px メイリオ","white");
+      t.x=15;
+      t.y=380;
+      clearBG.addChild(t);
+      var t=new createjs.Text("リティア、一件解決！","24px メイリオ","white");
+      t.x=50;
+      t.y=440;
+      clearBG.addChild(t);
+      function nextgame(){
+        clear_3.x=0;
+        clear_3.y=0;
+        clear_3.alpha=0;
+        clearBG.addChild(clear_3);
+        createjs.Tween.get(clear_3)
+        .to({alpha:1},300)
+      drawbuttom(350,350,"クリックで再挑戦",0,170,35);
+      cLock=true;
+      }
+    }};
 };
