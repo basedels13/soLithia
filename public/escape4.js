@@ -11,7 +11,7 @@
 
 //ドラッグ＆ドロップ　https://ics.media/tutorial-createjs/mouse_drag/
 
-//next　上げたカードを降ろす　ダブルクリックで上げる 1回戻るボタン リセットボタン 
+//next　上げたカードを降ろす　ダブルクリックで上げる
 //未定→ スマホ対応　破片強打（カードを左上に飛ばす）
 
 window.onload = function(){
@@ -56,7 +56,7 @@ function onResize(e){
   }
 }
 if (createjs.Touch.isSupported() == true) {
-createjs.Touch.enable(stage);//タップに対応する
+//createjs.Touch.enable(stage);//タップに対応する
 }
 var graphics;
 graphics=new createjs.Graphics();
@@ -74,7 +74,6 @@ CorsorC.graphics
         .beginStroke("rgba(0,255,250,0.8)")
         .setStrokeStyle(3)
         .drawRoundRect(0, 0, 280, 24, 3, 3);
-//yakumap.addChild(rect);
 var Cnext = new createjs.Container();//コンテナ
 var deckmap = new createjs.Container();
 var Backyard = new createjs.Container();//背景
@@ -90,7 +89,7 @@ stage.addChild(yakumap);
 stage.addChild(clearBG);
 var BG = new createjs.Bitmap("soL_back.png");
 BG.alpha=0.4;
-Backyard.addChild(BG);
+//Backyard.addChild(BG);
 var yakumap_hint = new createjs.Bitmap("soL_hint.png");
 yakumap_hint.alpha=0;
 yakumap_hint.scale=0.6;
@@ -119,22 +118,7 @@ Msgwindow.scale=100/128;
 var clear_1 = new createjs.Bitmap("soL_clear_1.png");
 var clear_2 = new createjs.Bitmap("soL_clear_2.png");
 var clear_3 = new createjs.Bitmap("soL_clear_3.png");
-var arwL = new createjs.Bitmap('Winedom_arrowleft.png');
-var arwR = new createjs.Bitmap('Winedom_arrowright.png');
-var arwD = new createjs.Bitmap('Winedom_arrowdown.png');
-arwL.x=5;
-arwL.y=240;
-arwL.scale=0.25;
-arwR.x=655;
-arwR.y=240;
-arwR.scale=1;
-arwD.x=340;
-arwD.y=350;
-arwD.scale=1;
-arwL.alpha=0;
-arwR.alpha=1;
-arwD.alpha=1;
-//stage.addChild(arwD);
+
 //データベース
 var chrimg_src= new Array("VSB_baondot.png","VSB_elsdot.png","VSB_baonpf.png","VSB_elspf.png","VSB_garekidot.png");
 var Card_src= new Array('Card_images/BackColor_Black.png','Card_images/Spade01.png','Card_images/Spade02.png','Card_images/Spade03.png','Card_images/Spade04.png','Card_images/Spade05.png','Card_images/Spade06.png','Card_images/Spade07.png','Card_images/Spade08.png','Card_images/Spade09.png','Card_images/Spade10.png','Card_images/Spade11.png','Card_images/Spade12.png','Card_images/Spade13.png','Card_images/Heart01.png','Card_images/Heart02.png','Card_images/Heart03.png','Card_images/Heart04.png','Card_images/Heart05.png','Card_images/Heart06.png','Card_images/Heart07.png','Card_images/Heart08.png','Card_images/Heart09.png','Card_images/Heart10.png','Card_images/Heart11.png','Card_images/Heart12.png','Card_images/Heart13.png','Card_images/Club01.png','Card_images/Club02.png','Card_images/Club03.png','Card_images/Club04.png','Card_images/Club05.png','Card_images/Club06.png','Card_images/Club07.png','Card_images/Club08.png','Card_images/Club09.png','Card_images/Club10.png','Card_images/Club11.png','Card_images/Club12.png','Card_images/Club13.png','Card_images/Diamond01.png','Card_images/Diamond02.png','Card_images/Diamond03.png','Card_images/Diamond04.png','Card_images/Diamond05.png','Card_images/Diamond06.png','Card_images/Diamond07.png','Card_images/Diamond08.png','Card_images/Diamond09.png','Card_images/Diamond10.png','Card_images/Diamond11.png','Card_images/Diamond12.png','Card_images/Diamond13.png')
@@ -344,39 +328,22 @@ function SEbuffer(){
   }
 //立ち絵
 var img = new Image();
-var e1= new Image();
-var e2= new Image();
-var e3= new Image();
-var e4= new Image();
-var e5= new Image();
-//el icon
-var e6= new Image();
-//プロフィール立ち絵
-var e7= new Image();
-var e8= new Image();
-var e9= new Image();
-var e10= new Image();
-//背景
-var BGimg=new Image();
-var DPimg=new Image();
-//覚醒玉
-var DPicon=new Image();
-var zoom= new Image();
+
 var se1 = new Howl({
 src:"decision10.mp3",
 volume: 0.25,
 });
 var se2 = new Howl({
-  src:"cancel3.mp3",
-      volume: 0.3,
+  src:"card-flip.mp3",
+      volume: 0.4,
     });
 var se3 = new Howl({
   src:"decision32.mp3",
       volume: 0.3,
     });
 var se4 = new Howl({
-  src:"recovery2.mp3",
-      volume: 0.16,
+  src:"shufflecard2.mp3",
+      volume: 0.4,
     });
 var se5 = new Howl({
   src:"parameter_up.mp3",
@@ -504,8 +471,6 @@ var grad  = cx.createLinearGradient(0,510,0,600);
   cx.fillRect(720,140,60,60);
   cx.fillRect(720,205,60,60);
   cx.fillStyle ='rgba(0, 0, 0, 1)'
-  //cx.fillText('UNDO',727,180)
-  //cx.fillText('RESET',722,240)
   yakumap_hint.alpha=1;
   Gamestart();
 }
@@ -539,8 +504,6 @@ function emitParticles() {
     particle.compositeOperation = "lighter";
     particle.alpha=0.25;
     // パーティクルの発生場所
-    //particle.x = stage.mouseX;
-    //particle.y = stage.mouseY;
     particle.x = stage.mouseX*(1/stage.scaleX);
     particle.y = stage.mouseY*(1/stage.scaleY);
     // 動的にプロパティーを追加します。
@@ -787,6 +750,7 @@ function DeckReset(p=0,point=0){
     function step(){
       point+=1;
       decksNow+=1;
+      se2.play();
       if(point>=p){
         //end
         drawbuttom(10,50,decks.length,1,50,40);
@@ -859,7 +823,6 @@ function handleMove(event) {
       arwD.y = stage.mouseY-dragPointY;
   break;
   default:
-    //console.log(this.card);
     if(this.card<0){
       //デッキのカード
       var C=-1*this.card
@@ -903,9 +866,6 @@ function handleMove(event) {
 function handleUp(event) {
   if(cLock && opLock==0){
   switch(this.card){
-    case "arwD":
-      arwD.alpha=1;
-  break;
   default:
     if(this.card<0){
       //デッキのカード
@@ -1188,7 +1148,6 @@ function onMouseOut() {
  		var rect = e.target.getBoundingClientRect();
  		mouseX =  Math.floor(e.clientX - rect.left);
 		mouseY =  Math.floor(e.clientY - rect.top);
-  MouseCircle(e);
       console.log('clicked!',cLock)
 		if(mouseX>710 && mouseX <790){
           if(mouseY>10 && mouseY<48){          
@@ -1255,7 +1214,6 @@ function onMouseOut() {
     if(gamestate==1 && cLock){
       //次のゲームへ
       clearBG.removeAllChildren();
-      //deckmap.removeAllChildren();
       field.removeAllChildren();
       //var Backyard = new createjs.Container();//背景
       //var yakumap = new createjs.Container();//config
@@ -1283,6 +1241,7 @@ function Gamestart(){
     cx3.clearRect(0,0,800,600)
     cx4.clearRect(0,0,800,600)
     cx5.clearRect(0,0,800,450);
+    se4.play();
     startT = Date.now();
     switch(playMode[0]){
       case 1:
