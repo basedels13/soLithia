@@ -9,7 +9,6 @@
 //同じスートのエースは7としても扱うことができる
 
 //ドラッグ＆ドロップ　https://ics.media/tutorial-createjs/mouse_drag/
-
 //next　上げたカードを降ろす　ダブルクリックで上げる
 
 window.onload = function(){
@@ -74,20 +73,29 @@ CorsorC.graphics
         .drawRoundRect(0, 0, 280, 24, 3, 3);
 var Cnext = new createjs.Container();//コンテナ
 var deckmap = new createjs.Container();
-var Backyard = new createjs.Container();//背景
 var field = new createjs.Container();//field
 var yakumap = new createjs.Container();//config
 var Tempmap = new createjs.Container();
 var clearBG = new createjs.Container();//clear
+var Backyard = new createjs.Container();//タイトル/背景
 stage.addChild(Backyard);
 stage.addChild(field);
 stage.addChild(deckmap);
 stage.addChild(Tempmap);
 stage.addChild(yakumap);
 stage.addChild(clearBG);
+stage.addChild(Backyard);
+//たいとるがめん
+var shape = new createjs.Shape();
+shape.graphics.beginFill("#3b7353");
+shape.graphics.drawRect(0, 0, 800, 600); // 長方形を描画
+Backyard.addChild(shape); // 表示リストに追加
 var BG = new createjs.Bitmap("soL_back.png");
 BG.alpha=0.4;
-//Backyard.addChild(BG);
+Backyard.addChild(BG);
+var t = new createjs.Text("Click to START", "24px serif", "white");
+Backyard.addChild(t);
+
 var yakumap_hint = new createjs.Bitmap("soL_hint.png");
 yakumap_hint.alpha=0;
 yakumap_hint.scale=0.6;
@@ -143,6 +151,7 @@ yakumap_hint.addEventListener("click", {rule:playMode[0],handleEvent:ruleButton}
 yakumap_reset.addEventListener("click", {rule:playMode[0],handleEvent:resetButton});
 yakumap_undo.addEventListener("click", {rule:playMode[0],handleEvent:undoButton});
 retry_bt.addEventListener("click", {rule:playMode[0],handleEvent:Gamestart});
+shape.addEventListener("click", {rule:playMode[0],handleEvent:load2});
 //カード画像の読込（嘘）
 var cardback = new createjs.Bitmap('Card_images/BackColor_Black.png');
 var spa1 = new createjs.Bitmap('Card_images/Spade01.png');
@@ -248,7 +257,7 @@ var pagetemp=-1;
 var msgstate=1;
 var msglength=2;
 var msgtemp=1;
-var gamestate =0;
+var gamestate=10;
 var startT = 0;
 var clearT = 0;
 var hour = 0;
@@ -332,15 +341,15 @@ function SEbuffer(){
 var img = new Image();
 
 var se1 = new Howl({
-src:"decision10.mp3",
-volume: 0.25,
-});
+  src:"card-flip.mp3",
+      volume: 0.2,
+    });
 var se2 = new Howl({
   src:"card-flip.mp3",
       volume: 0.4,
     });
 var se3 = new Howl({
-  src:"decision32.mp3",
+  src:"button32.mp3",
       volume: 0.3,
     });
 var se4 = new Howl({
@@ -348,8 +357,8 @@ var se4 = new Howl({
       volume: 0.4,
     });
 var se5 = new Howl({
-  src:"parameter_up.mp3",
-  volume: 0.2,
+  src:"card-flip.mp3",
+      volume: 0.4,
     });
 var se6 = new Howl({
   src:"Marimbaglissando1.mp3",
@@ -360,68 +369,68 @@ var se7 = new Howl({
   volume: 0.3,
   });
 var se8 = new Howl({
-  src:"tukkomi2.mp3",
-  volume: 0.2,
+  src:"card-flip.mp3",
+      volume: 0.4,
   });
 var se9 = new Howl({
-  src:"critical1.mp3",
+  src:"rinbell.mp3",
   volume: 0.16,
   });
 var se10 = new Howl({
-  src:"throw_knife.mp3",
-  volume: 0.4,
+  src:"card-flip.mp3",
+      volume: 0.4,
   });
 var se11 = new Howl({
-  src:"Short_mistery_009.mp3",
-  volume: 0.3,
+  src:"card-flip.mp3",
+      volume: 0.4,
   });
 var se12 = new Howl({
-  src:"decision14.mp3",
-  volume: 0.2,
+  src:"card-flip.mp3",
+      volume: 0.4,
   });
 var se13 = new Howl({
-    src:"shakin.mp3",
+    src:"Enter.mp3",
     volume: 0.12,
     });
 var se14 = new Howl({
-  src:"scene2.mp3",
-  volume: 0.3,
+  src:"card-flip.mp3",
+      volume: 0.4,
   });
 var se15 = new Howl({
-  src:"money.mp3",
-  volume: 0.2,
+  src:"card-flip.mp3",
+      volume: 0.4,
   });
 var se16 = new Howl({
-  src:"hitSE6.mp3",
-  volume: 0.2,
+  src:"card-flip.mp3",
+      volume: 0.4,
   });
 var se17 = new Howl({
-  src:"sword3.mp3",
-  volume: 0.4,
+  src:"card-flip.mp3",
+      volume: 0.4,
   });
 var se18 = new Howl({
-  src:"sword5.mp3",
-  volume: 0.4,
+  src:"card-flip.mp3",
+      volume: 0.4,
   });
 var se19 = new Howl({
-  src:"sword2.mp3",
-  volume: 0.4,
+  src:"card-flip.mp3",
+      volume: 0.4,
   });
 var se20 = new Howl({
   src:"kaiju_foot.mp3",
   volume: 0.5,
   });
 var se21 = new Howl({
-  src:"sento_totunyu.mp3",
-  volume: 0.2,
+  src:"card-flip.mp3",
+      volume: 0.4,
   });
 var se22 = new Howl({
-  src:"status_up.mp3",
-  volume: 0.2,
+  src:"card-flip.mp3",
+      volume: 0.4,
     });
 var se23 = new Howl({
-  src:"syusoku.mp3",
-  volume: 0.12,
+  src:"card-flip.mp3",
+      volume: 0.4,
     });
 const bgm1data ={
     src: "Run_through_space.mp3",
@@ -430,27 +439,11 @@ const bgm1data ={
     volume: 0.2,
   };
 var Bgm=new Music(bgm1data);
-
-var loadmax=1;
-function loadgraph(){
-  cx3.fillStyle = "#e4e4e4";
-  var A=loadstate/loadmax*600;
-    //cx3.fillRect(100, 200, A, 50);
-    //createjs.Tween.get(Cstar).to({x:A+100},300);
-  loadstate+=1;
-  console.log(loadstate,loadmax);
-  if(loadstate>=loadmax){
-    //createjs.Tween.get(Cstar).to({x:700},300);
-    load2();
-  }
-}
-img.src='Don_bg1.png';
-img.onload=function(){loadgraph();
-};
+var loadmax;
 
 function load2(){
-  loadstate+=1;
-  //saveUP();
+  Backyard.alpha=0;
+  se6.play();
   console.log(loadstate,loadmax);
 		cx.fillStyle = 'rgba(0, 0, 0, 0.5)';
 		cx.fillRect(710,0,90,510);
@@ -583,6 +576,7 @@ function undoButton(event){
       if(!duelLog.length){
         cLock=true;
         return false};
+        se1.play();
       var Ary=duelLog.pop();
       console.log(Ary);
       console.log(Ary.card,Ary.card[0]);
@@ -788,6 +782,7 @@ function handleDown(event) {
       dragPointX = stage.mouseX - T.x;
       dragPointY = stage.mouseY - T.y;
       T.alpha=0.5;
+      se1.play()
       };
       return true;
     }
@@ -811,6 +806,7 @@ function handleDown(event) {
           return false;
         }
       }
+      se1.play()
       for(var i=J;i<hands[I].length;i++){
         var T=Cardlists[I][i];
       dragPointX = stage.mouseX - T.x;
@@ -819,6 +815,7 @@ function handleDown(event) {
       }
     }else{
       //最上段のカード
+      se1.play()
       dragPointX = stage.mouseX - T.x;
       dragPointY = stage.mouseY - T.y;
       T.alpha=0.5;
@@ -880,6 +877,7 @@ function handleUp(event) {
   default:
     if(this.card<0){
       //デッキのカード
+      se1.play()
       cLock=false;
       var X=-1*this.card
       console.log(deckfaces[deckfaces.length-1],X);
@@ -995,6 +993,7 @@ function handleUp(event) {
             case 2:
               case 3:
           if(hands[I][J]==Extras[TX]+1){
+            se1.play()
             var C=hands[I][J];
             Extras[TX]+=1;
             var newCard = new createjs.Bitmap(Card_src[hands[I][J]]);
@@ -1043,6 +1042,7 @@ function handleUp(event) {
         console.log(A,B,C,D);
         if((hands[TX].length==0 && A==13) || (B-A==1 && (C+D)%2==1)){
           //移動先に追加する
+            se1.play()
             var X=0;
             for(var i=J;i<hands[I].length;i++){
               var T=Cardlists[I][i];
@@ -1280,7 +1280,6 @@ function Gamestart(){
     cx3.clearRect(0,0,800,600)
     cx4.clearRect(0,0,800,600)
     cx5.clearRect(0,0,800,450);
-    se4.play();
     startT = Date.now();
     switch(playMode[0]){
       case 1:
@@ -1306,8 +1305,10 @@ function Gamestart(){
     for(var i=0;i<hands.length;i++){
       for(var j=0;j<hands[i].length;j++){
       var newCard = new createjs.Bitmap(Card_src[hands[i][j]]);
-      newCard.x=50+i*(cardWidth+cardgapX);
-      newCard.y=150+j*cardgapY;
+      newCard.x=50;
+      newCard.y=5;
+      //newCard.x=50+i*(cardWidth+cardgapX);
+      //newCard.y=150+j*cardgapY;
       field.addChild(newCard);
       Cardlists[i].push(newCard);
       //アニメーションを用意しておく
@@ -1342,7 +1343,6 @@ function Gamestart(){
       //console.log(decks,decks.length);
         break;
     }
-    
     printView();
     console.log('デュエル開始')  
   };
@@ -1389,7 +1389,26 @@ function Gamestart(){
     newCard.alpha=0.3;
     field.addChild(newCard);
     DeckReset();
+    FirstAnimation();
   };
+  function FirstAnimation(i=0,j=0){
+    //カードを配るように見せる
+      var T = Cardlists[i][j];
+      createjs.Tween.get(T)
+      .to({x:50+i*(cardWidth+cardgapX),y:150+j*cardgapY,alpha:1},30)
+      .call(nextcard);
+      function nextcard(){
+        se1.play();
+        i+=1;
+        if(i>6){
+          j+=1;
+          if(j>6){
+            return false;
+          };
+          i=j};
+        FirstAnimation(i,j);
+      }
+    };
   function disp(){
       clearT =Date.now();
     datet = parseInt((clearT - startT )/ 1000);
