@@ -4,7 +4,6 @@
 //スートは4種類あるがスートに関係なくn-1はnの下に移動できる
 //最前列にはどんなカードも置くことができる
 //最前列と2列目で10,11,12,13の合計は4枚を超えないようにする
-
 //モンスターゾーンの隣には2×4枚のカードを置ける
 //2枚の合計の数が同じように置くことで倒せる
 //同じスートのエースは7としても扱うことができる
@@ -12,7 +11,6 @@
 //ドラッグ＆ドロップ　https://ics.media/tutorial-createjs/mouse_drag/
 
 //next　上げたカードを降ろす　ダブルクリックで上げる
-//未定→ スマホ対応　破片強打（カードを左上に飛ばす）
 
 window.onload = function(){
 main();
@@ -56,7 +54,7 @@ function onResize(e){
   }
 }
 if (createjs.Touch.isSupported() == true) {
-//createjs.Touch.enable(stage);//タップに対応する
+createjs.Touch.enable(stage);//タップに対応する
 }
 var graphics;
 graphics=new createjs.Graphics();
@@ -101,7 +99,7 @@ yakumap_undo.scale=0.6;
 yakumap_undo.x=720;
 yakumap_undo.y=140;
 var yakumap_reset = new createjs.Bitmap("soL_hint.png");
-yakumap_reset.alpha=0;
+yakumap_reset.alpha=1;
 yakumap_reset.scale=0.6;
 yakumap_reset.x=720;
 yakumap_reset.y=205;
@@ -118,6 +116,7 @@ Msgwindow.scale=100/128;
 var clear_1 = new createjs.Bitmap("soL_clear_1.png");
 var clear_2 = new createjs.Bitmap("soL_clear_2.png");
 var clear_3 = new createjs.Bitmap("soL_clear_3.png");
+var retry_bt = new createjs.Bitmap("soL_retry_bt.png");
 
 //データベース
 var chrimg_src= new Array("VSB_baondot.png","VSB_elsdot.png","VSB_baonpf.png","VSB_elspf.png","VSB_garekidot.png");
@@ -143,6 +142,7 @@ var handsLog=[];//リセット用
 yakumap_hint.addEventListener("click", {rule:playMode[0],handleEvent:ruleButton});
 yakumap_reset.addEventListener("click", {rule:playMode[0],handleEvent:resetButton});
 yakumap_undo.addEventListener("click", {rule:playMode[0],handleEvent:undoButton});
+retry_bt.addEventListener("click", {rule:playMode[0],handleEvent:Gamestart});
 //カード画像の読込（嘘）
 var cardback = new createjs.Bitmap('Card_images/BackColor_Black.png');
 var spa1 = new createjs.Bitmap('Card_images/Spade01.png');
@@ -239,7 +239,7 @@ var debugmode=true;//座標の表示を管理
 var loadstate=0;
 var cLock=true;//true->操作可能
 var opLock=0;
-var mLock=0;//1->メッセージ送りもーど
+var mLock=true;//deckめくっている最中falseに
 var MessageLog=[];
 var nowtalking=0;
 var pagestate=-1;
@@ -255,7 +255,9 @@ var hour = 0;
 var min = 0;
 var sec = 0;
 var datet =0;
-
+var key13=0;//enter
+var key27=0;//esc
+var key119=0;//F8
 //保存するデータ
 var vBar=1;
 var sBar=1;
@@ -693,6 +695,11 @@ function resetButton(event){
   }
 }
 function DeckReset(p=0,point=0){
+  console.log('deckreset',p,point)
+  if(p!==0){
+    p=this.point;
+    if(!cLock){return false};
+  };
   cLock=false;
   switch(p){
   case 0:
@@ -733,8 +740,11 @@ function DeckReset(p=0,point=0){
     //decks->数字が格納された配列
     //decklists->createが格納された配列
     if(p>decks.length){
+      se4.play();
+      DeckReset(0);
       return false;
     }
+    mLock=false;
     var TT=decks.shift();
     deckfaces.push(TT);
     var T=Decklists.pop();
@@ -754,6 +764,7 @@ function DeckReset(p=0,point=0){
       if(point>=p){
         //end
         drawbuttom(10,50,decks.length,1,50,40);
+        mLock=true;
         cLock=true;
         return true;
       }else{
@@ -765,7 +776,7 @@ function DeckReset(p=0,point=0){
   }
   };
 function handleDown(event) {
-  if(cLock && opLock==0){
+  if(cLock && mLock && opLock==0){
   switch(this.card){
   default:
     console.log(this.card,DeckFacelists);
@@ -816,7 +827,7 @@ function handleDown(event) {
   }
 }};
 function handleMove(event) {
-  if(cLock && opLock==0){
+  if(cLock && mLock && opLock==0){
   switch(this.card){
     case "arwD":
       arwD.x = stage.mouseX-dragPointX;
@@ -864,7 +875,7 @@ function handleMove(event) {
   break;
 }}};
 function handleUp(event) {
-  if(cLock && opLock==0){
+  if(cLock && mLock && opLock==0){
   switch(this.card){
   default:
     if(this.card<0){
@@ -1142,7 +1153,6 @@ canvas5.addEventListener('mouseout', onMouseOut, false);
 function onMouseOut() {
  //console.log('mouseout')
 };
-
   canvas5.addEventListener("click", clickHandler, false);
 	function clickHandler(e) {
  		var rect = e.target.getBoundingClientRect();
@@ -1200,26 +1210,18 @@ function onMouseOut() {
   return false;
         }};
     if(gamestate==0){
+      //タップ操作を有効にした場合クリックイベントが反応してくれなかったため
       if(cLock){
         if(mouseX>70 && mouseX <150){
           if(mouseY>4 && mouseY<134){
             //デッキのカードをめくる
           if(decks.length){
-            DeckReset(1);
+            //DeckReset(1);
           }else{
-            DeckReset();
+            //DeckReset();
           }
           }}
     }};
-    if(gamestate==1 && cLock){
-      //次のゲームへ
-      clearBG.removeAllChildren();
-      field.removeAllChildren();
-      //var Backyard = new createjs.Container();//背景
-      //var yakumap = new createjs.Container();//config
-      //var Tempmap = new createjs.Container();
-      Gamestart();
-    }
 if(gamestate==10 && loadstate >=loadmax){
   //メニュー画面へ
   if(pagestate==-1){
@@ -1233,9 +1235,46 @@ if(gamestate==10 && loadstate >=loadmax){
   Gamestart();
   }
 }};
+//キー入力受付
+window.addEventListener("keyup", keyupHandler, false);
+  function keyupHandler(e) {
+  if(e.keyCode==13){
+  key13=0;//enter
+  }
+  if(e.keyCode==27){
+  key27=0;//esc
+  }
+  if(e.keyCode==119){
+    key119=0;//F8
+  }
+  }
 
+  window.addEventListener("keydown", keyDownHandler, false);
+	function keyDownHandler(e) {
+    console.log(e.keyCode,e.key,cLock);
+    var code = e.keyCode;
+    //keyはString.fromCharCode(code)で取得
+    if(cLock==0 && code !==27){
+      return false;
+    }
+    if(e.keyCode==13 && key13==0){
+      key13=1;//enter
+      }
+    if(e.keyCode==27 && key27==0){
+      key27=1;//esc
+    }
+    if(e.keyCode==119 && key119==0){
+      key119=1;//esc
+      if(gamestate==1 && cLock){
+        //次のゲームへ
+        Gamestart();
+      }
+    }
+    };
 function Gamestart(){
     gamestate=0;
+    clearBG.removeAllChildren();
+    field.removeAllChildren();
     cx1.clearRect(0,0,800,450)
     cx2.clearRect(0,0,800,450)
     cx3.clearRect(0,0,800,600)
@@ -1322,6 +1361,13 @@ function Gamestart(){
     cx.stroke();
     createRoundRect(614,5,80,128,5,cx);
     cx.stroke();
+    var newCard = new createjs.Bitmap(Card_src[0]);
+    newCard.x=50
+    newCard.y=5
+    newCard.alpha=0.3;
+    newCard.addEventListener("click", {point:1,handleEvent:DeckReset});
+    field.addChild(newCard);
+    //deck
     var newCard = new createjs.Bitmap(Card_src[1]);
     newCard.x=50+3*(cardWidth+cardgapX)
     newCard.y=5
@@ -1567,7 +1613,7 @@ function compareFunc(a,b){return a-b;}
       Msgwindow.y=300;
       clearBG.addChild(Msgwindow);
       createjs.Tween.get(Msgwindow)
-      .to({y:0},50);
+      .to({y:0},150);
       var t=new createjs.Text("リティア","28px メイリオ","white");
       t.x=15;
       t.y=380;
@@ -1576,14 +1622,18 @@ function compareFunc(a,b){return a-b;}
       t.x=50;
       t.y=440;
       clearBG.addChild(t);
+      clear_3.x=0;
+      clear_3.y=-20;
+      clear_3.alpha=0;
+      clear_3.rotation=-2;
+      clearBG.addChild(clear_3);
+      createjs.Tween.get(clear_3)
+      .wait(450)
+      .to({x:50,alpha:1},300)
       function nextgame(){
-        clear_3.x=0;
-        clear_3.y=0;
-        clear_3.alpha=0;
-        clearBG.addChild(clear_3);
-        createjs.Tween.get(clear_3)
-        .to({alpha:1},300)
-      drawbuttom(350,350,"クリックで再挑戦",0,170,35);
+        retry_bt.x=600;
+        retry_bt.y=350;
+        clearBG.addChild(retry_bt);
       cLock=true;
       }
     }};
