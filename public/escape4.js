@@ -70,7 +70,7 @@ Car1.x=30;
 Car1.y=55;
 Car1.scale=3;
 Backyard.addChild(Car1);
-var Car2 = new createjs.Bitmap("Card_images/BackColor_Black.png");
+var Car2 = new createjs.Bitmap("Card_images/BackColor_Closed.png");
 Car2.x=430;
 Car2.y=55;
 Car2.scale=3;
@@ -86,7 +86,7 @@ Bt3.y=430;
 Bt3.scale=2;
 Backyard.addChild(Bt3);
 Car1.addEventListener("click", {card:1,handleEvent:GameReady});
-Car2.addEventListener("click", {card:3,handleEvent:GameReady});
+//Car2.addEventListener("click", {card:3,handleEvent:GameReady});
 function GameReady(){
   playMode[0]=this.card;
   load2();
