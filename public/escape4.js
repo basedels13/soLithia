@@ -1,7 +1,7 @@
 //ドラッグ＆ドロップ　https://ics.media/tutorial-createjs/mouse_drag/
 //next　エルドリッチ アタックゾーン->メインゾーンへの移動
 //アタックゾーン　左側は　任意のカードを1枚置くことができる　モンスターがいる時に右側にも置くことができるようになる
-
+//13のスートの一致がハート=クローバーになっている？
 window.onload = function(){
 main();
 };
@@ -55,6 +55,34 @@ stage.addChild(Tempmap);
 stage.addChild(yakumap);
 stage.addChild(clearBG);
 //stage.addChild(Backyard);
+//設定
+var mouseX;
+var mouseY;
+var mute="ON"
+var alpha = 0;
+var debugmode=false;//座標の表示を管理
+var loadstate=0;
+var cLock=true;//true->操作可能
+var opLock=0;
+var mLock=true;//deckめくっている最中falseに
+var MessageLog=[];
+var nowtalking=0;
+var pagestate=-1;
+var pagelength=1;
+var pagetemp=-1;
+var msgstate=1;
+var msglength=2;
+var msgtemp=1;
+var gamestate=10;
+var startT = 0;
+var clearT = 0;
+var hour = 0;
+var min = 0;
+var sec = 0;
+var datet =0;
+var key13=0;//enter
+var key27=0;//esc
+var key119=0;//F8
 //たいとるがめん
 var shape = new createjs.Shape();
 shape.graphics.beginFill("#3b7353");
@@ -86,7 +114,7 @@ Bt3.y=430;
 Bt3.scale=2;
 Backyard.addChild(Bt3);
 Car1.addEventListener("click", {card:1,handleEvent:GameReady});
-//Car2.addEventListener("click", {card:3,handleEvent:GameReady});
+if(debugmode){Car2.addEventListener("click", {card:3,handleEvent:GameReady})};
 function GameReady(){
   playMode[0]=this.card;
   load2();
@@ -101,8 +129,8 @@ yakumap_undo.alpha=0;
 yakumap_undo.scale=0.6;
 yakumap_undo.x=720;
 yakumap_undo.y=140;
-var yakumap_reset = new createjs.Bitmap("soL_hint.png");
-yakumap_reset.alpha=0;
+var yakumap_reset = new createjs.Bitmap("soL_solve.png");
+yakumap_reset.alpha=0
 yakumap_reset.scale=0.6;
 yakumap_reset.x=720;
 yakumap_reset.y=205;
@@ -117,6 +145,7 @@ Msgwindow.scale=100/128;
 var clear_1 = new createjs.Bitmap("soL_clear_1.png");
 var clear_2 = new createjs.Bitmap("soL_clear_2.png");
 var clear_3 = new createjs.Bitmap("soL_clear_3.png");
+var clear_4 = new createjs.Bitmap("soL_clear_4.png");
 var retry_bt = new createjs.Bitmap("soL_retry_bt.png");
 var effect1 = {
   images : ["Card_images/Card_delete.png"],
@@ -185,53 +214,26 @@ createjs.Ticker.addEventListener("tick",function(){
       });
     }
   }
-//t 0buff 1debuff
-//設定
-var mouseX;
-var mouseY;
-var mute="ON"
-var alpha = 0;
-var debugmode=true;//座標の表示を管理
-var loadstate=0;
-var cLock=true;//true->操作可能
-var opLock=0;
-var mLock=true;//deckめくっている最中falseに
-var MessageLog=[];
-var nowtalking=0;
-var pagestate=-1;
-var pagelength=1;
-var pagetemp=-1;
-var msgstate=1;
-var msglength=2;
-var msgtemp=1;
-var gamestate=10;
-var startT = 0;
-var clearT = 0;
-var hour = 0;
-var min = 0;
-var sec = 0;
-var datet =0;
-var key13=0;//enter
-var key27=0;//esc
-var key119=0;//F8
 //保存するデータ
-var vBar=1;
+var vBar=0.6;
 var sBar=1;
-
+var cleared=[0,0,0,0];
 var UserData = {
-  "Name":"azure_ch",
+  "Name":"SoL_ch",
   "Volume": vBar,
   "SEVolume": sBar,
+  "cleaed":[0,0,0,0],
 };
 function saveDL(){
   try{
 UserData = {
-  "Name":"azure_ch",
+  "Name":"SoL_ch",
   "Volume": vBar,
   "SEVolume": sBar,
+  "cleaed":[0,0,0,0],
 };
 console.log(UserData);
-localStorage.setItem('UserData_Winedom', JSON.stringify(UserData));
+localStorage.setItem('UserData_SoL', JSON.stringify(UserData));
   }catch(e){
     console.log('ねこ')
   }
@@ -239,7 +241,7 @@ localStorage.setItem('UserData_Winedom', JSON.stringify(UserData));
 function saveUP(){
   try{
 var getdata; // 読込むデータ
-getdata = JSON.parse(localStorage.getItem('UserData_Winedom'));
+getdata = JSON.parse(localStorage.getItem('UserData_SoL'));
 console.log('Userdata loaded');
 vBar=getdata.Volume;
 sBar=getdata.SEVolume;
@@ -252,8 +254,9 @@ function saveDel(){
   //デフォルト
 vBar=1;
 sBar=1;
+cleared=[0,0,0,0];
   try{
-    localStorage.removeItem('UserData_Winedom')
+    localStorage.removeItem('UserData_SoL')
         console.log('localStorage cleared');
       }catch(e){
         console.log('ねこ')
@@ -380,12 +383,19 @@ var se23 = new Howl({
       volume: 0.4,
     });
 const bgm1data ={
-    src: "Run_through_space.mp3",
+    src: "PerituneMaterial_EpicBattle_Deity_loop.mp3",
     loopStart: 0,
-    loopEnd: 85910,
-    volume: 0.2,
+    loopEnd: 117660,
+    volume: 0.1,
+  };
+  const bgm2data ={
+    src: "PerituneMaterial_Lost_place5_loop.mp3",
+    loopStart: 0,
+    loopEnd: 132000,
+    volume: 0.1,
   };
 var Bgm=new Music(bgm1data);
+var musicnum=0;
 var loadmax;
 
 function load2(){
@@ -413,6 +423,7 @@ var grad  = cx.createLinearGradient(0,510,0,600);
   cx.fillRect(720,205,60,60);
   cx.fillStyle ='rgba(0, 0, 0, 1)'
   yakumap_hint.alpha=1;
+  if(debugmode){yakumap_reset.alpha=1}else{yakumap_reset.alpha=0};
   Gamestart();
 }
 //画像のロード
@@ -798,6 +809,7 @@ function monsterMove(){
       if(Els==-1){
         //モンスターゾーンがすべて埋まっている
         console.log('game over')
+        Gameover(1);
         return false;
         }
       se1.play()
@@ -830,8 +842,16 @@ function monsterMove(){
     }};
   drawbuttom(580,450,"Monster "+E+"/4",1,120,40);
   drawbuttom(580,500,"討伐数 "+Decklists.length+"/16",1,120,40);
+  if(Decklists.length>10 && musicnum!==1){
+    musicnum=1;
+    console.log("climax");
+    Bgm.stop();
+    Bgm=new Music(bgm1data);
+    Bgm.playMusic();
+  };
   if(Decklists.length==16){
     Gameover();
+    Bgm.stop();
   }
   cLock=true;
 };
@@ -1874,7 +1894,7 @@ function Gamestart(){
         cards.splice(0, 7),
       ]
       decks = cards.concat();
-      //console.log(decks,decks.length);
+      Extras=[0,13,26,39];
     for(var i=0;i<hands.length;i++){
       for(var j=0;j<hands[i].length;j++){
       var newCard = new createjs.Bitmap(Card_src[hands[i][j]]);
@@ -2022,6 +2042,12 @@ function Gamestart(){
         FirstAnimation();
         break;
       case 3:
+        if(musicnum!==2){
+        Bgm.stop();
+        musicnum=2;
+        Bgm=new Music(bgm2data);
+        Bgm.playMusic();
+        }
         cx.strokeStyle="white";
         createRoundRect(344,5,80,128,5,cx);
         cx.stroke();
@@ -2342,54 +2368,160 @@ function compareFunc(a,b){return a-b;}
         break;
 }
     }
-    function Gameover(){
+    function Gameover(A=0){
       console.log('gameover');
       if(gamestate==0){
-        cLock=false;
-      gamestate=1;
-      //createjs.Tween.get(field).to({alpha:0.5},1000)
-      clear_1.x=800;
-      clear_1.y=0;
-      clearBG.addChild(clear_1);
-      createjs.Tween.get(clear_1)
-      .to({x:0,alpha:1},300)
-      clear_2.x=-100;
-      clear_2.y=0;
-      clear_2.alpha=0;
-      clearBG.addChild(clear_2);
-      createjs.Tween.get(clear_2)
-      .to({x:0,alpha:1},300)
-      .wait(1000)
-      .call(nextgame)
-      Msgwindow.alpha=1;
-      Msgwindow.x=0;
-      Msgwindow.y=300;
-      clearBG.addChild(Msgwindow);
-      createjs.Tween.get(Msgwindow)
-      .to({y:0},150);
-      var t=new createjs.Text("リティア","28px メイリオ","white");
-      t.x=15;
-      t.y=380;
-      clearBG.addChild(t);
-      switch(playMode[0]){
-        case 3:
-          var t=new createjs.Text("ふっふっふ、どんどんかかってきなさい！","24px メイリオ","white");
-          break;
-        default:
-          var t=new createjs.Text("リティア、一件解決！","24px メイリオ","white");
-          break;
-      }
-      t.x=50;
-      t.y=440;
-      clearBG.addChild(t);
-      clear_3.x=0;
-      clear_3.y=-20;
-      clear_3.alpha=0;
-      clear_3.rotation=-2;
-      clearBG.addChild(clear_3);
-      createjs.Tween.get(clear_3)
-      .wait(450)
-      .to({x:50,alpha:1},300)
+        switch(A){
+          case 1:
+            cLock=false;
+            gamestate=1;
+            //createjs.Tween.get(field).to({alpha:0.5},1000)
+            var shape = new createjs.Shape();
+            shape.graphics.beginFill("black");
+            shape.graphics.drawRect(0, 0, 800, 600);
+            shape.alpha=0;
+            clearBG.addChild(shape);
+            createjs.Tween.get(shape)
+            .to({x:0,alpha:0.3},900)
+            .wait(1000);
+            clear_1.x=800;
+            clear_1.y=0;
+            clearBG.addChild(clear_1);
+            createjs.Tween.get(clear_1)
+            .to({x:0,alpha:1},300)
+            .wait(1000)
+            .call(nextgame)
+            disp();
+            Cstar.x=580;
+            Cstar.y=50;
+            Cstar.rotation=15;
+            Cstar.scale=0.7
+            tweeNstar.paused=true;
+            clearBG.addChild(Cstar);
+            var t=new createjs.Text("タイム","22px メイリオ","white");
+            t.x=600;
+            t.y=80;
+            clearBG.addChild(t);
+            var t=new createjs.Text(hour+":"+min+":"+sec,"36px メイリオ","white");
+            t.x=610;
+            t.y=105;
+            clearBG.addChild(t);
+            switch(playMode[0]){
+              case 1:
+            var t=new createjs.Text("card move","22px メイリオ","white");
+            t.x=600;
+            t.y=150;
+            clearBG.addChild(t);
+            var t=new createjs.Text(duelLog.length,"36px メイリオ","white");
+            t.x=610;
+            t.y=175;
+            clearBG.addChild(t);
+            break;
+            case 3:
+              var t=new createjs.Text("enemy","22px メイリオ","white");
+              t.x=600;
+              t.y=150;
+              clearBG.addChild(t);
+              var t=new createjs.Text(Decklists.length+"/16","36px メイリオ","white");
+              t.x=610;
+              t.y=175;
+              clearBG.addChild(t);
+              break;
+            }
+            clear_4.x=0;
+            clear_4.y=-20;
+            clear_4.alpha=0;
+            clearBG.addChild(clear_4);
+            createjs.Tween.get(clear_4)
+            .wait(450)
+            .to({x:50,alpha:1},300)
+      
+            break;
+          default:
+            cLock=false;
+            gamestate=1;
+            //createjs.Tween.get(field).to({alpha:0.5},1000)
+            clear_1.x=800;
+            clear_1.y=0;
+            clearBG.addChild(clear_1);
+            createjs.Tween.get(clear_1)
+            .to({x:0,alpha:1},300)
+            clear_2.x=-100;
+            clear_2.y=0;
+            clear_2.alpha=0;
+            clearBG.addChild(clear_2);
+            createjs.Tween.get(clear_2)
+            .to({x:0,alpha:1},300)
+            .wait(1000)
+            .call(nextgame)
+            Msgwindow.alpha=1;
+            Msgwindow.x=0;
+            Msgwindow.y=300;
+            clearBG.addChild(Msgwindow);
+            createjs.Tween.get(Msgwindow)
+            .to({y:0},150);
+            var t=new createjs.Text("リティア","28px メイリオ","white");
+            t.x=15;
+            t.y=380;
+            clearBG.addChild(t);
+            switch(playMode[0]){
+              case 3:
+                var t=new createjs.Text("ふっふっふ、どんどんかかってきなさい！","24px メイリオ","white");
+                break;
+              default:
+                var t=new createjs.Text("リティア、一件解決！","24px メイリオ","white");
+                break;
+            }
+            t.x=50;
+            t.y=440;
+            clearBG.addChild(t);
+            disp();
+            Cstar.x=580;
+            Cstar.y=50;
+            Cstar.rotation=15;
+            Cstar.scale=0.7
+            tweeNstar.paused=true;
+            clearBG.addChild(Cstar);
+            var t=new createjs.Text("clear time","22px メイリオ","white");
+            t.x=600;
+            t.y=80;
+            clearBG.addChild(t);
+            var t=new createjs.Text(hour+":"+min+":"+sec,"36px メイリオ","white");
+            t.x=610;
+            t.y=105;
+            clearBG.addChild(t);
+            switch(playMode[0]){
+              case 1:
+            var t=new createjs.Text("card move","22px メイリオ","white");
+            t.x=600;
+            t.y=150;
+            clearBG.addChild(t);
+            var t=new createjs.Text(duelLog.length,"36px メイリオ","white");
+            t.x=610;
+            t.y=175;
+            clearBG.addChild(t);
+            break;
+            case 3:
+              var t=new createjs.Text("enemy","22px メイリオ","white");
+              t.x=600;
+              t.y=150;
+              clearBG.addChild(t);
+              var t=new createjs.Text(Decklists.length+"/16","36px メイリオ","white");
+              t.x=610;
+              t.y=175;
+              clearBG.addChild(t);
+              break;
+            }
+            clear_3.x=0;
+            clear_3.y=-20;
+            clear_3.alpha=0;
+            clearBG.addChild(clear_3);
+            createjs.Tween.get(clear_3)
+            .wait(450)
+            .to({x:50,alpha:1},300)
+      
+            break;
+        }
       function nextgame(){
         retry_bt.x=600;
         retry_bt.y=350;
