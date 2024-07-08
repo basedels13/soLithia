@@ -1,7 +1,6 @@
 //ドラッグ＆ドロップ　https://ics.media/tutorial-createjs/mouse_drag/
-//next　エルドリッチ アタックゾーン->メインゾーンへの移動
-//アタックゾーン　左側は　任意のカードを1枚置くことができる　モンスターがいる時に右側にも置くことができるようになる
-//13のスートの一致がハート=クローバーになっている？
+//next　エルドリッチ 13のスートの一致がハート=クローバーになっている？
+//ボス
 window.onload = function(){
 main();
 };
@@ -45,28 +44,25 @@ var Cnext = new createjs.Container();//コンテナ
 var deckmap = new createjs.Container();
 var field = new createjs.Container();//field
 var yakumap = new createjs.Container();//config
-var Tempmap = new createjs.Container();
 var clearBG = new createjs.Container();//clear
 var Backyard = new createjs.Container();//タイトル/背景
+var Configmap = new createjs.Container();//soundボタン・オプション等
 stage.addChild(Backyard);
 stage.addChild(field);
 stage.addChild(deckmap);
-stage.addChild(Tempmap);
 stage.addChild(yakumap);
 stage.addChild(clearBG);
+stage.addChild(Configmap);
 //stage.addChild(Backyard);
 //設定
 var mouseX;
 var mouseY;
 var mute="ON"
-var alpha = 0;
 var debugmode=false;//座標の表示を管理
 var loadstate=0;
 var cLock=true;//true->操作可能
 var opLock=0;
 var mLock=true;//deckめくっている最中falseに
-var MessageLog=[];
-var nowtalking=0;
 var pagestate=-1;
 var pagelength=1;
 var pagetemp=-1;
@@ -83,6 +79,21 @@ var datet =0;
 var key13=0;//enter
 var key27=0;//esc
 var key119=0;//F8
+//オプション
+var shape = new createjs.Shape();
+shape.graphics.beginFill("#3b7353");
+shape.graphics.drawRect(700, 0, 120, 50); // 長方形を描画
+shape.alpha=0.8;
+Configmap.addChild(shape); // 表示リストに追加
+var t = new createjs.Text("SOUND", "20px serif", "white");
+t.x=705;
+t.y=0;
+Configmap.addChild(t);
+var muteshape = new createjs.Text(mute, "28px serif", "white");
+muteshape.x=720;
+muteshape.y=20;
+Configmap.addChild(muteshape);
+shape.addEventListener("click", {handleEvent:SoundConfig});
 //たいとるがめん
 var shape = new createjs.Shape();
 shape.graphics.beginFill("#3b7353");
@@ -846,8 +857,10 @@ function monsterMove(){
     musicnum=1;
     console.log("climax");
     Bgm.stop();
+    if(mute="ON"){
     Bgm=new Music(bgm1data);
     Bgm.playMusic();
+    }
   };
   if(Decklists.length==16){
     Gameover();
@@ -1704,6 +1717,69 @@ function handleUp(event) {
       }
     }
 }};
+function SoundConfig(){
+  se1.volume(0);
+  se2.volume(0);
+  se3.volume(0);
+  se4.volume(0);
+  se5.volume(0);
+  se6.volume(0);
+  se7.volume(0);
+  se8.volume(0);
+  se9.volume(0);
+  se10.volume(0);
+  se11.volume(0);
+  se12.volume(0);
+  se13.volume(0);
+  se14.volume(0);
+  se15.volume(0);
+  se16.volume(0);
+  se17.volume(0);
+  se18.volume(0);
+  se19.volume(0);
+  se20.volume(0);
+  se21.volume(0);
+  se22.volume(0);
+  se23.volume(0);
+  if(!cLock && debugmode){
+    //for debug
+    cLock=true;
+  }
+  //ミュートの切り替え
+  if( mute=="OFF" ){
+    SEbuffer();
+    Bgm.mute(false);
+    switch (musicnum){
+      case 1:
+        Bgm =new Music(bgm1data);
+        Bgm.playMusic();
+        break;
+      case 2:
+        Bgm =new Music(bgm2data);
+        Bgm.playMusic();
+        break;
+      case 3:
+        Bgm =new Music(bgm3data);
+        Bgm.playMusic();
+        break;
+      default:
+        console.log(musicnum,'bgm error!')
+        Bgm.stop();
+        break;
+    }
+    mute="ON";
+    }else{
+    Bgm.mute(true);
+    Bgm.stop();
+    mute="OFF";
+    console.log('bgm muted!')
+}
+Configmap.removeChild(muteshape);
+muteshape = new createjs.Text(mute, "28px serif", "white");
+muteshape.x=720;
+muteshape.y=20;
+Configmap.addChild(muteshape);
+};
 canvas5.onmousedown = mouseDownListener;
 function mouseDownListener(e) {
   createjs.Ticker.addEventListener("tick", MouseCircle);
@@ -1743,47 +1819,6 @@ function onMouseOut() {
       console.log('clicked!',cLock)
 		if(mouseX>710 && mouseX <790){
           if(mouseY>10 && mouseY<48){          
-            se1.volume(0);
-            se2.volume(0);
-            se3.volume(0);
-            se4.volume(0);
-            se5.volume(0);
-            se6.volume(0);
-            se7.volume(0);
-            se8.volume(0);
-            se9.volume(0);
-            se10.volume(0);
-            se11.volume(0);
-            se12.volume(0);
-            se13.volume(0);
-            se14.volume(0);
-            se15.volume(0);
-            se16.volume(0);
-            se17.volume(0);
-            se18.volume(0);
-            se19.volume(0);
-            se20.volume(0);
-            se21.volume(0);
-            se22.volume(0);
-            se23.volume(0);
-            console.log(cx5.globalAlpha,cLock);
-            cx5.clearRect(710, 10, 80, 38);
-            cx5.globalAlpha = 1;
-            if(!cLock && debugmode){
-              //for debug
-              cLock=true;
-            }
-    //ミュートの切り替え
-  if( mute=="OFF" ){
-    SEbuffer();
-    Bgm.mute(false);
-    mute="ON";
-    }else{
-    Bgm.mute(true);
-    Bgm.stop();
-    mute="OFF";
-    console.log('bgm muted!')
-    }
   cx3.clearRect(710, 10, 80, 38);
   cx3.font = "12px Arial";
   cx3.fillText("SOUND", 710, 22);
@@ -2011,6 +2046,10 @@ function Gamestart(){
         cx.stroke();
         createRoundRect(614,5,80,128,5,cx);
         cx.stroke();
+        for(var i=0;i<7;i++){
+        createRoundRect(74+90*i,150,80,128,5,cx);
+        cx.stroke();
+        }
         var newCard = new createjs.Bitmap(Card_src[0]);
         newCard.x=50
         newCard.y=5
@@ -2045,9 +2084,10 @@ function Gamestart(){
         if(musicnum!==2){
         Bgm.stop();
         musicnum=2;
+        if(mute="ON"){
         Bgm=new Music(bgm2data);
         Bgm.playMusic();
-        }
+        }}
         cx.strokeStyle="white";
         createRoundRect(344,5,80,128,5,cx);
         cx.stroke();
