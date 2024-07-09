@@ -1,6 +1,6 @@
 //ドラッグ＆ドロップ　https://ics.media/tutorial-createjs/mouse_drag/
 //next　エルドリッチ 13のスートの一致がハート=クローバーになっている？
-//ボス
+//ボス　設定　セーブ　タイトルに戻るボタン　など
 window.onload = function(){
 main();
 };
@@ -24,6 +24,7 @@ var stage = new createjs.Stage("canvas5");//Stage
 if (createjs.Touch.isSupported() == true) {
 createjs.Touch.enable(stage);//タップに対応する
 }
+stage.enableMouseOver();
 var graphics;
 graphics=new createjs.Graphics();
 graphics
@@ -35,25 +36,19 @@ var Cstar = new createjs.Shape(graphics);
 var tweeNstar;
 tweeNstar=createjs.Tween.get(Cstar, {loop: true})
 .to({rotation:360},1200);
-var CorsorC = new createjs.Shape();
-CorsorC.graphics
-        .beginStroke("rgba(0,255,250,0.8)")
-        .setStrokeStyle(3)
-        .drawRoundRect(0, 0, 280, 24, 3, 3);
 var Cnext = new createjs.Container();//コンテナ
 var deckmap = new createjs.Container();
 var field = new createjs.Container();//field
-var yakumap = new createjs.Container();//config
 var clearBG = new createjs.Container();//clear
+var yakumap = new createjs.Container();//config
 var Backyard = new createjs.Container();//タイトル/背景
 var Configmap = new createjs.Container();//soundボタン・オプション等
 stage.addChild(Backyard);
 stage.addChild(field);
 stage.addChild(deckmap);
-stage.addChild(yakumap);
 stage.addChild(clearBG);
 stage.addChild(Configmap);
-//stage.addChild(Backyard);
+stage.addChild(yakumap);
 //設定
 var mouseX;
 var mouseY;
@@ -114,6 +109,18 @@ Car2.x=430;
 Car2.y=55;
 Car2.scale=3;
 Backyard.addChild(Car2);
+var Car3 = new createjs.Bitmap("Card_images/Spade12.png");
+Car3.x=30;
+Car3.y=55;
+Car3.scale=3;
+Car3.alpha=0;
+Backyard.addChild(Car3);
+var Car4 = new createjs.Bitmap("Card_images/Spade_M11.png");
+Car4.x=430;
+Car4.y=55;
+Car4.scale=3;
+Car4.alpha=0;
+Backyard.addChild(Car4);
 var Bt1 = new createjs.Bitmap("soL_rule_bt1.png");
 Bt1.x=50;
 Bt1.y=430;
@@ -124,12 +131,33 @@ Bt3.x=450;
 Bt3.y=430;
 Bt3.scale=2;
 Backyard.addChild(Bt3);
+Car1.addEventListener("mouseover", {card:1,handleEvent:MouseOver});
+Car1.addEventListener("mouseout", {card:2,handleEvent:MouseOver});
 Car1.addEventListener("click", {card:1,handleEvent:GameReady});
+Car2.addEventListener("mouseover", {card:3,handleEvent:MouseOver});
+Car2.addEventListener("mouseout", {card:4,handleEvent:MouseOver});
 if(debugmode){Car2.addEventListener("click", {card:3,handleEvent:GameReady})};
 function GameReady(){
   playMode[0]=this.card;
   load2();
 }
+function MouseOver(e){
+  switch(this.card){
+    case 1:
+      Car3.alpha=1;
+      break;
+    case 2:
+      Car3.alpha=0;
+      break;
+    case 3:
+      Car4.alpha=1;
+      break;
+    case 4:
+      Car4.alpha=0;
+      break;
+  }
+console.log('mouseover')
+};
 var yakumap_hint = new createjs.Bitmap("soL_hint.png");
 yakumap_hint.alpha=0;
 yakumap_hint.scale=0.6;
@@ -151,6 +179,9 @@ yakumap.addChild(yakumap_reset);
 var yakumap_rule = new createjs.Bitmap("soL_rule1.png");
 yakumap_rule.alpha=0;
 yakumap.addChild(yakumap_rule)
+var Cursor= new createjs.Bitmap("soL_cursor.png");
+Cursor.scale=2;
+yakumap.addChild(Cursor)
 var Msgwindow = new createjs.Bitmap("window_ds.png");
 Msgwindow.scale=100/128;
 var clear_1 = new createjs.Bitmap("soL_clear_1.png");
@@ -278,7 +309,7 @@ function SEbuffer(){
   se2.volume(0.3*sBar);
   se3.volume(0.3*sBar);
   se4.volume(0.16*sBar);
-  se5.volume(0.2*sBar);
+  se5.volume(0.07*sBar);
   se6.volume(0.25*sBar);
   se7.volume(0.3*sBar);
   se8.volume(0.2*sBar);
@@ -318,8 +349,8 @@ var se4 = new Howl({
       volume: 0.4,
     });
 var se5 = new Howl({
-  src:"card-flip.mp3",
-      volume: 0.4,
+  src:"8bit_vanish.mp3",
+      volume: 0.07,
     });
 var se6 = new Howl({
   src:"Marimbaglissando1.mp3",
@@ -478,6 +509,11 @@ createjs.Ticker.addEventListener("tick", UpdateParticles);
 function UpdateParticles(event){
   updateParticles();
   if(duelLog.length && playMode[0]==1){yakumap_undo.alpha=1;}else{yakumap_undo.alpha=0;}
+}
+function MouseCursor(event){
+  //カーソル
+  Cursor.x = stage.mouseX;
+  Cursor.y = stage.mouseY;
 }
 function MouseCircle(event){
   //クリックした場所を教える
@@ -853,7 +889,7 @@ function monsterMove(){
     }};
   drawbuttom(580,450,"Monster "+E+"/4",1,120,40);
   drawbuttom(580,500,"討伐数 "+Decklists.length+"/16",1,120,40);
-  if(Decklists.length>10 && musicnum!==1){
+  if((E==4 || E==16-Decklists.length)&& musicnum!==1){
     musicnum=1;
     console.log("climax");
     Bgm.stop();
@@ -870,7 +906,7 @@ function monsterMove(){
 };
 function Efuda(p=0){
   //10,11,12,13ならtrueを返す
-  var efuda=[10,11,12,13,23,24,25,26,36,37,38,39,49,50,51,52]
+  const efuda=[10,11,12,13,23,24,25,26,36,37,38,39,49,50,51,52]
   var E=efuda.findIndex(value=>value==p);
   if(E!==-1){return true}else{return false};
 }
@@ -906,6 +942,7 @@ function Destraction(i=0){
   .to({rotation:0},120)
   .wait(100)
   .call(monsterMove);
+  se5.play();
   }
 function handleDown(event) {
   if(cLock && mLock && opLock==0){
@@ -1800,6 +1837,7 @@ if(debugmode){
 cx3.fillText("X座標：" + Math.floor(mouseX*(1/stage.scaleX)), 714, 22);
 cx3.fillText("Y座標：" + Math.floor(mouseY*(1/stage.scaleY)), 714, 34);
 cx3.fillText("Lock：" + cLock, 714, 46);
+createjs.Ticker.addEventListener("tick", MouseCursor);
 }else{
 cx3.font = "12px Arial";
 cx3.fillText("SOUND", 715, 22);
