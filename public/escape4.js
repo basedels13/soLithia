@@ -150,10 +150,14 @@ function MouseOver(e){
       Car3.alpha=0;
       break;
     case 3:
+      if(debugmode){
       Car4.alpha=1;
+      }
       break;
     case 4:
+      if(debugmode){
       Car4.alpha=0;
+      }
       break;
   }
 console.log('mouseover')
@@ -1833,11 +1837,11 @@ function mouseMoveListener(e) {
   cx3.clearRect(710, 10, 80, 38);
   cx3.fillStyle = "black";
 cx3.font = "12px Arial";
+createjs.Ticker.addEventListener("tick", MouseCursor);
 if(debugmode){
 cx3.fillText("X座標：" + Math.floor(mouseX*(1/stage.scaleX)), 714, 22);
 cx3.fillText("Y座標：" + Math.floor(mouseY*(1/stage.scaleY)), 714, 34);
 cx3.fillText("Lock：" + cLock, 714, 46);
-createjs.Ticker.addEventListener("tick", MouseCursor);
 }else{
 cx3.font = "12px Arial";
 cx3.fillText("SOUND", 715, 22);
