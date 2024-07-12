@@ -1,6 +1,7 @@
 //ドラッグ＆ドロップ　https://ics.media/tutorial-createjs/mouse_drag/
-//next　エルドリッチ 13のスートの一致がハート=クローバーになっている？
-//ボス　設定　セーブ　タイトルに戻るボタン　など
+//next　設定　セーブ　タイトルに戻るボタン　など
+//やるきあれば→アルテラシア
+//リトライ、2週目に音量が大きくなる？
 window.onload = function(){
 main();
 };
@@ -40,18 +41,21 @@ var Cnext = new createjs.Container();//コンテナ
 var deckmap = new createjs.Container();
 var field = new createjs.Container();//field
 var clearBG = new createjs.Container();//clear
-var yakumap = new createjs.Container();//config
+var yakumap = new createjs.Container();//ヒントボタン等
 var Backyard = new createjs.Container();//タイトル/背景
 var Configmap = new createjs.Container();//soundボタン・オプション等
 stage.addChild(Backyard);
 stage.addChild(field);
 stage.addChild(deckmap);
 stage.addChild(clearBG);
-stage.addChild(Configmap);
 stage.addChild(yakumap);
+stage.addChild(Configmap);
 //設定
 var mouseX;
 var mouseY;
+//ドラッグアンドドロップ
+var dragPointX;
+var dragPointY;
 var mute="ON"
 var debugmode=false;//座標の表示を管理
 var loadstate=0;
@@ -104,7 +108,7 @@ Car1.x=30;
 Car1.y=55;
 Car1.scale=3;
 Backyard.addChild(Car1);
-var Car2 = new createjs.Bitmap("Card_images/BackColor_Closed.png");
+var Car2 = new createjs.Bitmap("Card_images/BackColor_Black.png");
 Car2.x=430;
 Car2.y=55;
 Car2.scale=3;
@@ -136,7 +140,7 @@ Car1.addEventListener("mouseout", {card:2,handleEvent:MouseOver});
 Car1.addEventListener("click", {card:1,handleEvent:GameReady});
 Car2.addEventListener("mouseover", {card:3,handleEvent:MouseOver});
 Car2.addEventListener("mouseout", {card:4,handleEvent:MouseOver});
-if(debugmode){Car2.addEventListener("click", {card:3,handleEvent:GameReady})};
+Car2.addEventListener("click", {card:3,handleEvent:GameReady});
 function GameReady(){
   playMode[0]=this.card;
   load2();
@@ -150,14 +154,10 @@ function MouseOver(e){
       Car3.alpha=0;
       break;
     case 3:
-      if(debugmode){
       Car4.alpha=1;
-      }
       break;
     case 4:
-      if(debugmode){
       Car4.alpha=0;
-      }
       break;
   }
 console.log('mouseover')
@@ -172,20 +172,23 @@ yakumap_undo.alpha=0;
 yakumap_undo.scale=0.6;
 yakumap_undo.x=720;
 yakumap_undo.y=140;
-var yakumap_reset = new createjs.Bitmap("soL_solve.png");
+var yakumap_reset = new createjs.Bitmap("soL_retry.png");
 yakumap_reset.alpha=0
 yakumap_reset.scale=0.6;
 yakumap_reset.x=720;
 yakumap_reset.y=205;
+var yakumap_solve = new createjs.Bitmap("soL_new.png");
+yakumap_solve.alpha=0
+yakumap_solve.scale=0.6;
+yakumap_solve.x=720;
+yakumap_solve.y=270;
 yakumap.addChild(yakumap_hint);
 yakumap.addChild(yakumap_undo);
 yakumap.addChild(yakumap_reset);
+yakumap.addChild(yakumap_solve);
 var yakumap_rule = new createjs.Bitmap("soL_rule1.png");
 yakumap_rule.alpha=0;
 yakumap.addChild(yakumap_rule)
-var Cursor= new createjs.Bitmap("soL_cursor.png");
-Cursor.scale=2;
-yakumap.addChild(Cursor)
 var Msgwindow = new createjs.Bitmap("window_ds.png");
 Msgwindow.scale=100/128;
 var clear_1 = new createjs.Bitmap("soL_clear_1.png");
@@ -226,10 +229,12 @@ var cardgapY=20;//トランプを重ねる時の
 var cardgapX=10;//行同士の隙間
 var duelLog=[];//アンドゥ用
 var handsLog=[];//リセット用
+var retryswitch=0;
 
 yakumap_hint.addEventListener("click", {rule:playMode[0],handleEvent:ruleButton});
 yakumap_reset.addEventListener("click", {rule:playMode[0],handleEvent:resetButton});
 yakumap_undo.addEventListener("click", {rule:playMode[0],handleEvent:undoButton});
+yakumap_solve.addEventListener("click", {rule:playMode[0],handleEvent:solveButton});
 retry_bt.addEventListener("click", {rule:playMode[0],handleEvent:Gamestart});
 //shape.addEventListener("click", {rule:playMode[0],handleEvent:load2});
 //アップデートする
@@ -316,7 +321,7 @@ function SEbuffer(){
   se5.volume(0.07*sBar);
   se6.volume(0.25*sBar);
   se7.volume(0.3*sBar);
-  se8.volume(0.2*sBar);
+  se8.volume(0.1*sBar);
   se9.volume(0.16*sBar);
   se10.volume(0.4*sBar);
   se11.volume(0.3*sBar);
@@ -365,8 +370,8 @@ var se7 = new Howl({
   volume: 0.3,
   });
 var se8 = new Howl({
-  src:"card-flip.mp3",
-      volume: 0.4,
+  src:"Creature6.mp3",
+      volume: 0.1,
   });
 var se9 = new Howl({
   src:"rinbell.mp3",
@@ -440,6 +445,12 @@ const bgm1data ={
     loopEnd: 132000,
     volume: 0.1,
   };
+  const bgm3data ={
+    src: "Peritune_Whistling_Winds_loop.mp3",
+    loopStart: 0,
+    loopEnd: 88040,
+    volume: 0.1,
+  };
 var Bgm=new Music(bgm1data);
 var musicnum=0;
 var loadmax;
@@ -468,8 +479,6 @@ var grad  = cx.createLinearGradient(0,510,0,600);
   cx.fillRect(720,140,60,60);
   cx.fillRect(720,205,60,60);
   cx.fillStyle ='rgba(0, 0, 0, 1)'
-  yakumap_hint.alpha=1;
-  if(debugmode){yakumap_reset.alpha=1}else{yakumap_reset.alpha=0};
   Gamestart();
 }
 //画像のロード
@@ -512,7 +521,10 @@ function handleComplete() {
 createjs.Ticker.addEventListener("tick", UpdateParticles);
 function UpdateParticles(event){
   updateParticles();
-  if(duelLog.length && playMode[0]==1){yakumap_undo.alpha=1;}else{yakumap_undo.alpha=0;}
+  if(gamestate==0){yakumap_hint.alpha=1}else{yakumap_hint.alpha=0};
+  if(gamestate==0 && duelLog.length){yakumap_solve.alpha=1}else{yakumap_solve.alpha=0};
+  if(gamestate==0 && duelLog.length && playMode[0]==1){yakumap_undo.alpha=1;}else{yakumap_undo.alpha=0;}
+  if(gamestate==0 && duelLog.length){yakumap_reset.alpha=1;}else{yakumap_reset.alpha=0;}
 }
 function MouseCursor(event){
   //カーソル
@@ -540,7 +552,7 @@ function emitParticles() {
     particle.graphics
             .beginFill(createjs.Graphics.getHSL(count, 50, 50))
             .drawCircle(0, 0, 30 * Math.random());
-    yakumap.addChild(particle);
+    Configmap.addChild(particle);
     particle.compositeOperation = "lighter";
     particle.alpha=0.25;
     // パーティクルの発生場所
@@ -582,15 +594,12 @@ function updateParticles() {
     // 寿命の判定
     if (particle.life <= 0) {
       // ステージから削除
-      yakumap.removeChild(particle);
+      Configmap.removeChild(particle);
       // 配列からも削除
       particles.splice(i, 1);
     }
   }
 }
-//ドラッグアンドドロップ
-var dragPointX;
-var dragPointY;
 function ruleButton(event){
   if(cLock){
   //ルール画像を表示/格納
@@ -618,7 +627,7 @@ function undoButton(event){
   cLock=false;
   switch(this.rule){
     default:
-      if(!duelLog.length){
+      if(!duelLog.length || duelLog[0]=="start"){
         cLock=true;
         return false};
         se1.play();
@@ -728,11 +737,18 @@ function step(){
 }};
 function resetButton(event){
   //解決する
-  //handsの値が全て昇順の時のみ？
+  retryswitch+=1;
+  Gameretry();
+}
+function solveButton(event){
+  if(cLock){
   if(debugmode){
   Gameover();
+  }else{
+  //new game;
+  Gamestart();
   }
-}
+}}
 function DeckReset(p=0,point=0){
   console.log('deckreset',p,point)
   if(p!==0){
@@ -816,6 +832,7 @@ function DeckReset(p=0,point=0){
   };
 function monsterMove(){
   //エルドリッチモード　最前列のモンスターカードを移動
+  cLock=false;
   console.log('battle')
   //モンスター破壊
   for(var i=0;i<4;i++){
@@ -825,31 +842,20 @@ function monsterMove(){
       var B=attacker[i][0]%13;
       var C=attacker[i][1]%13;
       if(A==0){A+=13}
-      if(A==B+C){
-        //破壊
-        Destraction(i);
-        return true;
-      }
+        Destraction(i,A,B,C);
       //2 スートが同じエースは7としても扱う
-      var AA=Math.floor((Extras[i])/13);
-      var BB=Math.floor((attacker[i][0])/13);
-      var CC=Math.floor((attacker[i][0])/13);
+      var AA=Math.floor((Extras[i]-1)/13);
+      var BB=Math.floor((attacker[i][0]-1)/13);
+      var CC=Math.floor((attacker[i][1]-1)/13);
       if(B ==1 && AA==BB){
-        if(A==7+C){
-          //破壊
-          Destraction(i);
-        return true;
+          Destraction(i,A,7,C);
         }
-      }
       if(C ==1 && AA==CC){
-        if(A==B+7){
-          //破壊
-          Destraction(i);
+          Destraction(i,A,7,B);
         return true;
-        }
       }
     }
-  }
+  };
   console.log('monstermove')
   for(var i=0;i<4;i++){
     //console.log(hands[i][hands[i].length-1],Efuda(hands[i][hands[i].length-1]));
@@ -860,7 +866,27 @@ function monsterMove(){
       if(Els==-1){
         //モンスターゾーンがすべて埋まっている
         console.log('game over')
-        Gameover(1);
+        //簡単なアニメーション
+        function endroll(){Gameover(1)};
+        var T=Cardlists[i][hands[i].length-1];
+        se8.play();
+        var newCard = new createjs.Bitmap(Card_src[hands[i][hands[i].length-1]]);
+        newCard.x=T.x;
+        newCard.y=T.y;
+        field.addChild(newCard);
+        field.removeChild(T)
+        createjs.Tween.get(newCard)
+        .wait(100)
+        .to({scale:2,x:75,y:150},50)
+        .to({rotation:-5,x:68},50)
+        .to({rotation:5,x:82},50)
+        .to({rotation:-5,x:68},50)
+        .to({rotation:5,x:82},50)
+        .to({rotation:-5,x:68},50)
+        .to({rotation:5,x:82},50)
+        .to({rotation:0,x:75},50)
+        .wait(100)
+        .call(endroll);
         return false;
         }
       se1.play()
@@ -914,8 +940,9 @@ function Efuda(p=0){
   var E=efuda.findIndex(value=>value==p);
   if(E!==-1){return true}else{return false};
 }
-function Destraction(i=0){
-  console.log('destraction!',i);
+function Destraction(i=0,A,B,C){
+  //console.log('destraction!',i);
+  if(A!==B+C){return false;}
   var Card=Exlists[i][0];
   createjs.Tween.get(Card)
   .to({alpha:0},150);
@@ -1210,6 +1237,35 @@ function handleUp(event) {
           TX-=3;
           //Exlists
           switch(TX){
+            case -2:
+              //自動的にUP
+              TX=Math.floor((X-1)/13);
+              if(X==Extras[TX]+1){
+                Extras[TX]+=1;
+                var newCard = new createjs.Bitmap(Card_src[X]);
+                newCard.x=T.x
+                newCard.y=T.y
+                field.addChild(newCard);
+                //extraへ追加
+                createjs.Tween.get(newCard)
+                .to({x:50+(TX+3)*(cardWidth+cardgapX),y:5},70)
+                .call(endPhase);
+                Exlists[TX].push(newCard);
+                //cardlistから消去
+                deckmap.removeChild(T);
+                DeckFacelists.splice(decksNow-1,1);
+                decksNow-=1;
+                deckfaces.pop();
+                duelLog.push({card:[X],from:-1,to:10+TX});
+                console.log(duelLog);
+                //クリア条件
+                if(Extras[0]==13 && Extras[1]==26 && Extras[2]==39 && Extras[3]==52){
+                  Gameover();
+                }
+              }else{
+                ExitCard(-1);            
+              };
+              break;
             case 0:
               case 1:
                 case 2:
@@ -1349,6 +1405,33 @@ function handleUp(event) {
           case 4:
           case 5:
           case 6:
+            if(I==TX && J==hands[I].length-1){
+              //自動的にUP
+              TX=Math.floor((hands[I][J]-1)/13);
+              if(hands[I][J]==Extras[TX]+1){
+                se1.play()
+                var C=hands[I][J];
+                Extras[TX]+=1;
+                var newCard = new createjs.Bitmap(Card_src[hands[I][J]]);
+                newCard.x=T.x
+                newCard.y=T.y
+                field.addChild(newCard);
+                //extraへ追加
+                createjs.Tween.get(newCard)
+                .to({x:50+(TX+3)*(cardWidth+cardgapX),y:5},70)
+                .call(endPhase);
+                Exlists[TX].push(newCard);
+                //cardlistから消去
+                field.removeChild(T);
+                Cardlists[I].splice(J,1);
+                hands[I].splice(J,1);
+                duelLog.push({card:[C],from:I,to:10+TX});
+                //クリア条件
+                if(Extras[0]==13 && Extras[1]==26 && Extras[2]==39 && Extras[3]==52){
+                  Gameover();
+                }         
+              }else{ExitCard();break;};
+          }
             var A=hands[I][J]%13;
             var B=hands[TX][hands[TX].length-1]%13;
             if(A==0){A+=13};
@@ -1619,6 +1702,8 @@ function handleUp(event) {
           case 1:
           case 2:
           case 3:
+            //同じレーンならexitする
+            if(I==TX){ExitCard();return false;}
             var A=hands[I][J]%13;
             var B=hands[TX][hands[TX].length-1]%13;
             if(A==0){A+=13};
@@ -1829,26 +1914,7 @@ canvas5.onmouseup = mouseUpListener;
 function mouseUpListener(e) {
   createjs.Ticker.removeEventListener("tick", MouseCircle);
 };
-canvas5.onmousemove = mouseMoveListener;
-function mouseMoveListener(e) {
-  var rect = e.target.getBoundingClientRect();
-  mouseX = Math.floor(e.clientX - rect.left);
-  mouseY = Math.floor(e.clientY - rect.top);
-  cx3.clearRect(710, 10, 80, 38);
-  cx3.fillStyle = "black";
-cx3.font = "12px Arial";
-createjs.Ticker.addEventListener("tick", MouseCursor);
-if(debugmode){
-cx3.fillText("X座標：" + Math.floor(mouseX*(1/stage.scaleX)), 714, 22);
-cx3.fillText("Y座標：" + Math.floor(mouseY*(1/stage.scaleY)), 714, 34);
-cx3.fillText("Lock：" + cLock, 714, 46);
-}else{
-cx3.font = "12px Arial";
-cx3.fillText("SOUND", 715, 22);
-cx3.font = "Bold 24px Arial";
-cx3.fillText( mute, 730, 42);
-}
-}
+
 canvas5.addEventListener('mouseout', onMouseOut, false);
 function onMouseOut() {
  //console.log('mouseout')
@@ -1921,6 +1987,9 @@ window.addEventListener("keyup", keyupHandler, false);
       }
     if(e.keyCode==27 && key27==0){
       key27=1;//esc
+      if(gamestate==0 && cLock){
+        //メニューに戻る
+      }
     }
     if(e.keyCode==119 && key119==0){
       key119=1;//esc
@@ -1977,8 +2046,6 @@ function Gamestart(){
       var newCard = new createjs.Bitmap(Card_src[hands[i][j]]);
       newCard.x=50;
       newCard.y=5;
-      //newCard.x=50+i*(cardWidth+cardgapX);
-      //newCard.y=150+j*cardgapY;
       field.addChild(newCard);
       Cardlists[i].push(newCard);
       //アニメーションを用意しておく
@@ -2017,6 +2084,7 @@ function Gamestart(){
       Cardlists=[[],[],[],[]]
       Extras=[-1,-1,-1,-1];
       decks = [];
+      Exlists=[[],[],[],[]];
       attacker=[[-1,-1],[-1,-1],[-1,-1],[-1,-1]];
       Decklists=[];
       handsLog=cards.concat();
@@ -2071,10 +2139,116 @@ function Gamestart(){
     printView();
     console.log('デュエル開始')  
   };
+function Gameretry(){
+  cLock=false;
+  field.removeAllChildren();
+  switch(playMode[0]){
+    case 1:
+    //クロンダイク
+    Card_src=Card_src_N.concat();
+    cards =handsLog.concat();
+    duelLog=[];
+    Cardlists=[[],[],[],[],[],[],[]]
+    //handsLog=cards.concat();
+    hands = [
+      cards.splice(0, 1),
+      cards.splice(0, 2),
+      cards.splice(0, 3),
+      cards.splice(0, 4),
+      cards.splice(0, 5),
+      cards.splice(0, 6),
+      cards.splice(0, 7),
+    ]
+    decks = cards.concat();
+    Extras=[0,13,26,39];
+  for(var i=0;i<hands.length;i++){
+    for(var j=0;j<hands[i].length;j++){
+    var newCard = new createjs.Bitmap(Card_src[hands[i][j]]);
+    newCard.x=50;
+    newCard.y=5;
+    field.addChild(newCard);
+    Cardlists[i].push(newCard);
+    //アニメーションを用意しておく
+    //i列目のj行目でアクセスする
+    var HashCard=i*100+j;
+    newCard.addEventListener("mousedown", {card:HashCard,handleEvent:handleDown});
+    newCard.addEventListener("pressmove", {card:HashCard,handleEvent:handleMove});
+    newCard.addEventListener("pressup", {card:HashCard,handleEvent:handleUp});
+    }
+  };
+      break;
+    case 3:
+    //エルドリッチ
+    Card_src=Card_src_M.concat();
+    cards = handsLog.concat();
+    duelLog=[];
+    Cardlists=[[],[],[],[]]
+    Extras=[-1,-1,-1,-1];
+    decks = [];
+    Exlists=[[],[],[],[]];
+    attacker=[[-1,-1],[-1,-1],[-1,-1],[-1,-1]];
+    Decklists=[];
+    handsLog=cards.concat();
+    hands = [
+      cards.splice(0, 13),
+      cards.splice(0, 13),
+      cards.splice(0, 13),
+      cards.splice(0, 13),
+    ]
+    //なるべく初手ゲームオーバーをなくすために最前,2列目に現れるモンスターは4体以下にしておく
+    var T=0;
+    for(var i=0;i<4;i++){
+      if(Efuda(hands[i][hands[i].length-1])){
+        T+=1;
+      }
+      if(Efuda(hands[i][hands[i].length-2])){
+        T+=1;
+      }
+    }
+    if(T>4){
+      for(var i=0;i<4;i++){
+      if(Efuda(hands[i][hands[i].length-1]) || Efuda(hands[i][hands[i].length-2])){
+      var M=hands[i].findIndex(value=>!Efuda(value))
+      if(M!==-1){
+        var MM=hands[i].splice(M, 1)
+        hands[i].splice(0, 0, MM[0])
+        T-=1;
+      }}
+    }
+    if(T<=4){break;}
+    }
+    for(var i=0;i<hands.length;i++){
+      for(var j=0;j<hands[i].length;j++){
+      var newCard = new createjs.Bitmap(Card_src[hands[i][j]]);
+      newCard.x=680;
+      newCard.y=425;
+      field.addChild(newCard);
+      Cardlists[i].push(newCard);
+      //アニメーションを用意しておく
+      //i列目のj行目でアクセスする
+      var HashCard=i*100+j;
+      if(!Efuda(hands[i][j])){
+      newCard.addEventListener("mousedown", {card:HashCard,handleEvent:handleDown});
+      newCard.addEventListener("pressmove", {card:HashCard,handleEvent:handleMove});
+      newCard.addEventListener("pressup", {card:HashCard,handleEvent:handleUp});
+      }}
+    };
+      break;
+  }
+  printView();
+  console.log('デュエル開始')  
+};
   function printView(){
     //シャッフルして描画するまで
     switch(playMode[0]){
       case 1:
+        if(musicnum!==3){
+          Bgm.stop();
+          musicnum=3;
+          if(mute="ON"){
+          Bgm=new Music(bgm3data);
+          Bgm.playMusic();
+          }}
         cx.strokeStyle="white";
         createRoundRect(74,5,80,128,5,cx);
         cx.stroke();
@@ -2221,6 +2395,7 @@ function Gamestart(){
             j+=1;
             if(j>6){
               cLock=true;
+              duelLog.push("start");
               return false;
             };
             i=j};
@@ -2244,6 +2419,7 @@ function Gamestart(){
                 T.regY = Y;
               }
               setTimeout(monsterMove,300);
+              duelLog.push("start");
               return false;
             }};
           FirstAnimation(i,j);
@@ -2457,6 +2633,7 @@ function compareFunc(a,b){return a-b;}
           case 1:
             cLock=false;
             gamestate=1;
+            retryswitch=0;
             //createjs.Tween.get(field).to({alpha:0.5},1000)
             var shape = new createjs.Shape();
             shape.graphics.beginFill("black");
@@ -2522,6 +2699,7 @@ function compareFunc(a,b){return a-b;}
           default:
             cLock=false;
             gamestate=1;
+            retryswitch=0;
             //createjs.Tween.get(field).to({alpha:0.5},1000)
             clear_1.x=800;
             clear_1.y=0;
@@ -2601,7 +2779,6 @@ function compareFunc(a,b){return a-b;}
             createjs.Tween.get(clear_3)
             .wait(450)
             .to({x:50,alpha:1},300)
-      
             break;
         }
       function nextgame(){
