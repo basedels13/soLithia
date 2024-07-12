@@ -930,7 +930,7 @@ function monsterMove(){
   };
   if(Decklists.length==16){
     Gameover();
-    Bgm.stop();
+    //Bgm.stop();
   }
   cLock=true;
 };
