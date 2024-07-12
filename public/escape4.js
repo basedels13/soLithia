@@ -101,7 +101,7 @@ Backyard.addChild(shape); // 表示リストに追加
 var BG = new createjs.Bitmap("soL_back.png");
 BG.alpha=0.4;
 Backyard.addChild(BG);
-var t = new createjs.Text("Click Card to START", "24px serif", "white");
+var t = new createjs.Text("ver0.99/Click Card to START", "24px serif", "white");
 Backyard.addChild(t);
 var Car1 = new createjs.Bitmap("Card_images/BackColor_Black.png");
 Car1.x=30;
