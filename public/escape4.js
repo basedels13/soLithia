@@ -832,7 +832,7 @@ function DeckReset(p=0,point=0){
   };
 function monsterMove(){
   //エルドリッチモード　最前列のモンスターカードを移動
-  cLock=false;
+  //cLock=false;
   console.log('battle')
   //モンスター破壊
   for(var i=0;i<4;i++){
