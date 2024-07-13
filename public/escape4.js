@@ -1,6 +1,6 @@
 //ドラッグ＆ドロップ　https://ics.media/tutorial-createjs/mouse_drag/
 //next　設定　セーブ　タイトルに戻るボタン　など
-//やるきあれば→アルテラシア
+//やるきあれば→アルテラシア　クラシック
 //リトライ、2週目に音量が大きくなる？
 window.onload = function(){
 main();
@@ -42,14 +42,18 @@ var deckmap = new createjs.Container();
 var field = new createjs.Container();//field
 var clearBG = new createjs.Container();//clear
 var yakumap = new createjs.Container();//ヒントボタン等
-var Backyard = new createjs.Container();//タイトル/背景
+var Titleyard = new createjs.Container();//タイトル
+var Backyard = new createjs.Container();//背景
 var Configmap = new createjs.Container();//soundボタン・オプション等
+var Loadmap = new createjs.Container();//ダイアログ
 stage.addChild(Backyard);
+stage.addChild(Titleyard);
 stage.addChild(field);
 stage.addChild(deckmap);
 stage.addChild(clearBG);
 stage.addChild(yakumap);
 stage.addChild(Configmap);
+stage.addChild(Loadmap);
 //設定
 var mouseX;
 var mouseY;
@@ -97,44 +101,44 @@ shape.addEventListener("click", {handleEvent:SoundConfig});
 var shape = new createjs.Shape();
 shape.graphics.beginFill("#3b7353");
 shape.graphics.drawRect(0, 0, 800, 600); // 長方形を描画
-Backyard.addChild(shape); // 表示リストに追加
+Titleyard.addChild(shape); // 表示リストに追加
 var BG = new createjs.Bitmap("soL_back.png");
 BG.alpha=0.4;
-Backyard.addChild(BG);
+Titleyard.addChild(BG);
 var t = new createjs.Text("ver0.99/Click Card to START", "24px serif", "white");
-Backyard.addChild(t);
+Titleyard.addChild(t);
 var Car1 = new createjs.Bitmap("Card_images/BackColor_Black.png");
 Car1.x=30;
 Car1.y=55;
 Car1.scale=3;
-Backyard.addChild(Car1);
+Titleyard.addChild(Car1);
 var Car2 = new createjs.Bitmap("Card_images/BackColor_Black.png");
 Car2.x=430;
 Car2.y=55;
 Car2.scale=3;
-Backyard.addChild(Car2);
+Titleyard.addChild(Car2);
 var Car3 = new createjs.Bitmap("Card_images/Spade12.png");
 Car3.x=30;
 Car3.y=55;
 Car3.scale=3;
 Car3.alpha=0;
-Backyard.addChild(Car3);
+Titleyard.addChild(Car3);
 var Car4 = new createjs.Bitmap("Card_images/Spade_M11.png");
 Car4.x=430;
 Car4.y=55;
 Car4.scale=3;
 Car4.alpha=0;
-Backyard.addChild(Car4);
+Titleyard.addChild(Car4);
 var Bt1 = new createjs.Bitmap("soL_rule_bt1.png");
 Bt1.x=50;
 Bt1.y=430;
 Bt1.scale=2;
-Backyard.addChild(Bt1);
+Titleyard.addChild(Bt1);
 var Bt3 = new createjs.Bitmap("soL_rule_bt3.png");
 Bt3.x=450;
 Bt3.y=430;
 Bt3.scale=2;
-Backyard.addChild(Bt3);
+Titleyard.addChild(Bt3);
 Car1.addEventListener("mouseover", {card:1,handleEvent:MouseOver});
 Car1.addEventListener("mouseout", {card:2,handleEvent:MouseOver});
 Car1.addEventListener("click", {card:1,handleEvent:GameReady});
@@ -160,7 +164,6 @@ function MouseOver(e){
       Car4.alpha=0;
       break;
   }
-console.log('mouseover')
 };
 var yakumap_hint = new createjs.Bitmap("soL_hint.png");
 yakumap_hint.alpha=0;
@@ -456,7 +459,7 @@ var musicnum=0;
 var loadmax;
 
 function load2(){
-  Backyard.alpha=0;
+  Titleyard.alpha=0;
   se6.play();
 		cx.fillStyle = 'rgba(0, 0, 0, 0.5)';
 		cx.fillRect(710,0,90,510);
@@ -737,8 +740,10 @@ function step(){
 }};
 function resetButton(event){
   //解決する
-  retryswitch+=1;
-  Gameretry();
+  if(opLock==0){
+    opLock=2;
+    Dialogue("RESET GAME？","同じ盤面を最初からやり直します",3,-1);
+  }
 }
 function solveButton(event){
   if(cLock){
@@ -746,14 +751,17 @@ function solveButton(event){
   Gameover();
   }else{
   //new game;
-  Gamestart();
+  if(opLock==0){
+    opLock=2;
+    Dialogue("NEW GAME？","このゲームを諦めて新しいゲームを始めます",2,-1);
+  }
   }
 }}
 function DeckReset(p=0,point=0){
   console.log('deckreset',p,point)
   if(p!==0){
     p=this.point;
-    if(!cLock){return false};
+    if(!cLock || opLock!==0){return false};
   };
   cLock=false;
   switch(p){
@@ -842,17 +850,21 @@ function monsterMove(){
       var B=attacker[i][0]%13;
       var C=attacker[i][1]%13;
       if(A==0){A+=13}
+      if(A==B+C){
         Destraction(i,A,B,C);
+        return false;
+      };
       //2 スートが同じエースは7としても扱う
       var AA=Math.floor((Extras[i]-1)/13);
       var BB=Math.floor((attacker[i][0]-1)/13);
       var CC=Math.floor((attacker[i][1]-1)/13);
-      if(B ==1 && AA==BB){
+      if(B ==1 && AA==BB && A==7+C){
           Destraction(i,A,7,C);
+          return false;
         }
-      if(C ==1 && AA==CC){
+      if(C ==1 && AA==CC && A==7+B){
           Destraction(i,A,7,B);
-        return true;
+          return false;
       }
     }
   };
@@ -941,8 +953,6 @@ function Efuda(p=0){
   if(E!==-1){return true}else{return false};
 }
 function Destraction(i=0,A,B,C){
-  //console.log('destraction!',i);
-  if(A!==B+C){return false;}
   var Card=Exlists[i][0];
   createjs.Tween.get(Card)
   .to({alpha:0},150);
@@ -1429,7 +1439,8 @@ function handleUp(event) {
                 //クリア条件
                 if(Extras[0]==13 && Extras[1]==26 && Extras[2]==39 && Extras[3]==52){
                   Gameover();
-                }         
+                }
+                break;
               }else{ExitCard();break;};
           }
             var A=hands[I][J]%13;
@@ -1703,6 +1714,7 @@ function handleUp(event) {
           case 2:
           case 3:
             //同じレーンならexitする
+            console.log(I,TX);
             if(I==TX){ExitCard();return false;}
             var A=hands[I][J]%13;
             var B=hands[TX][hands[TX].length-1]%13;
@@ -1757,9 +1769,9 @@ function handleUp(event) {
     }
     //No
     function ExitCard(t=0){
+      console.log(I,J)
       if(t==-2){
         //アタックゾーン 調整する
-        console.log(I,J)
         var T=Atklists[I][J];
         createjs.Tween.get(T)
         .to({x:50+(J+1)*(cardWidth+cardgapX),y:5+I*cardHeight},90)
@@ -1819,7 +1831,7 @@ function handleUp(event) {
               var C=Math.floor((hands[I][i]-1)/13);
               var D=Math.floor((hands[I][i+1]-1)/13);
               var E=Math.abs(B-A);
-              if(A-B!==1 || E!==1){
+              if(E!==1){
                 cLock=true;
                 return false;
               }
@@ -1934,19 +1946,8 @@ function onMouseOut() {
   cx3.fillText( mute, 730, 42);
   return false;
         }};
-    if(gamestate==0){
-      //タップ操作を有効にした場合クリックイベントが反応してくれなかったため
-      if(cLock){
-        if(mouseX>70 && mouseX <150){
-          if(mouseY>4 && mouseY<134){
-            //デッキのカードをめくる
-          if(decks.length){
-            //DeckReset(1);
-          }else{
-            //DeckReset();
-          }
-          }}
-    }};
+  //タップ操作を有効にした場合クリックイベントが反応してくれなかったため削除
+
 if(gamestate==10 && loadstate >=loadmax){
   //メニュー画面へ
   if(pagestate==-1){
@@ -1989,6 +1990,10 @@ window.addEventListener("keyup", keyupHandler, false);
       key27=1;//esc
       if(gamestate==0 && cLock){
         //メニューに戻る
+        if(opLock==0){
+          opLock=2;
+          Dialogue("タイトル画面に戻りますか？","現在のプレイ状況は失われます",1,-1);
+        }
       }
     }
     if(e.keyCode==119 && key119==0){
@@ -1999,6 +2004,70 @@ window.addEventListener("keyup", keyupHandler, false);
       }
     }
     };
+    function Dialogue(word,detail="　",yes=1,no=-1){
+      Loadmap.removeAllChildren();
+      Loadmap.alpha=1;
+      var shape = new createjs.Shape();
+      shape.graphics.beginFill("rgba(20,20,20,0.7)");
+      shape.graphics.drawRect(0, 0, 800, 600);
+      Loadmap.addChild(shape);
+      var DL= new createjs.Bitmap("soL_dialogue.png");
+      DL.scale=1.7;
+      DL.x=190;
+      DL.y=180;
+      Loadmap.addChild(DL);
+      var t=new createjs.Text(word,"bold 26px 'メイリオ'","black");
+      t.x=245;
+      t.y=200;
+      Loadmap.addChild(t);
+      var t=new createjs.Text(detail,"bold 18px 'メイリオ'","black");
+      t.x=210;
+      t.y=260;
+      Loadmap.addChild(t);
+      var shape = new createjs.Shape();
+      shape.graphics.beginFill("#ff3838");
+      shape.graphics.drawRect(220, 300, 120, 60);
+      Loadmap.addChild(shape);
+      shape.addEventListener("click", {card:yes,handleEvent:DialogueResult});
+      var shape = new createjs.Shape();
+      shape.graphics.beginFill("#3898ff");
+      shape.graphics.drawRect(460, 300, 120, 60);
+      Loadmap.addChild(shape);
+      shape.addEventListener("click", {card:no,handleEvent:DialogueResult});
+      var t=new createjs.Text("YES","bold 24px 'メイリオ'","white");
+      t.x=250;
+      t.y=320;
+      Loadmap.addChild(t);
+      var t=new createjs.Text("NO","bold 24px 'メイリオ'","white");
+      t.x=500;
+      t.y=320;
+      Loadmap.addChild(t);
+      function DialogueResult(e){
+        switch(this.card){
+          case 1:
+            //go to title;
+            gamestate=10;
+            Titleyard.alpha=1;
+            field.removeAllChildren();
+            deckmap.removeAllChildren();
+            if(mute="ON"){Bgm.stop();};
+            musicnum=0;
+            break;
+          case 2:
+            Gamestart();
+            break;
+          case 3:
+            retryswitch+=1;
+            Gameretry();
+            break;
+          default:
+            //no
+            console.log(this.card);
+            break;
+        }
+        Loadmap.alpha=0;
+        opLock=0;
+      }}
 function Gamestart(){
     gamestate=0;
     cLock=false;
@@ -2543,89 +2612,6 @@ function compareFunc(a,b){return a-b;}
           context.arcTo(x, y, x + radius, y, radius);
           context.closePath();
     };
-    var BallRoundRect = function(context,x, y, w, h, r, bl, br, bh ,Balltype=0){
-      //t 0->下 1->左　2->上　3->右　に吹き出し -1->なし
-      switch(Balltype){
-      case 0:
-        context.beginPath();
-        context.moveTo(x + r, y);
-        context.lineTo(x + w - r, y);
-        context.arc(x + w - r, y + r, r, Math.PI * (3/2), 0, false);
-        context.lineTo(x + w, y + h - r);
-        context.arc(x + w - r, y + h - r, r, 0, Math.PI * (1/2), false);        
-        context.lineTo(x + br, y + h);
-        context.lineTo(x + (br + bl) / 2, y + h + bh);
-        context.lineTo(x + bl, y + h);
-        context.lineTo(x + r, y + h);
-        context.arc(x + r, y + h - r, r, Math.PI * (1/2), Math.PI, false);
-        context.lineTo(x, y + r);
-        context.arc(x + r, y + r, r, Math.PI, Math.PI * (3/2), false);
-        context.closePath();
-        break;
-      case 1:
-      context.beginPath();
-      context.moveTo(x + r, y);
-      context.lineTo(x + w - r, y);
-      context.arc(x + w - r, y + r, r, Math.PI * (3/2), 0, false);
-      context.lineTo(x + w, y + h - r);
-      context.arc(x + w - r, y + h - r, r, 0, Math.PI * (1/2), false);        
-      context.lineTo(x + r, y + h);
-      context.arc(x + r, y + h - r, r, Math.PI * (1/2), Math.PI, false);
-      context.lineTo(x, y + h - r  - br);
-      context.lineTo(x -bh, y + h - r - (br + bl) / 2);
-      context.lineTo(x, y + h - r - bl);
-      context.lineTo(x, y + r);
-      context.arc(x + r, y + r, r, Math.PI, Math.PI * (3/2), false);
-      context.closePath();
-      break;
-      case 2:
-        context.beginPath();
-        context.moveTo(x + r, y);
-        context.lineTo(x + br, y + h);
-        context.lineTo(x + (br + bl) / 2, y + h - bh);
-        context.lineTo(x + bl, y + h);
-        context.lineTo(x + w - r, y);
-        context.arc(x + w - r, y + r, r, Math.PI * (3/2), 0, false);
-        context.lineTo(x + w, y + h - r);
-        context.arc(x + w - r, y + h - r, r, 0, Math.PI * (1/2), false);        
-        context.lineTo(x + r, y + h);
-        context.arc(x + r, y + h - r, r, Math.PI * (1/2), Math.PI, false);
-        context.lineTo(x, y + r);
-        context.arc(x + r, y + r, r, Math.PI, Math.PI * (3/2), false);
-        context.closePath();
-        break;
-      case 3:
-        //三角形の角度を特殊裁定に
-        context.beginPath();
-        context.moveTo(x + r, y);
-        context.lineTo(x + w - r, y);
-        context.arc(x + w - r, y + r, r, Math.PI * (3/2), 0, false);
-        context.lineTo(x + w , y + r + br);
-        context.lineTo(x + w + bh, y + r + (br + 2* bl) / 3);
-        context.lineTo(x + w, y + r + bl);
-        context.lineTo(x + w, y + h - r);
-        context.arc(x + w - r, y + h - r, r, 0, Math.PI * (1/2), false);        
-        context.lineTo(x + r, y + h);
-        context.arc(x + r, y + h - r, r, Math.PI * (1/2), Math.PI, false);
-        context.lineTo(x, y + r);
-        context.arc(x + r, y + r, r, Math.PI, Math.PI * (3/2), false);
-        context.closePath();
-        break;
-      default:
-        context.beginPath();
-        context.moveTo(x + r, y);
-        context.lineTo(x + w - r, y);
-        context.arc(x + w - r, y + r, r, Math.PI * (3/2), 0, false);
-        context.lineTo(x + w, y + h - r);
-        context.arc(x + w - r, y + h - r, r, 0, Math.PI * (1/2), false);        
-        context.lineTo(x + r, y + h);
-        context.arc(x + r, y + h - r, r, Math.PI * (1/2), Math.PI, false);
-        context.lineTo(x, y + r);
-        context.arc(x + r, y + r, r, Math.PI, Math.PI * (3/2), false);
-        context.closePath();
-        break;
-}
-    }
     function Gameover(A=0){
       console.log('gameover');
       if(gamestate==0){
