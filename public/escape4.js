@@ -1,7 +1,5 @@
-//ドラッグ＆ドロップ　https://ics.media/tutorial-createjs/mouse_drag/
 //next　設定　セーブ　など
 //やるきあれば→EXに挙げたカードを降ろす, 破片強打
-//リトライ、2週目に音量が大きくなる？
 window.onload = function(){
 main();
 };
@@ -72,7 +70,7 @@ var mouseY;
 var dragPointX;
 var dragPointY;
 var mute="ON"
-var debugmode=false;//座標の表示を管理
+var debugmode=true;//座標の表示を管理
 var loadstate=0;
 var cLock=true;//true->操作可能
 var opLock=0;
@@ -93,31 +91,177 @@ var datet =0;
 var key13=0;//enter
 var key27=0;//esc
 var key119=0;//F8
-//オプション
-var shape = new createjs.Shape();
-shape.graphics.beginFill("#3b7353");
-shape.graphics.drawRect(700, 0, 120, 50); // 長方形を描画
-shape.alpha=0.8;
-Configmap.addChild(shape); // 表示リストに追加
-var t = new createjs.Text("SOUND", "20px serif", "white");
-t.x=705;
-t.y=0;
-Configmap.addChild(t);
-var muteshape = new createjs.Text(mute, "28px serif", "white");
-muteshape.x=720;
-muteshape.y=20;
-Configmap.addChild(muteshape);
-shape.addEventListener("click", {handleEvent:SoundConfig});
+var muteshape;
 //たいとるがめん
 var shape = new createjs.Shape();
 shape.graphics.beginFill("#3b7353");
 shape.graphics.drawRect(0, 0, 800, 600); // 長方形を描画
 Titleyard.addChild(shape); // 表示リストに追加
 var BG = new createjs.Bitmap("soL_back.png");
-BG.alpha=0.4;
+BG.alpha=0.3;
 Titleyard.addChild(BG);
-var t = new createjs.Text("ver0.991/Click Card to START", "24px serif", "white");
+function Title(){
+ if(debugmode){
+var circle1 = new createjs.Shape();
+circle1.graphics.beginFill("#2c4a3f")
+.drawCircle(0, 0, 80);
+circle1.x=230;
+circle1.y=165;
+Titleyard.addChild(circle1);
+var circle2 = new createjs.Shape()
+circle2.graphics.beginFill("#2c4a3f")
+.drawCircle(0, 0, 80)
+circle2.x=520;
+circle2.y=165;
+Titleyard.addChild(circle2);
+var circle3 = new createjs.Shape();
+circle3.graphics.beginFill("#4cb58b")
+.drawCircle(0, 0, 80)
+circle3.x=230;
+circle3.y=165;
+circle3.alpha=1;
+Titleyard.addChild(circle3);
+var circle4 = new createjs.Shape()
+circle4.graphics.beginFill("#4cb58b")
+.drawCircle(0, 0, 80)
+circle4.x=520;
+circle4.y=165;
+circle4.alpha=0;
+Titleyard.addChild(circle4);
+var sound1 = new createjs.Bitmap("soL_sound1.png");
+sound1.x=180;
+sound1.y=120;
+sound1.scale=1;
+Titleyard.addChild(sound1);
+var sound2 = new createjs.Bitmap("soL_sound2.png");
+sound2.x=470;
+sound2.y=120;
+sound2.scale=1;
+Titleyard.addChild(sound2);
+var t = new createjs.Text("ver0.994/Click Card to START", "24px serif", "white");
 Titleyard.addChild(t);
+Titleyard.addChild(t);
+var Car1 = new createjs.Bitmap("Card_images/BackColor_Black.png");
+Car1.x=250;
+Car1.y=280;
+Car1.scale=2;
+Titleyard.addChild(Car1);
+var Car2list=[];
+circle1.addEventListener("mouseover", {card:3,handleEvent:Soundcircle});
+circle1.addEventListener("mouseout", {card:4,handleEvent:Soundcircle});
+circle2.addEventListener("mouseover", {card:5,handleEvent:Soundcircle});
+circle2.addEventListener("mouseout", {card:6,handleEvent:Soundcircle});
+circle1.addEventListener("click", {card:1,handleEvent:Soundcircle});
+circle2.addEventListener("click", {card:2,handleEvent:Soundcircle});
+Car1.addEventListener("mouseover", {card:0,handleEvent:titleCardTurn});
+Car1.addEventListener("click", {card:0,handleEvent:GameReady});
+function Soundcircle(){
+  switch(this.card){
+    case 3:
+      if(mute=="OFF"){
+    circle3.alpha=0.3;
+      }
+      break;
+    case 4:
+      if(mute=="OFF"){
+    circle3.alpha=0;
+      }
+    break;
+    case 5:
+      if(mute=="ON"){
+    circle4.alpha=0.3;
+      }
+      break;
+    case 6:
+      if(mute=="ON"){
+    circle4.alpha=0;
+      }
+    break;
+    case 1:
+      //soundをonにする
+    if(mute=="OFF"){
+    mute="ON";
+    circle3.alpha=1;
+    circle4.alpha=0;
+    SEbuffer();
+    Bgm.mute(false);
+    se7.play();
+    }
+    break;
+    case 2:
+    //soundをoffにする
+    if(mute=="ON"){
+    mute="OFF";
+    circle3.alpha=0;
+    circle4.alpha=1;
+    se1.volume(0);
+    se2.volume(0);
+    se3.volume(0);
+    se4.volume(0);
+    se5.volume(0);
+    se6.volume(0);
+    se7.volume(0);
+    se8.volume(0);
+    se9.volume(0);
+    se10.volume(0);
+    se11.volume(0);
+    se12.volume(0);
+    se13.volume(0);
+    se14.volume(0);
+    se15.volume(0);
+    se16.volume(0);
+    se17.volume(0);
+    se18.volume(0);
+    se19.volume(0);
+    se20.volume(0);
+    Bgm.mute(true);
+    Bgm.stop();
+    mute="OFF";
+    }
+    break;
+  } 
+}
+function titleCardTurn(){
+  //カードめくる
+  if(this.card==0){
+        if(Car2list){
+          for(var i=0;i<Car2list.length;i++){
+            var F=Car2list[i];
+            Titleyard.removeChild(F); 
+          }
+        }
+        var R=Math.floor(Math.random()*Card_src_N.length-2)+1;
+        var Car2 = new createjs.Bitmap(Card_src_N[R]);
+        Car2.x=320;
+        Car2.y=250;
+        Car2.scale=2;
+        Car2.alpha=0;
+        Titleyard.addChild(Car2);
+        Car2list.push(Car2);
+        Car2.addEventListener("mouseout", {card:1,handleEvent:titleCardTurn});
+        Car2.addEventListener("click", {card:0,handleEvent:GameReady});
+        createjs.Tween.get(Car1)
+        .to({x:320,y:250,scaleX:0.05,scaleY:2.4},140)
+        .to({alpha:0},10);
+        createjs.Tween.get(Car2)
+        .to({scaleX:0.05,scaleY:2.2},70)
+        .to({x:250,y:280,scaleX:2,scaleY:2,alpha:1},140)
+  }else if(this.card==1){
+    var Car2=Car2list.pop();
+    createjs.Tween.get(Car1)
+    .to({x:320,y:250,alpha:0.3,scaleX:0.05,scaleY:2.2},140)
+    .to({x:250,y:280,scaleX:2,scaleY:2,alpha:1},20)
+    createjs.Tween.get(Car2)
+    .to({x:320,y:250,scaleX:0.05,scaleY:2.2},140)
+    .to({alpha:0},10)
+    .call(step);
+    function step(){
+      Titleyard.removeChild(Car2);
+    }
+  }
+}
+return false;
+}
 var Car1 = new createjs.Bitmap("Card_images/BackColor_Black.png");
 Car1.x=-20;
 Car1.y=55;
@@ -172,6 +316,11 @@ Car5.addEventListener("mouseout", {card:6,handleEvent:MouseOver});
 Car5.addEventListener("click", {card:2,handleEvent:GameReady});
 submitPass();
 function GameReady(){
+  if(this.card==0){
+    console.log('go to main menu')
+    menu(0);
+    return true;
+  }
   playMode[0]=this.card;
   load2();
 }
@@ -196,6 +345,7 @@ function MouseOver(e){
       Car6.alpha=0;
       break;
   }
+};
 };
 var yakumap_hint = new createjs.Bitmap("soL_hint.png");
 yakumap_hint.alpha=0;
@@ -507,10 +657,106 @@ const bgm1data ={
     loopEnd: 98160,
     volume: 0.1,
   };
+  const bgm5data ={
+    src: "PerituneMaterial_Daybreak.mp3",
+    loopStart: 0,
+    loopEnd: 96500,
+    volume: 0.1,
+  };
 var Bgm=new Music(bgm1data);
 var musicnum=0;
-var loadmax;
-
+function menu(state=0){
+  //メイン画面
+  if(musicnum!==5){
+    Bgm.stop();
+    musicnum=5;
+    if(mute=="ON"){
+    Bgm=new Music(bgm5data);
+    Bgm.playMusic();
+    }}
+  switch(state){
+    case 0:
+      Titleyard.removeAllChildren();
+      se6.play();
+      //初めて訪れた時
+      //オプションボタン
+      var shape = new createjs.Shape();
+      shape.graphics.beginFill("#3b7353");
+      shape.graphics.drawRect(700, 0, 120, 50); // 長方形を描画
+      shape.alpha=0.8;
+      Configmap.addChild(shape); // 表示リストに追加
+      var t = new createjs.Text("SOUND", "20px serif", "white");
+      t.x=705;
+      t.y=0;
+      Configmap.addChild(t);
+      muteshape = new createjs.Text(mute, "28px serif", "white");
+      muteshape.x=720;
+      muteshape.y=20;
+      Configmap.addChild(muteshape);
+      shape.addEventListener("click", {handleEvent:SoundConfig});
+      var BG = new createjs.Bitmap("Don_bg2.png");
+      BG.alpha=0.7;
+      Titleyard.addChild(BG);
+      var Room = new createjs.Bitmap("Card_images/soL_room.png");
+      Titleyard.addChild(Room);
+      var Table = new createjs.Bitmap("Card_images/soL_room_table.png");
+      Titleyard.addChild(Table);
+      var Path = new createjs.Bitmap("Card_images/soL_room_path.png");
+      Titleyard.addChild(Path);
+      var Letter = new createjs.Bitmap("Card_images/soL_room_letter.png");
+      Room.x=-40;
+      Room.y=-30;
+      Table.x=-40;
+      Table.y=-30;
+      Letter.scale=600/768;
+      Letter.y=-50;
+      Letter.alpha=0;
+      Titleyard.addChild(Letter);
+      Path.x=-80;
+      Path.y=-67;
+      var shape = new createjs.Shape();
+      shape.graphics.beginFill("rgba(0,0,0,0.7)");
+      shape.graphics.drawRect(0, 0, 800, 600);
+      Titleyard.addChild(shape);
+      var Header1 = new createjs.Bitmap("soL_header1.png");
+      Header1.x=450;
+      Header1.scale=0.7;
+      Titleyard.addChild(Header1);
+      var Header2 = new createjs.Bitmap("soL_header2.png");
+      Header2.y=-8;
+      Titleyard.addChild(Header2);
+      createjs.Tween.get(shape)
+      .to({alpha:0.3},2000);
+      createjs.Tween.get(Letter)
+      .to({alpha:1},2000);
+      createjs.Tween.get(Room)
+      .to({x:0,y:0,scale:600/768,alpha:1},3000, createjs.Ease.backOut);
+      createjs.Tween.get(Table)
+      .to({x:0,y:0,scale:600/768,alpha:1},3000, createjs.Ease.backOut)
+      .call(mainstep)
+      createjs.Tween.get(Path,{loop:true})
+      .to({x:-83,y:-64,alpha:0.7},3000, createjs.Ease.backInOut)
+      .to({x:-85,y:-68,alpha:0.9},3000, createjs.Ease.backInOut)
+      .to({x:-83,y:-70,alpha:0.7},3000, createjs.Ease.backInOut)
+      .to({x:-80,y:-67,alpha:1},3000);
+      function mainstep(){
+      Titleyard.addChild(Letter);
+      createjs.Tween.get(Letter,{loop:true})
+      .to({x:0,y:-54,alpha:0.9},2100)
+      .to({x:0,y:-50,alpha:1},2100);
+      createjs.Tween.get(Room,{loop:true})
+      .to({x:-6,y:-2,scale:606/768,alpha:1},2100)
+      .to({x:0,y:0,scale:600/768,alpha:1},2100);
+      createjs.Tween.get(Table,{loop:true})
+      .to({x:-6,y:-2,scale:606/768,alpha:0.9},2100)
+      .to({x:0,y:0,scale:600/768,alpha:1},2100);
+      Table.addEventListener("click", {handleEvent:load2});
+      opLock=2;
+      Dialogue("遊び方","テーブルをクリックしてソリティアを始める",-1,-1,0);
+      };
+      break;
+  }
+};
 function load2(){
   Titleyard.alpha=0;
   se6.play();
@@ -538,24 +784,27 @@ var grad  = cx.createLinearGradient(0,510,0,600);
   Gamestart();
 }
 //画像のロード
-    // LoadQueueのインスタンスを作成
-    var queue = new createjs.LoadQueue(),
-        // manifestを定義
-        manifest = [
-          {src:'Card_images/BackColor_Closed.png'},{src:'Card_images/BackColor_Black.png'},{src:'Card_images/Spade01.png'},{src:'Card_images/Spade02.png'},{src:'Card_images/Spade03.png'},{src:'Card_images/Spade04.png'},{src:'Card_images/Spade05.png'},{src:'Card_images/Spade06.png'},{src:'Card_images/Spade07.png'},{src:'Card_images/Spade08.png'},{src:'Card_images/Spade09.png'},{src:'Card_images/Spade10.png'},{src:'Card_images/Spade11.png'},{src:'Card_images/Spade12.png'},{src:'Card_images/Spade13.png'},
-          {src:'Card_images/Heart01.png'},{src:'Card_images/Heart02.png'},{src:'Card_images/Heart03.png'},{src:'Card_images/Heart04.png'},{src:'Card_images/Heart05.png'},{src:'Card_images/Heart06.png'},{src:'Card_images/Heart07.png'},{src:'Card_images/Heart08.png'},{src:'Card_images/Heart09.png'},{src:'Card_images/Heart10.png'},{src:'Card_images/Heart11.png'},{src:'Card_images/Heart12.png'},{src:'Card_images/Heart13.png'},
-          {src:'Card_images/Club01.png'},{src:'Card_images/Club02.png'},{src:'Card_images/Club03.png'},{src:'Card_images/Club04.png'},{src:'Card_images/Club05.png'},{src:'Card_images/Club06.png'},{src:'Card_images/Club07.png'},{src:'Card_images/Club08.png'},{src:'Card_images/Club09.png'},{src:'Card_images/Club10.png'},{src:'Card_images/Club11.png'},{src:'Card_images/Club12.png'},{src:'Card_images/Club13.png'},
-          {src:'Card_images/Diamond01.png'},{src:'Card_images/Diamond02.png'},{src:'Card_images/Diamond03.png'},{src:'Card_images/Diamond04.png'},{src:'Card_images/Diamond05.png'},{src:'Card_images/Diamond06.png'},{src:'Card_images/Diamond07.png'},{src:'Card_images/Diamond08.png'},{src:'Card_images/Diamond09.png'},{src:'Card_images/Diamond10.png'},{src:'Card_images/Diamond11.png'},{src:'Card_images/Diamond12.png'},{src:'Card_images/Diamond13.png'}
-        ];
+// LoadQueueのインスタンスを作成
+var queue = new createjs.LoadQueue(),
+      // manifestを定義
+      manifest = [
+        {src:'Card_images/BackColor_Closed.png'},{src:'Card_images/BackColor_Black.png'},{src:'Card_images/Spade01.png'},{src:'Card_images/Spade02.png'},{src:'Card_images/Spade03.png'},{src:'Card_images/Spade04.png'},{src:'Card_images/Spade05.png'},{src:'Card_images/Spade06.png'},{src:'Card_images/Spade07.png'},{src:'Card_images/Spade08.png'},{src:'Card_images/Spade09.png'},{src:'Card_images/Spade10.png'},{src:'Card_images/Spade11.png'},{src:'Card_images/Spade12.png'},{src:'Card_images/Spade13.png'},
+        {src:'Card_images/Heart01.png'},{src:'Card_images/Heart02.png'},{src:'Card_images/Heart03.png'},{src:'Card_images/Heart04.png'},{src:'Card_images/Heart05.png'},{src:'Card_images/Heart06.png'},{src:'Card_images/Heart07.png'},{src:'Card_images/Heart08.png'},{src:'Card_images/Heart09.png'},{src:'Card_images/Heart10.png'},{src:'Card_images/Heart11.png'},{src:'Card_images/Heart12.png'},{src:'Card_images/Heart13.png'},
+        {src:'Card_images/Club01.png'},{src:'Card_images/Club02.png'},{src:'Card_images/Club03.png'},{src:'Card_images/Club04.png'},{src:'Card_images/Club05.png'},{src:'Card_images/Club06.png'},{src:'Card_images/Club07.png'},{src:'Card_images/Club08.png'},{src:'Card_images/Club09.png'},{src:'Card_images/Club10.png'},{src:'Card_images/Club11.png'},{src:'Card_images/Club12.png'},{src:'Card_images/Club13.png'},
+        {src:'Card_images/Diamond01.png'},{src:'Card_images/Diamond02.png'},{src:'Card_images/Diamond03.png'},{src:'Card_images/Diamond04.png'},{src:'Card_images/Diamond05.png'},{src:'Card_images/Diamond06.png'},{src:'Card_images/Diamond07.png'},{src:'Card_images/Diamond08.png'},{src:'Card_images/Diamond09.png'},{src:'Card_images/Diamond10.png'},{src:'Card_images/Diamond11.png'},{src:'Card_images/Diamond12.png'},{src:'Card_images/Diamond13.png'},
+        {src:'Card_images/Spider1101.png'},{src:'Card_images/Spider1201.png'},{src:'Card_images/Spider1301.png'},{src:'Card_images/Spider1102.png'},{src:'Card_images/Spider1202.png'},{src:'Card_images/Spider1302.png'},{src:'Card_images/Spider1103.png'},{src:'Card_images/Spider1203.png'},{src:'Card_images/Spider1303.png'},{src:'Card_images/Spider1104.png'},{src:'Card_images/Spider1204.png'},{src:'Card_images/Spider1304.png'},
+        {src:'Card_images/BackColor_Closed.png'},{src:'Card_images/Spade_M10.png'},{src:'Card_images/Spade_M11.png'},{src:'Card_images/Spade_M12.png'},{src:'Card_images/Spade_M13.png'},{src:'Card_images/Heart_M10.png'},{src:'Card_images/Heart_M11.png'},{src:'Card_images/Heart_M12.png'},{src:'Card_images/Heart_M13.png'},{src:'Card_images/Club_M10.png'},{src:'Card_images/Club_M11.png'},{src:'Card_images/Club_M12.png'},{src:'Card_images/Club_M13.png'},{src:'Card_images/Diamond_M10.png'},{src:'Card_images/Diamond_M11.png'},{src:'Card_images/Diamond_M12.png'},{src:'Card_images/Diamond_M13.png'},
+        {src:'soL_back.png'},{src:'Don_bg2.png'},{src:'Don_bg3.png'},{src:'Don_bg4.png'}
+              ];
     // 同時接続数を設定
     queue.setMaxConnections(6);
-// 読み込みの進行状況が変化した
-queue.addEventListener("progress", handleProgress);
-// 1つのファイルを読み込み終わったら
-queue.addEventListener(
-  "fileload",
-  handleFileLoadComplete
-);
+  // 読み込みの進行状況が変化した
+  queue.addEventListener("progress", handleProgress);
+  // 1つのファイルを読み込み終わったら
+  queue.addEventListener(
+    "fileload",
+    handleFileLoadComplete
+  );
 // 全てのファイルを読み込み終わったら
 queue.addEventListener("complete", handleComplete);
 
@@ -572,6 +821,7 @@ function handleFileLoadComplete(event) {
 }
 function handleComplete() {
   console.log("LOAD COMPLETE");
+  Title();
 }
 
 createjs.Ticker.addEventListener("tick", UpdateParticles);
@@ -1112,7 +1362,7 @@ function monsterMove(){
     musicnum=1;
     console.log("climax");
     Bgm.stop();
-    if(mute="ON"){
+    if(mute=="ON"){
     Bgm=new Music(bgm1data);
     Bgm.playMusic();
     }
@@ -2162,6 +2412,10 @@ function SoundConfig(){
         Bgm =new Music(bgm4data);
         Bgm.playMusic();
         break;
+      case 5:
+        Bgm =new Music(bgm5data);
+        Bgm.playMusic();
+        break;
       default:
         console.log(musicnum,'bgm error!')
         Bgm.stop();
@@ -2188,41 +2442,11 @@ canvas5.onmouseup = mouseUpListener;
 function mouseUpListener(e) {
   createjs.Ticker.removeEventListener("tick", MouseCircle);
 };
-
-canvas5.addEventListener('mouseout', onMouseOut, false);
-function onMouseOut() {
- //console.log('mouseout')
+//タップ操作を有効にした場合クリックイベントが反応してくれなかったため削除
+canvas5.addEventListener("click", clickHandler, false);
+function clickHandler(e) {
+  console.log('clicked!',cLock)
 };
-  canvas5.addEventListener("click", clickHandler, false);
-	function clickHandler(e) {
- 		var rect = e.target.getBoundingClientRect();
- 		mouseX =  Math.floor(e.clientX - rect.left);
-		mouseY =  Math.floor(e.clientY - rect.top);
-      console.log('clicked!',cLock)
-		if(mouseX>710 && mouseX <790){
-          if(mouseY>10 && mouseY<48){          
-  cx3.clearRect(710, 10, 80, 38);
-  cx3.font = "12px Arial";
-  cx3.fillText("SOUND", 710, 22);
-  cx3.font = "Bold 24px Arial";
-  cx3.fillText( mute, 730, 42);
-  return false;
-        }};
-  //タップ操作を有効にした場合クリックイベントが反応してくれなかったため削除
-
-if(gamestate==10 && loadstate >=loadmax){
-  //メニュー画面へ
-  if(pagestate==-1){
-  pagestate=0;
-  msgstate=1;
-  msgtemp=1;
-  se6.play();
-  Cnext.alpha=0;
-  tweeNstar.paused=true;
-  stage.removeChild(Cstar);
-  Gamestart();
-  }
-}};
 //キー入力受付
 window.addEventListener("keyup", keyupHandler, false);
   function keyupHandler(e) {
@@ -2273,7 +2497,8 @@ window.addEventListener("keyup", keyupHandler, false);
       }
     }
     };
-    function Dialogue(word,detail="　",yes=1,no=-1){
+    function Dialogue(word,detail="　",yes=1,no=-1,ok=-1){
+      //ok 0->OKボタンにする
       Loadmap.removeAllChildren();
       Loadmap.alpha=1;
       var shape = new createjs.Shape();
@@ -2293,6 +2518,7 @@ window.addEventListener("keyup", keyupHandler, false);
       t.x=210;
       t.y=260;
       Loadmap.addChild(t);
+      if(ok==-1){
       var shape = new createjs.Shape();
       shape.graphics.beginFill("#ff3838");
       shape.graphics.drawRect(220, 300, 120, 60);
@@ -2311,6 +2537,17 @@ window.addEventListener("keyup", keyupHandler, false);
       t.x=500;
       t.y=320;
       Loadmap.addChild(t);
+      }else{
+      var shape = new createjs.Shape();
+      shape.graphics.beginFill("#ff3838");
+      shape.graphics.drawRect(345, 300, 120, 60);
+      Loadmap.addChild(shape);
+      shape.addEventListener("click", {card:yes,handleEvent:DialogueResult});
+      var t=new createjs.Text("OK","bold 24px 'メイリオ'","white");
+      t.x=375;
+      t.y=320;
+      Loadmap.addChild(t); 
+      }
       function DialogueResult(e){
         switch(this.card){
           case 1:
@@ -2340,8 +2577,7 @@ function Gameend(){
   field.removeAllChildren();
   cx.clearRect(0,0,800,600)
   deckmap.removeAllChildren();
-  if(mute="ON"){Bgm.stop();};
-  musicnum=0;
+  menu(1);
 }
 function Gamestart(){
     gamestate=0;
@@ -2671,7 +2907,7 @@ function Gameretry(){
         if(musicnum!==3){
           Bgm.stop();
           musicnum=3;
-          if(mute="ON"){
+          if(mute=="ON"){
           Bgm=new Music(bgm3data);
           Bgm.playMusic();
           }}
@@ -2719,7 +2955,7 @@ function Gameretry(){
           if(musicnum!==4){
             Bgm.stop();
             musicnum=4;
-            if(mute="ON"){
+            if(mute=="ON"){
             Bgm=new Music(bgm4data);
             Bgm.playMusic();
             }}
@@ -2749,7 +2985,7 @@ function Gameretry(){
         if(musicnum!==2){
         Bgm.stop();
         musicnum=2;
-        if(mute="ON"){
+        if(mute=="ON"){
         Bgm=new Music(bgm2data);
         Bgm.playMusic();
         }}
