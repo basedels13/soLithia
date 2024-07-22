@@ -50,7 +50,7 @@ tweeNstar=createjs.Tween.get(Cstar, {loop: true})
 var Cnext = new createjs.Container();//コンテナ
 var deckmap = new createjs.Container();
 var field = new createjs.Container();//field
-var clearBG = new createjs.Container();//clear
+var clearBG = new createjs.Container();//clear画面
 var yakumap = new createjs.Container();//ヒントボタン等
 var Titleyard = new createjs.Container();//タイトル
 var Backyard = new createjs.Container();//背景
@@ -102,7 +102,6 @@ var BG = new createjs.Bitmap("soL_back.png");
 BG.alpha=0.3;
 Titleyard.addChild(BG);
 function Title(){
- if(debugmode){
 var circle1 = new createjs.Shape();
 circle1.graphics.beginFill("#2c4a3f")
 .drawCircle(0, 0, 80);
@@ -154,6 +153,7 @@ circle1.addEventListener("click", {card:1,handleEvent:Soundcircle});
 circle2.addEventListener("click", {card:2,handleEvent:Soundcircle});
 Car1.addEventListener("click", {card:0,handleEvent:GameReady});
 titleCardTurn(0);
+submitPass();
 function Soundcircle(){
   switch(this.card){
     case 3:
@@ -271,51 +271,84 @@ function titleCardTurn(card){
     titleCardTurn(1);
   }
 }
-return false;
-}
+};
+function SoLmap(){
+  if(opLock==0){
+    field.removeAllChildren();
+    opLock=5;
+    se11.play();
+//ソリティア開始前の画面
+var BG1 = new createjs.Bitmap("Don_bg2.png");
+BG1.alpha=0;
+field.addChild(BG1);
+var BG2 = new createjs.Bitmap("Don_bg3.png");
+BG2.alpha=0;
+field.addChild(BG2);
+var BG3 = new createjs.Bitmap("Don_bg4.png");
+BG3.alpha=0;
+field.addChild(BG3);
 var Car1 = new createjs.Bitmap("Card_images/BackColor_Black.png");
-Car1.x=-20;
-Car1.y=55;
+Car1.x=-200;
+Car1.y=100;
 Car1.scale=3;
-Titleyard.addChild(Car1);
+Car1.alpha=0.8;
+field.addChild(Car1);
 var Car2 = new createjs.Bitmap("Card_images/BackColor_Black.png");
-Car2.x=450;
-Car2.y=55;
+Car2.x=-200;
+Car2.y=100;
 Car2.scale=3;
-Titleyard.addChild(Car2);
+Car2.alpha=0.8;
+field.addChild(Car2);
 var Car3 = new createjs.Bitmap("Card_images/Spade12.png");
 Car3.x=-20;
-Car3.y=55;
+Car3.y=100;
 Car3.scale=3;
 Car3.alpha=0;
-Titleyard.addChild(Car3);
+field.addChild(Car3);
 var Car4 = new createjs.Bitmap("Card_images/Spade_M11.png");
 Car4.x=450;
-Car4.y=55;
+Car4.y=100;
 Car4.scale=3;
 Car4.alpha=0;
-Titleyard.addChild(Car4);
+field.addChild(Car4);
 var Car5 = new createjs.Bitmap("Card_images/BackColor_Black.png");
-Car5.x=215;
-Car5.y=55;
+Car5.x=-200;
+Car5.y=100;
 Car5.scale=3;
-Titleyard.addChild(Car5);
+Car5.alpha=0.8;
+field.addChild(Car5);
 var Car6 = new createjs.Bitmap("Card_images/Diamond01.png");
 Car6.x=215;
-Car6.y=55;
+Car6.y=100;
 Car6.scale=3;
 Car6.alpha=0;
-Titleyard.addChild(Car6);
+field.addChild(Car6);
 var Bt1 = new createjs.Bitmap("soL_rule_bt1.png");
-Bt1.x=50;
-Bt1.y=430;
-Bt1.scale=2;
-//Titleyard.addChild(Bt1);
+Bt1.x=70;
+Bt1.y=475;
+Bt1.scale=1.2;
+Bt1.alpha=0;
+field.addChild(Bt1);
+var Bt2 = new createjs.Bitmap("soL_rule_bt2.png");
+Bt2.x=310;
+Bt2.y=475;
+Bt2.scale=1.2;
+Bt2.alpha=0;
+field.addChild(Bt2);
 var Bt3 = new createjs.Bitmap("soL_rule_bt3.png");
-Bt3.x=450;
-Bt3.y=430;
-Bt3.scale=2;
-//Titleyard.addChild(Bt3);
+Bt3.x=540;
+Bt3.y=475;
+Bt3.scale=1.2;
+Bt3.alpha=0;
+field.addChild(Bt3);
+createjs.Tween.get(Car1)
+.to({x:-20},400, createjs.Ease.backOut);
+createjs.Tween.get(Car5)
+.to({x:215},600, createjs.Ease.backOut);
+createjs.Tween.get(Car2)
+.to({x:450},800, createjs.Ease.backOut)
+.call(SoLkey);
+function SoLkey(){
 Car1.addEventListener("mouseover", {card:1,handleEvent:MouseOver});
 Car1.addEventListener("mouseout", {card:2,handleEvent:MouseOver});
 Car1.addEventListener("click", {card:1,handleEvent:GameReady});
@@ -325,39 +358,85 @@ Car2.addEventListener("click", {card:3,handleEvent:GameReady});
 Car5.addEventListener("mouseover", {card:5,handleEvent:MouseOver});
 Car5.addEventListener("mouseout", {card:6,handleEvent:MouseOver});
 Car5.addEventListener("click", {card:2,handleEvent:GameReady});
-submitPass();
-function GameReady(){
-  if(this.card==0){
-    console.log('go to main menu')
-    menu(0);
-    return true;
-  }
-  playMode[0]=this.card;
-  load2();
+createjs.Tween.get(Bt1)
+.to({alpha:1},200);
+createjs.Tween.get(Bt2)
+.to({alpha:1},200);
+createjs.Tween.get(Bt3)
+.to({alpha:1},200);
+var option_bt5 = new createjs.Bitmap('soL_batu.png');
+  option_bt5.x=700;
+  option_bt5.y=60;
+  option_bt5.scale=0.5;
+  field.addChild(option_bt5)
+  option_bt5.addEventListener("click", {card:10,handleEvent:GameReady});
+  var shapeMask3 = new createjs.Shape();
+shapeMask3.graphics
+      .beginFill("gold")
+      .drawRect(30, 53, 730, 480);
+field.mask = shapeMask3;
+createjs.Tween.get(BG1)
+.to({alpha:0.8},60);
 }
 function MouseOver(e){
   switch(this.card){
     case 1:
       Car3.alpha=1;
+      createjs.Tween.get(BG1)
+      .to({alpha:0.8},200);
+      createjs.Tween.get(BG2)
+      .to({alpha:0},200);
+      createjs.Tween.get(BG3)
+      .to({alpha:0},200);
       break;
     case 2:
       Car3.alpha=0;
       break;
     case 3:
       Car4.alpha=1;
+      createjs.Tween.get(BG1)
+      .to({alpha:0},200);
+      createjs.Tween.get(BG2)
+      .to({alpha:0.8},200);
+      createjs.Tween.get(BG3)
+      .to({alpha:0},200);
       break;
     case 4:
       Car4.alpha=0;
       break;
     case 5:
       Car6.alpha=1;
+      createjs.Tween.get(BG1)
+      .to({alpha:0},200);
+      createjs.Tween.get(BG2)
+      .to({alpha:0},200);
+      createjs.Tween.get(BG3)
+      .to({alpha:0.8},200);
       break;
     case 6:
       Car6.alpha=0;
       break;
   }
 };
+}};
+function GameReady(){
+  if(this.card==0){
+    console.log('go to main menu')
+    menu(0);
+    return true;
+  }
+  if(this.card==10){
+    console.log('go to main menu')
+    se11.play();
+    field.removeAllChildren();
+    opLock=0;
+    Titleyard.alpha=1;
+    return true;
+  }
+  playMode[0]=this.card;
+  load2();
 };
+
 var yakumap_hint = new createjs.Bitmap("soL_hint.png");
 yakumap_hint.alpha=0;
 yakumap_hint.scale=0.6;
@@ -604,7 +683,7 @@ var se9 = new Howl({
   });
 var se10 = new Howl({
   src:"006_se_kira6.mp3",
-      volume: 0.4,
+      volume: 0.2,
   });
 var se11 = new Howl({
   src:"count_single.mp3",
@@ -777,7 +856,7 @@ function menu(state=0){
       createjs.Tween.get(Table,{loop:true})
       .to({x:-6,y:-2,scale:606/768,alpha:0.9},2100)
       .to({x:0,y:0,scale:600/768,alpha:1},2100);
-      Table.addEventListener("click", {handleEvent:load2});
+      Table.addEventListener("click", {handleEvent:SoLmap});
       Opicon.addEventListener("click", {handleEvent:OptionConfig});
       //console.log(gamestate);
       if(gamestate==99){
@@ -789,8 +868,14 @@ function menu(state=0){
   }
 };
 function load2(){
-  if(opLock!==0){return false;}
+  if(opLock!==5){return false;}
   Titleyard.alpha=0;
+  //マスクの消し方が分からなかったので
+  var shapeMask3 = new createjs.Shape();
+  shapeMask3.graphics
+        .beginFill("gold")
+        .drawRect(0, 0, 800, 600);
+  field.mask = shapeMask3;
   se6.play();
 		cx.fillStyle = 'rgba(0, 0, 0, 0.5)';
 		cx.fillRect(710,0,90,510);
@@ -813,6 +898,7 @@ var grad  = cx.createLinearGradient(0,510,0,600);
   cx.fillRect(720,140,60,60);
   cx.fillRect(720,205,60,60);
   cx.fillStyle ='rgba(0, 0, 0, 1)'
+  opLock=0;
   Gamestart();
 }
 //画像のロード
