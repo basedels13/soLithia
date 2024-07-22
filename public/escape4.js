@@ -1,5 +1,6 @@
-//next　設定　セーブ　など
+//next　セーブ　ゲーム開始前UI　など
 //やるきあれば→EXに挙げたカードを降ろす, 破片強打
+//debugmode 出荷前にfalseに
 window.onload = function(){
 main();
 };
@@ -81,7 +82,7 @@ var pagetemp=-1;
 var msgstate=1;
 var msglength=2;
 var msgtemp=1;
-var gamestate=10;
+var gamestate=-1;//-1:load中 10:title 11:title/2回目以降 100:menu 0:now playing 1:game over
 var startT = 0;
 var clearT = 0;
 var hour = 0;
@@ -126,8 +127,9 @@ circle4.graphics.beginFill("#4cb58b")
 .drawCircle(0, 0, 80)
 circle4.x=520;
 circle4.y=165;
-circle4.alpha=0;
+circle4.alpha=1;
 Titleyard.addChild(circle4);
+if(mute=="OFF"){circle3.alpha=0;}else{circle4.alpha=0;};
 var sound1 = new createjs.Bitmap("soL_sound1.png");
 sound1.x=180;
 sound1.y=120;
@@ -138,9 +140,6 @@ sound2.x=470;
 sound2.y=120;
 sound2.scale=1;
 Titleyard.addChild(sound2);
-var t = new createjs.Text("ver0.994/Click Card to START", "24px serif", "white");
-Titleyard.addChild(t);
-Titleyard.addChild(t);
 var Car1 = new createjs.Bitmap("Card_images/BackColor_Black.png");
 Car1.x=250;
 Car1.y=280;
@@ -153,8 +152,8 @@ circle2.addEventListener("mouseover", {card:5,handleEvent:Soundcircle});
 circle2.addEventListener("mouseout", {card:6,handleEvent:Soundcircle});
 circle1.addEventListener("click", {card:1,handleEvent:Soundcircle});
 circle2.addEventListener("click", {card:2,handleEvent:Soundcircle});
-Car1.addEventListener("mouseover", {card:0,handleEvent:titleCardTurn});
 Car1.addEventListener("click", {card:0,handleEvent:GameReady});
+titleCardTurn(0);
 function Soundcircle(){
   switch(this.card){
     case 3:
@@ -221,9 +220,12 @@ function Soundcircle(){
     break;
   } 
 }
-function titleCardTurn(){
+function titleCardTurn(card){
   //カードめくる
-  if(this.card==0){
+  if(gamestate!==10 && gamestate!==11){
+    return false;
+  }
+  if(card==0){
         if(Car2list){
           for(var i=0;i<Car2list.length;i++){
             var F=Car2list[i];
@@ -238,26 +240,35 @@ function titleCardTurn(){
         Car2.alpha=0;
         Titleyard.addChild(Car2);
         Car2list.push(Car2);
-        Car2.addEventListener("mouseout", {card:1,handleEvent:titleCardTurn});
         Car2.addEventListener("click", {card:0,handleEvent:GameReady});
         createjs.Tween.get(Car1)
-        .to({x:320,y:250,scaleX:0.05,scaleY:2.4},140)
+        .to({x:320,y:250,scaleX:0.05,scaleY:2.4},220)
         .to({alpha:0},10);
         createjs.Tween.get(Car2)
-        .to({scaleX:0.05,scaleY:2.2},70)
-        .to({x:250,y:280,scaleX:2,scaleY:2,alpha:1},140)
-  }else if(this.card==1){
+        .to({scaleX:0.05,scaleY:2.2},90)
+        .to({x:250,y:280,scaleX:2,scaleY:2,alpha:1},220)
+        .wait(2000)
+        .call(titleCardTurn1);
+  }else if(card==1){
     var Car2=Car2list.pop();
     createjs.Tween.get(Car1)
-    .to({x:320,y:250,alpha:0.3,scaleX:0.05,scaleY:2.2},140)
-    .to({x:250,y:280,scaleX:2,scaleY:2,alpha:1},20)
+    .to({scaleX:0.05,scaleY:2.2},90)
+    .to({x:250,y:280,scaleX:2,scaleY:2,alpha:1},220)
+    .wait(2000)
+    .call(titleCardTurn0);
     createjs.Tween.get(Car2)
-    .to({x:320,y:250,scaleX:0.05,scaleY:2.2},140)
+    .to({x:320,y:250,scaleX:0.05,scaleY:2.4},220)
     .to({alpha:0},10)
     .call(step);
     function step(){
       Titleyard.removeChild(Car2);
     }
+  }
+  function titleCardTurn0(){
+    titleCardTurn(0);
+  }
+  function titleCardTurn1(){
+    titleCardTurn(1);
   }
 }
 return false;
@@ -465,6 +476,7 @@ createjs.Ticker.addEventListener("tick",function(){
 //保存するデータ
 var vBar=0.6;
 var sBar=1;
+var Barlist=[];//soundconfigで使用
 var cleared=[[0,0,0],[0,0,0]];//ク/マ/エ クリア回数/ ク/マ/エ 挑戦回数の順
 var highscore_1=[
   {time:-1,score:-1},
@@ -492,13 +504,14 @@ var UserData = {
     {time:-1,score:-1},
   ],
 };
-function saveDL(){
+function saveExport(){
+  //セーブデータをjsonとして外部出力
   try{
 UserData = {
   "Name":"SoL_ch",
   "Volume": vBar,
   "SEVolume": sBar,
-  "cleaed":[0,0,0,0,0,0],
+  "cleared":[0,0,0,0,0,0],
 };
 console.log(UserData);
 localStorage.setItem('UserData_SoL', JSON.stringify(UserData));
@@ -519,10 +532,10 @@ SEbuffer();
   }
 }
 function saveDel(){
-  //デフォルト
+  //デフォルトに戻す
 vBar=1;
 sBar=1;
-cleaed=[0,0,0,0,0,0]
+cleared=[0,0,0,0,0,0]
   try{
     localStorage.removeItem('UserData_SoL')
         console.log('localStorage cleared');
@@ -590,11 +603,11 @@ var se9 = new Howl({
   volume: 0.16,
   });
 var se10 = new Howl({
-  src:"card-flip.mp3",
+  src:"006_se_kira6.mp3",
       volume: 0.4,
   });
 var se11 = new Howl({
-  src:"card-flip.mp3",
+  src:"count_single.mp3",
       volume: 0.4,
   });
 var se12 = new Howl({
@@ -676,24 +689,15 @@ function menu(state=0){
     }}
   switch(state){
     case 0:
+      //タイトルから訪れた時はここ
+      opLock=2;
       Titleyard.removeAllChildren();
       se6.play();
-      //初めて訪れた時
+      if(gamestate==10 || gamestate==11){
+      gamestate+=89;
+      };
       //オプションボタン
-      var shape = new createjs.Shape();
-      shape.graphics.beginFill("#3b7353");
-      shape.graphics.drawRect(700, 0, 120, 50); // 長方形を描画
-      shape.alpha=0.8;
-      Configmap.addChild(shape); // 表示リストに追加
-      var t = new createjs.Text("SOUND", "20px serif", "white");
-      t.x=705;
-      t.y=0;
-      Configmap.addChild(t);
-      muteshape = new createjs.Text(mute, "28px serif", "white");
-      muteshape.x=720;
-      muteshape.y=20;
-      Configmap.addChild(muteshape);
-      shape.addEventListener("click", {handleEvent:SoundConfig});
+      SoundConfig(0,-1);
       var BG = new createjs.Bitmap("Don_bg2.png");
       BG.alpha=0.7;
       Titleyard.addChild(BG);
@@ -704,10 +708,6 @@ function menu(state=0){
       var Path = new createjs.Bitmap("Card_images/soL_room_path.png");
       Titleyard.addChild(Path);
       var Letter = new createjs.Bitmap("Card_images/soL_room_letter.png");
-      Room.x=-40;
-      Room.y=-30;
-      Table.x=-40;
-      Table.y=-30;
       Letter.scale=600/768;
       Letter.y=-50;
       Letter.alpha=0;
@@ -719,21 +719,48 @@ function menu(state=0){
       shape.graphics.drawRect(0, 0, 800, 600);
       Titleyard.addChild(shape);
       var Header1 = new createjs.Bitmap("soL_header1.png");
-      Header1.x=450;
+      Header1.x=480;
       Header1.scale=0.7;
       Titleyard.addChild(Header1);
       var Header2 = new createjs.Bitmap("soL_header2.png");
       Header2.y=-8;
       Titleyard.addChild(Header2);
-      createjs.Tween.get(shape)
-      .to({alpha:0.3},2000);
-      createjs.Tween.get(Letter)
-      .to({alpha:1},2000);
-      createjs.Tween.get(Room)
-      .to({x:0,y:0,scale:600/768,alpha:1},3000, createjs.Ease.backOut);
-      createjs.Tween.get(Table)
-      .to({x:0,y:0,scale:600/768,alpha:1},3000, createjs.Ease.backOut)
-      .call(mainstep)
+      var Opicon = new createjs.Bitmap("soL_opicon.png");
+      Opicon.x=730;
+      Opicon.y=540;
+      Titleyard.addChild(Opicon);
+      if(gamestate==99){
+        Room.x=-40;
+        Room.y=-30;
+        Table.x=-40;
+        Table.y=-30;
+        createjs.Tween.get(shape)
+        .to({alpha:0.3},2000);
+        createjs.Tween.get(Letter)
+        .to({alpha:1},2000);
+        createjs.Tween.get(Room)
+        .to({x:0,y:0,scale:600/768,alpha:1},3000, createjs.Ease.backOut);
+        createjs.Tween.get(Table)
+        .to({x:0,y:0,scale:600/768,alpha:1},3000, createjs.Ease.backOut)
+        .call(mainstep)  
+        }else{
+        opLock=0;
+        Room.x=-60;
+        Room.y=-40;
+        Room.scale=630/768;
+        Table.x=-60;
+        Table.y=-40;
+        Table.scale=630/768;
+        createjs.Tween.get(shape)
+        .to({alpha:0.3},500);
+        createjs.Tween.get(Letter)
+        .to({alpha:1},500);
+        createjs.Tween.get(Room)
+        .to({x:0,y:0,scale:600/768,alpha:1},600, createjs.Ease.backOut);
+        createjs.Tween.get(Table)
+        .to({x:0,y:0,scale:600/768,alpha:1},600, createjs.Ease.backOut)
+        .call(mainstep)    
+        };
       createjs.Tween.get(Path,{loop:true})
       .to({x:-83,y:-64,alpha:0.7},3000, createjs.Ease.backInOut)
       .to({x:-85,y:-68,alpha:0.9},3000, createjs.Ease.backInOut)
@@ -751,13 +778,18 @@ function menu(state=0){
       .to({x:-6,y:-2,scale:606/768,alpha:0.9},2100)
       .to({x:0,y:0,scale:600/768,alpha:1},2100);
       Table.addEventListener("click", {handleEvent:load2});
-      opLock=2;
-      Dialogue("遊び方","テーブルをクリックしてソリティアを始める",-1,-1,0);
+      Opicon.addEventListener("click", {handleEvent:OptionConfig});
+      //console.log(gamestate);
+      if(gamestate==99){
+        Dialogue("遊び方","テーブルをクリックしてソリティアを始める",-1,-1,0);
+        };
+      gamestate=100;
       };
       break;
   }
 };
 function load2(){
+  if(opLock!==0){return false;}
   Titleyard.alpha=0;
   se6.play();
 		cx.fillStyle = 'rgba(0, 0, 0, 0.5)';
@@ -794,17 +826,18 @@ var queue = new createjs.LoadQueue(),
         {src:'Card_images/Diamond01.png'},{src:'Card_images/Diamond02.png'},{src:'Card_images/Diamond03.png'},{src:'Card_images/Diamond04.png'},{src:'Card_images/Diamond05.png'},{src:'Card_images/Diamond06.png'},{src:'Card_images/Diamond07.png'},{src:'Card_images/Diamond08.png'},{src:'Card_images/Diamond09.png'},{src:'Card_images/Diamond10.png'},{src:'Card_images/Diamond11.png'},{src:'Card_images/Diamond12.png'},{src:'Card_images/Diamond13.png'},
         {src:'Card_images/Spider1101.png'},{src:'Card_images/Spider1201.png'},{src:'Card_images/Spider1301.png'},{src:'Card_images/Spider1102.png'},{src:'Card_images/Spider1202.png'},{src:'Card_images/Spider1302.png'},{src:'Card_images/Spider1103.png'},{src:'Card_images/Spider1203.png'},{src:'Card_images/Spider1303.png'},{src:'Card_images/Spider1104.png'},{src:'Card_images/Spider1204.png'},{src:'Card_images/Spider1304.png'},
         {src:'Card_images/BackColor_Closed.png'},{src:'Card_images/Spade_M10.png'},{src:'Card_images/Spade_M11.png'},{src:'Card_images/Spade_M12.png'},{src:'Card_images/Spade_M13.png'},{src:'Card_images/Heart_M10.png'},{src:'Card_images/Heart_M11.png'},{src:'Card_images/Heart_M12.png'},{src:'Card_images/Heart_M13.png'},{src:'Card_images/Club_M10.png'},{src:'Card_images/Club_M11.png'},{src:'Card_images/Club_M12.png'},{src:'Card_images/Club_M13.png'},{src:'Card_images/Diamond_M10.png'},{src:'Card_images/Diamond_M11.png'},{src:'Card_images/Diamond_M12.png'},{src:'Card_images/Diamond_M13.png'},
-        {src:'soL_back.png'},{src:'Don_bg2.png'},{src:'Don_bg3.png'},{src:'Don_bg4.png'}
+        {src:'soL_back.png'},{src:'Don_bg2.png'},{src:'Don_bg3.png'},{src:'Don_bg4.png'},{src:'soL_dialogue.png'},
+        {src:'Card_images/soL_room.png'},{src:'Card_images/soL_room_path.png'},{src:'Card_images/soL_room_table.png'},
               ];
-    // 同時接続数を設定
-    queue.setMaxConnections(6);
-  // 読み込みの進行状況が変化した
-  queue.addEventListener("progress", handleProgress);
-  // 1つのファイルを読み込み終わったら
-  queue.addEventListener(
-    "fileload",
-    handleFileLoadComplete
-  );
+// 同時接続数を設定
+queue.setMaxConnections(6);
+// 読み込みの進行状況が変化した
+queue.addEventListener("progress", handleProgress);
+// 1つのファイルを読み込み終わったら
+queue.addEventListener(
+  "fileload",
+  handleFileLoadComplete
+);
 // 全てのファイルを読み込み終わったら
 queue.addEventListener("complete", handleComplete);
 
@@ -814,6 +847,11 @@ queue.loadManifest(manifest);
 function handleProgress(event) {
   // 読み込み率を0.0~1.0で取得
   var progress = event.progress;
+  Loadmap.removeAllChildren();
+  var Rate=Math.floor(progress*100);
+  var load = new createjs.Text("Now loading..."+Rate+"%", "24px serif", "white");
+  load.y=30;
+  Loadmap.addChild(load);
 }
 function handleFileLoadComplete(event) {
   // 読み込んだファイル
@@ -821,6 +859,13 @@ function handleFileLoadComplete(event) {
 }
 function handleComplete() {
   console.log("LOAD COMPLETE");
+  Loadmap.removeAllChildren();
+  var t = new createjs.Text("ver0.994/Click Card to START", "24px serif", "white");
+  Titleyard.addChild(t);
+  var t = new createjs.Text("音の設定ができます。（あとで変更可能）", "24px serif", "white");
+  t.y=30;
+  Titleyard.addChild(t);
+  gamestate=10;
   Title();
 }
 
@@ -910,6 +955,7 @@ function ruleButton(event){
   if(cLock){
   //ルール画像を表示/格納
   cLock=false;
+  se11.play();
   switch(this.rule){
     default:
       if(opLock==0){
@@ -938,20 +984,16 @@ function undoButton(event){
         return false};
         se1.play();
       var Ary=duelLog.pop();
-      console.log(Ary);
-      console.log(Ary.card,Ary.card[0]);
+      if(debugmode){
+        console.log(Ary);
+        console.log(Ary.card,Ary.card[0]);
+      }
       //-1 Deck 10- Ex
           for(var i=0;i<Ary.card.length;i++){
             var T=Ary.card[i];
             switch(Ary.from){
-              case -2:
-                //A-Kセット
-                //終了後、もう一度undoする
-                Extras[0]-=1;
-                hands[to]=hands[to].concat(Ary.card);
-                break;
               case -1:
-                //カード配布
+                  //ウラ
                   var newCard = new createjs.Bitmap(Card_src[0]);
                   newCard.x=50;
                   newCard.y=5;
@@ -1016,7 +1058,6 @@ function undoButton(event){
                 newCard.addEventListener("pressup", {card:HashCard,handleEvent:handleUp});
                 createjs.Tween.get(newCard)
                 .to({x:50+Ary.from*(cardWidth+cardgapX),y:150+(hands[Ary.from].length-1)*cardgapY},70)
-                console.log(hands[Ary.from]);
               break;
             }
             switch(Ary.to){
@@ -1046,7 +1087,6 @@ function undoButton(event){
         return false};
         se1.play();
       var Ary=duelLog.pop();
-      console.log(Ary);
           for(var i=0;i<Ary.card.length;i++){
             switch(Ary.from){
               case -2:
@@ -1142,6 +1182,7 @@ function resetButton(event){
   //解決する
   if(opLock==0){
     opLock=2;
+    se11.play();
     Dialogue("RESET GAME？","同じ盤面を最初からやり直します",3,-1);
   }
 }
@@ -1150,11 +1191,12 @@ function solveButton(event){
   //new game;
   if(opLock==0){
     opLock=2;
+    se11.play();
     Dialogue("NEW GAME？","このゲームを諦めて新しいゲームを始めます",2,-1);
   }
 }}
 function DeckReset(p=0,point=0){
-  console.log('deckreset',p,point)
+  console.log('deckreset',decks,p,point)
   if(p!==0){
     p=this.point;
     if(!cLock || opLock!==0){return false};
@@ -1268,7 +1310,6 @@ function CardTurn(p=0){
 function monsterMove(){
   //エルドリッチモード　最前列のモンスターカードを移動
   //cLock=false;
-  console.log('battle')
   //モンスター破壊
   for(var i=0;i<4;i++){
     if(Extras[i]!==-1 && attacker[i][0]!==-1 && attacker[i][1]!==-1){
@@ -1295,7 +1336,6 @@ function monsterMove(){
       }
     }
   };
-  console.log('monstermove')
   for(var i=0;i<4;i++){
     //console.log(hands[i][hands[i].length-1],Efuda(hands[i][hands[i].length-1]));
     if(Efuda(hands[i][hands[i].length-1])){
@@ -1304,7 +1344,6 @@ function monsterMove(){
       var Els=Extras.findIndex(value=>value==-1);
       if(Els==-1){
         //モンスターゾーンがすべて埋まっている
-        console.log('game over')
         //簡単なアニメーション
         function endroll(){Gameover(1)};
         var T=Cardlists[i][hands[i].length-1];
@@ -1350,7 +1389,6 @@ function monsterMove(){
         break;
     }
   }
-  //console.log('End of monstermove')
   var E=0;
   for (var i=0;i<Exlists.length;i++){
     if(Exlists[i].length){
@@ -1360,7 +1398,6 @@ function monsterMove(){
   drawbuttom(580,500,"討伐数 "+Decklists.length+"/16",1,120,40);
   if((E==4 || E==16-Decklists.length)&& musicnum!==1){
     musicnum=1;
-    console.log("climax");
     Bgm.stop();
     if(mute=="ON"){
     Bgm=new Music(bgm1data);
@@ -1510,7 +1547,6 @@ function handleDown(event) {
   if(cLock && mLock && opLock==0){
 switch(playMode[0]){
   case 1:
-        console.log(this.card,DeckFacelists);
         if(moveAllow(this.card)){
         if(this.card<0){
           //デッキのカード
@@ -1542,7 +1578,6 @@ switch(playMode[0]){
       }
     break;
   case 2:
-      console.log(this.card);
       if(moveAllow(this.card)){
       var I=Math.floor(this.card/100);
       var J=this.card%100;
@@ -1574,7 +1609,6 @@ switch(playMode[0]){
           var I=Math.floor(C/100)-1;
           var J=C%100 -1;
           var T=Atklists[I][J];
-          console.log(attacker[I][J]);
           dragPointX = stage.mouseX - T.x;
           dragPointY = stage.mouseY - T.y;
           T.alpha=0.5;
@@ -1583,7 +1617,6 @@ switch(playMode[0]){
         }
         var I=Math.floor(this.card/100);
         var J=this.card%100;
-        console.log(hands[I][J]);
         if(J < hands[I].length){
           se1.play()
           for(var i=J;i<hands[I].length;i++){
@@ -1724,7 +1757,6 @@ function handleUp(event) {
                 decksNow-=1;
                 deckfaces.pop();
                 duelLog.push({card:[X],from:-1,to:10+TX});
-                console.log(duelLog);
                 //クリア条件
                 if(Extras[0]==13 && Extras[1]==26 && Extras[2]==39 && Extras[3]==52){
                   Gameover();
@@ -1754,7 +1786,6 @@ function handleUp(event) {
                 decksNow-=1;
                 deckfaces.pop();
                 duelLog.push({card:[X],from:-1,to:10+TX});
-                console.log(duelLog);
                 //クリア条件
                 if(Extras[0]==13 && Extras[1]==26 && Extras[2]==39 && Extras[3]==52){
                   Gameover();
@@ -1904,7 +1935,6 @@ function handleUp(event) {
             var C=Math.floor((hands[I][J]-1)/13);
             var D=Math.floor((hands[TX][hands[TX].length-1]-1)/13);
             //無のスペースならばKのみ許可する
-            console.log(A,B,C,D);
             if((hands[TX].length==0 && A==13) || (B-A==1 && (C+D)%2==1)){
               //移動先に追加する
                 se1.play()
@@ -1931,7 +1961,6 @@ function handleUp(event) {
                   Cardlists[I].splice(J,X);
                   var Ary=hands[I].splice(J,X);
                   duelLog.push({card:Ary,from:I,to:TX});
-                  console.log(duelLog);
             }else{
               ExitCard();          
             }
@@ -2017,7 +2046,6 @@ function handleUp(event) {
         var TX=Math.floor((stage.mouseX-70)/90);
         var TY=Math.floor((stage.mouseY-5)/140);
           TX-=3;
-          console.log(T,attacker[I][J],TX,TY);
           switch(TX){
           case -1:
             switch(TY){
@@ -2141,7 +2169,6 @@ function handleUp(event) {
         var TX=Math.floor((stage.mouseX-70)/90);
         var TY=Math.floor((stage.mouseY-5)/140);
         TX-=3;
-        console.log(hands[I][J],TX,TY);
           switch(TX){
             case -2:
               switch(TY){
@@ -2149,7 +2176,6 @@ function handleUp(event) {
                 case 1:
                 case 2:
                 case 3:
-                  console.log(Extras[TY],attacker[TY][TX+2],J,hands[I].length)
                   if(attacker[TY][TX+2]!==-1){
                     //既にカードがある場合には置けない
                     ExitCard();
@@ -2190,7 +2216,6 @@ function handleUp(event) {
                   case 1:
                   case 2:
                   case 3:
-                    console.log(Extras[TY],attacker[TY][TX+2],J,hands[I].length)
                     if(Extras[TY]==-1 || attacker[TY][TX+2]!==-1){
                       //モンスターがいない・既にカードがある場合には置けない
                       ExitCard();
@@ -2230,7 +2255,6 @@ function handleUp(event) {
           case 2:
           case 3:
             //同じレーンならexitする
-            console.log(I,TX);
             if(I==TX){ExitCard();return false;}
             var A=hands[I][J]%13;
             var B=hands[TX][hands[TX].length-1]%13;
@@ -2265,7 +2289,6 @@ function handleUp(event) {
                   Cardlists[I].splice(J,X);
                   var Ary=hands[I].splice(J,X);
                   duelLog.push({card:Ary,from:I,to:TX});
-                  console.log(duelLog);
             }else{
               ExitCard();          
             }
@@ -2289,7 +2312,6 @@ function handleUp(event) {
     }
     //No
     function ExitCard(t=0){
-      console.log(I,J)
       if(t==-2){
         //アタックゾーン
         var T=Atklists[I][J];
@@ -2366,7 +2388,26 @@ function handleUp(event) {
       }
     }
 }};
-function SoundConfig(){
+function SoundConfig(event,p=0){
+  console.log('soundconfig',p)
+  if(p!==0){
+    //sound on/offボタンを作成する
+  var shape = new createjs.Shape();
+  shape.graphics.beginFill("#3b7353");
+  shape.graphics.drawRect(700, 0, 120, 50); // 長方形を描画
+  shape.alpha=0.8;
+  Configmap.addChild(shape); // 表示リストに追加
+  var t = new createjs.Text("SOUND", "20px serif", "white");
+  t.x=705;
+  t.y=0;
+  Configmap.addChild(t);
+  muteshape = new createjs.Text(mute, "28px serif", "white");
+  muteshape.x=720;
+  muteshape.y=20;
+  Configmap.addChild(muteshape);
+  shape.addEventListener("click", {handleEvent:SoundConfig});
+  return false;
+  }
   se1.volume(0);
   se2.volume(0);
   se3.volume(0);
@@ -2421,12 +2462,12 @@ function SoundConfig(){
         Bgm.stop();
         break;
     }
+    se11.play();
     mute="ON";
     }else{
     Bgm.mute(true);
     Bgm.stop();
     mute="OFF";
-    console.log('bgm muted!')
 }
 Configmap.removeChild(muteshape);
 muteshape = new createjs.Text(mute, "28px serif", "white");
@@ -2434,6 +2475,224 @@ muteshape.x=720;
 muteshape.y=20;
 Configmap.addChild(muteshape);
 };
+function OptionConfig(){
+  if(opLock==0){
+  opLock=3;
+  se11.play();
+  Configmap.removeAllChildren();
+  var shape = new createjs.Shape();
+  shape.graphics.beginFill("#black");
+  shape.graphics.drawRect(300, 200, 220, 250);
+  shape.alpha=0.7;
+  Configmap.addChild(shape);
+  var option_bt1 = new createjs.Bitmap('soL_option_bt1.png');
+  option_bt1.x=310;
+  option_bt1.y=250;
+  option_bt1.scale=1.2;
+  Configmap.addChild(option_bt1)
+  var option_bt2 = new createjs.Bitmap('soL_option_bt2.png');
+  option_bt2.x=310;
+  option_bt2.y=300;
+  option_bt2.scale=1.2;
+  Configmap.addChild(option_bt2)
+  var option_bt3 = new createjs.Bitmap('soL_option_bt3.png');
+  option_bt3.x=310;
+  option_bt3.y=350;
+  option_bt3.scale=1.2;
+  Configmap.addChild(option_bt3)
+  var option_bt4 = new createjs.Bitmap('soL_option_bt4.png');
+  option_bt4.x=310;
+  option_bt4.y=400;
+  option_bt4.scale=1.2;
+  Configmap.addChild(option_bt4)
+  var option_bt5 = new createjs.Bitmap('soL_batu.png');
+  option_bt5.x=475;
+  option_bt5.y=200;
+  option_bt5.scale=0.4;
+  Configmap.addChild(option_bt5)
+  option_bt1.addEventListener("click", {card:1,handleEvent:OptionConfig});
+  option_bt2.addEventListener("click", {card:2,handleEvent:OptionConfig});
+  option_bt3.addEventListener("click", {card:3,handleEvent:OptionConfig});
+  option_bt4.addEventListener("click", {card:4,handleEvent:OptionConfig});
+  option_bt5.addEventListener("click", {card:5,handleEvent:OptionConfig});
+  return false;
+  }
+  if(opLock==3){
+    switch(this.card){
+      case 1:
+        Configmap.removeAllChildren();
+        SoundConfig(0,-1);
+        //opLock=2;
+        se11.play();
+        Dialogue("EXIT？","狭間に別れを告げてタイトルに戻ります",4,-1);
+        break;
+      case 2:
+          //音量の設定
+          se7.play();
+          Configmap.removeAllChildren();
+          var shape = new createjs.Shape();
+          shape.graphics.beginFill("#black");
+          shape.graphics.drawRect(150, 110, 500, 250);
+          shape.alpha=0.7;
+          Configmap.addChild(shape);
+          var option_bt5 = new createjs.Bitmap('soL_batu.png');
+          option_bt5.x=610;
+          option_bt5.y=110;
+          option_bt5.scale=0.4;
+          Configmap.addChild(option_bt5)
+          option_bt5.addEventListener("click", {card:6,handleEvent:OptionConfig});
+          Barlist=[];
+          var shape = new createjs.Shape();
+          shape.graphics.beginFill("rgb(244,177,131)");
+          shape.graphics.beginStroke("rgb(237,125,50)");
+          shape.graphics.setStrokeStyle(3);
+          shape.graphics.drawRect(310, 175, 180*vBar, 30);
+          Configmap.addChild(shape);
+          Barlist.push(shape);      
+          var shape = new createjs.Shape();
+          shape.graphics.beginFill("rgb(244,177,131)");
+          shape.graphics.beginStroke("rgb(237,125,50)");
+          shape.graphics.setStrokeStyle(3);
+          shape.graphics.drawRect(310, 225, 180*sBar, 30);
+          Configmap.addChild(shape);
+          Barlist.push(shape);       
+          var t=new createjs.Text("音楽","bold 32px 'メイリオ'","white");
+          t.x=160;
+          t.y=172;
+          Configmap.addChild(t);
+          var t=new createjs.Text("効果音","bold 32px 'メイリオ'","white");
+          t.x=160;
+          t.y=222;
+          Configmap.addChild(t);
+          var option_arrow = new createjs.Bitmap('Winedom_arrowleft.png');
+          option_arrow.x=270;
+          option_arrow.y=170;
+          option_arrow.scale=0.4;
+          Configmap.addChild(option_arrow)
+          option_arrow.addEventListener("click", {card:1,handleEvent:SoundBar});
+          var option_arrow = new createjs.Bitmap('Winedom_arrowleft.png');
+          option_arrow.x=270;
+          option_arrow.y=220;
+          option_arrow.scale=0.4;
+          Configmap.addChild(option_arrow)
+          option_arrow.addEventListener("click", {card:3,handleEvent:SoundBar});
+          var option_arrow = new createjs.Bitmap('Winedom_arrowright.png');
+          option_arrow.x=570;
+          option_arrow.y=170;
+          option_arrow.scale=0.4;
+          Configmap.addChild(option_arrow)
+          option_arrow.addEventListener("click", {card:2,handleEvent:SoundBar});
+          var option_arrow = new createjs.Bitmap('Winedom_arrowright.png');
+          option_arrow.x=570;
+          option_arrow.y=220;
+          option_arrow.scale=0.4;
+          Configmap.addChild(option_arrow)
+          option_arrow.addEventListener("click", {card:4,handleEvent:SoundBar});
+        break;
+      case 3:
+          //クレジット
+          se7.play();
+          Configmap.removeAllChildren();
+          var option_bt = new createjs.Bitmap('soL_cregit.png');
+          option_bt.x=152;
+          option_bt.y=690;
+          Configmap.addChild(option_bt)
+          var option_bt5 = new createjs.Bitmap('soL_batu.png');
+          option_bt5.x=612;
+          option_bt5.y=698;
+          option_bt5.scale=0.4;
+          Configmap.addChild(option_bt5)
+          option_bt5.addEventListener("click", {card:6,handleEvent:OptionConfig});
+          createjs.Tween.get(option_bt)
+          .to({x:152,y:90},500, createjs.Ease.backOut);
+          createjs.Tween.get(option_bt5)
+          .to({x:612,y:98},500, createjs.Ease.backOut);
+        break;
+      case 4:
+          //データ初期化
+          se11.play();
+          Configmap.removeAllChildren();
+          if(JSON.parse(localStorage.getItem('UserData_SoL')) === null){
+            Dialogue("No save data","ローカルストレージにデータがありません。",-1,-1,1);
+          }else{
+            Dialogue("Delete save data?","ローカルストレージのデータを消去します！（この操作は取り消しできません）",5,-1);
+          }
+        break;
+      case 5:
+        se7.play();
+        Configmap.removeAllChildren();
+        SoundConfig(0,-1);
+        opLock=0;
+        break;
+      case 6:
+        //se7.play();
+        Configmap.removeAllChildren();
+        opLock=0;
+        OptionConfig();
+      break;
+    }
+  }
+  function SoundBar(){
+    switch(this.card){
+      case 1:
+        if(vBar<=0.2){vBar=0}else{vBar-=0.2}
+        se11.play();
+        Bgm.volume(0.1*vBar);
+        var B=Barlist[0];
+          var shape = new createjs.Shape();
+          shape.graphics.beginFill("rgb(244,177,131)");
+          shape.graphics.beginStroke("rgb(237,125,50)");
+          shape.graphics.setStrokeStyle(3);
+          shape.graphics.drawRect(310, 175, 180*vBar, 30);
+          Configmap.addChild(shape);
+          Configmap.removeChild(B);
+          Barlist[0]=shape;
+        break;
+      case 2:
+        if(vBar>=1.4){vBar=1.4}else{vBar+=0.2}
+        se11.play();
+        Bgm.volume(0.1*vBar);
+        var B=Barlist[0];
+        var shape = new createjs.Shape();
+        shape.graphics.beginFill("rgb(244,177,131)");
+        shape.graphics.beginStroke("rgb(237,125,50)");
+        shape.graphics.setStrokeStyle(3);
+        shape.graphics.drawRect(310, 175, 180*vBar, 30);
+        Configmap.addChild(shape);
+        Configmap.removeChild(B);
+        Barlist[0]=shape;
+        break;
+      case 3:
+        if(sBar<=0.2){sBar=0}else{sBar-=0.2}
+          SEbuffer();
+          se11.play();
+          var B=Barlist[1];
+          var shape = new createjs.Shape();
+          shape.graphics.beginFill("rgb(244,177,131)");
+          shape.graphics.beginStroke("rgb(237,125,50)");
+          shape.graphics.setStrokeStyle(3);
+          shape.graphics.drawRect(310, 225, 180*sBar, 30);
+          Configmap.addChild(shape);
+          Configmap.removeChild(B);
+          Barlist[1]=shape;
+        break;
+      case 4:
+        if(sBar>=1.4){sBar=1.4}else{sBar+=0.2}
+        SEbuffer();
+        se11.play();
+        var B=Barlist[1];
+        var shape = new createjs.Shape();
+        shape.graphics.beginFill("rgb(244,177,131)");
+        shape.graphics.beginStroke("rgb(237,125,50)");
+        shape.graphics.setStrokeStyle(3);
+        shape.graphics.drawRect(310, 225, 180*sBar, 30);
+        Configmap.addChild(shape);
+        Configmap.removeChild(B);
+        Barlist[1]=shape;
+        break;
+    }
+  }
+}
 canvas5.onmousedown = mouseDownListener;
 function mouseDownListener(e) {
   createjs.Ticker.addEventListener("tick", MouseCircle);
@@ -2478,16 +2737,26 @@ window.addEventListener("keyup", keyupHandler, false);
         //メニューに戻る
         if(opLock==0){
           opLock=2;
+          se11.play();
           Dialogue("QUIT GAME？","ゲームを終了してリザルト画面に移動します",1,-1);
+        }
+      }
+      if(gamestate==100 && cLock){
+        //メニューに戻る
+        if(opLock==0){
+          opLock=2;
+          se11.play();
+          Dialogue("EXIT？","狭間に別れを告げてタイトルに戻ります",4,-1);
         }
       }
     }
     if(e.keyCode==119 && key119==0){
-      key119=1;//esc
+      key119=1;//F8
       if(gamestate==0 && cLock){
           //new game;
           if(opLock==0 && duelLog.length){
             opLock=2;
+            se11.play();
             Dialogue("NEW GAME？","このゲームを諦めて新しいゲームを始めます",2,-1);
           }
         }
@@ -2540,7 +2809,7 @@ window.addEventListener("keyup", keyupHandler, false);
       }else{
       var shape = new createjs.Shape();
       shape.graphics.beginFill("#ff3838");
-      shape.graphics.drawRect(345, 300, 120, 60);
+      shape.graphics.drawRect(345, 300, 105, 60);
       Loadmap.addChild(shape);
       shape.addEventListener("click", {card:yes,handleEvent:DialogueResult});
       var t=new createjs.Text("OK","bold 24px 'メイリオ'","white");
@@ -2549,6 +2818,7 @@ window.addEventListener("keyup", keyupHandler, false);
       Loadmap.addChild(t); 
       }
       function DialogueResult(e){
+        se7.play();
         switch(this.card){
           case 1:
             //game over
@@ -2561,6 +2831,30 @@ window.addEventListener("keyup", keyupHandler, false);
             retryswitch+=1;
             Gameretry();
             break;
+          case 4:
+            //shut down
+              Bgm.stop();
+              musicnum=0;
+              //mute="ON";
+            Titleyard.removeAllChildren();
+            Configmap.removeAllChildren();
+            Titleyard.addChild(t);
+            var shape = new createjs.Shape();
+            shape.graphics.beginFill("#3b7353");
+            shape.graphics.drawRect(0, 0, 800, 600); // 長方形を描画
+            Titleyard.addChild(shape); // 表示リストに追加
+            var BG = new createjs.Bitmap("soL_back.png");
+            BG.alpha=0.3;
+            Titleyard.addChild(BG);
+            var t = new createjs.Text("Click Card to START", "24px serif", "white");
+            Titleyard.addChild(t);
+            gamestate=11;
+            Title();
+            break;
+          case 5:
+            //ローカルストレージのデータを削除
+            saveDel();
+            break;
           default:
             //no
             console.log(this.card);
@@ -2571,7 +2865,7 @@ window.addEventListener("keyup", keyupHandler, false);
       }}
 function Gameend(){
   //go to title;
-  gamestate=10;
+  //gamestate=10;
   Titleyard.alpha=1;
   clearBG.removeAllChildren();
   field.removeAllChildren();
@@ -2624,6 +2918,7 @@ function Gamestart(){
         cards.splice(0, 7),
       ]
       decks = cards.concat();
+      deckfaces=[];
       Extras=[0,13,26,39];
       Exlists=[[],[],[],[]]
     for(var i=0;i<hands.length;i++){
@@ -2786,6 +3081,7 @@ function Gameretry(){
       cards.splice(0, 7),
     ]
     decks = cards.concat();
+    deckfaces=[];
     Extras=[0,13,26,39];
   for(var i=0;i<hands.length;i++){
     for(var j=0;j<hands[i].length;j++){
@@ -2971,7 +3267,6 @@ function Gameretry(){
           //newCard.addEventListener("click", {point:1,handleEvent:DeckReset});
           field.addChild(newCard);
           for(var k=0;k<decks.length;k++){
-            console.log(decks.length);
             var newCard = new createjs.Bitmap(Card_src[0]);
             newCard.x=690;
             newCard.y=425-k*0.5;
@@ -3031,7 +3326,6 @@ function Gameretry(){
     }
   };
   function FirstAnimation(i=0,j=0){
-    //console.log('first animation')
     //カードを配るように見せる
     switch(playMode[0]){
       case 1:
@@ -3177,10 +3471,11 @@ function Gameretry(){
       }
       }}
     }
-    console.log(TM,TR);
+    //console.log(TM,TR);
       if(TR>=0){
         var TN=13;
         var Ary=hands[TR].slice(hands[TR].length-13,hands[TR].length);
+        se10.play();
         Cut();
       function Cut(){
       var T=Cardlists[TR].pop();
@@ -3284,6 +3579,33 @@ function compareFunc(a,b){return a-b;}
           context.arcTo(x, y, x + radius, y, radius);
           context.closePath();
     };
+    function PopAnm(word=0,delay=800,width=135,height=35,x=30,y=20){
+      //少しの時間だけ情報を表示する
+    var C= new createjs.Shape();
+    C.graphics.beginFill("black").drawRect(0,0,width,height);
+    C.x=x-60;
+    C.y=y;
+    C.alpha=0;
+    stage.addChild(C);
+    var D= new createjs.Text(word, "bold 16px Arial", "white");
+    D.x=x-60;
+    D.y=y+10;
+    D.alpha=0;
+    stage.addChild(D);
+    createjs.Tween.get(C)
+    .to({x:x-30,alpha:0.7},200)
+    .wait(delay)
+    .to({alpha:0},200)
+    .call(CDend);
+    createjs.Tween.get(D)
+    .to({x:30,alpha:1},200)
+    .wait(delay)
+    .to({alpha:0},200);
+      function CDend (){
+        stage.removeChild(C);
+        stage.removeChild(D);
+      }
+    }
     function Gameover(A=0){
       console.log('gameover');
       if(gamestate==0){
