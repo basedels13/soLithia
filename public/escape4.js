@@ -1,5 +1,5 @@
 //next　ポンチ作成(キッチン作成途中)、ポンチのヒント、脱出
-//スパイダーで宝石　ヘニルの時空へ
+//ヘニルの時空へ
 //やるきあれば→EXに挙げたカードを降ろす, 破片強打
 window.onload = function(){
 main();
@@ -84,7 +84,7 @@ stage.addChild(clearBG);
 stage.addChild(yakumap);
 stage.addChild(Configmap);
 stage.addChild(Loadmap);
-Itemyard.x=100;
+Itemyard.x=110;
 var tweeNroom=createjs.Tween.get(Roomyard,{loop:true})
 .to({x:-6,y:-2,scale:1.01,alpha:1},2100)
 .to({x:0,y:0,scale:1,alpha:1},2100);
@@ -177,6 +177,9 @@ circle2.addEventListener("click", {card:2,handleEvent:Soundcircle});
 Car1.addEventListener("click", {card:0,handleEvent:GameReady});
 titleCardTurn(0);
 submitPass();
+if(InvID(0)>=4){
+Letterbox.push(["不明","no title","ありません","qr_src2"])
+};
 function Soundcircle(){
   switch(this.card){
     case 3:
@@ -345,7 +348,7 @@ var Card_src_N= new Array('Card_images/BackColor_Black.png','Card_images/Spade01
 var Card_src_M= new Array('Card_images/BackColor_Closed.png','Card_images/Spade01.png','Card_images/Spade02.png','Card_images/Spade03.png','Card_images/Spade04.png','Card_images/Spade05.png','Card_images/Spade06.png','Card_images/Spade07.png','Card_images/Spade08.png','Card_images/Spade09.png','Card_images/Spade_M10.png','Card_images/Spade_M11.png','Card_images/Spade_M12.png','Card_images/Spade_M13.png','Card_images/Heart01.png','Card_images/Heart02.png','Card_images/Heart03.png','Card_images/Heart04.png','Card_images/Heart05.png','Card_images/Heart06.png','Card_images/Heart07.png','Card_images/Heart08.png','Card_images/Heart09.png','Card_images/Heart_M10.png','Card_images/Heart_M11.png','Card_images/Heart_M12.png','Card_images/Heart_M13.png','Card_images/Club01.png','Card_images/Club02.png','Card_images/Club03.png','Card_images/Club04.png','Card_images/Club05.png','Card_images/Club06.png','Card_images/Club07.png','Card_images/Club08.png','Card_images/Club09.png','Card_images/Club_M10.png','Card_images/Club_M11.png','Card_images/Club_M12.png','Card_images/Club_M13.png','Card_images/Diamond01.png','Card_images/Diamond02.png','Card_images/Diamond03.png','Card_images/Diamond04.png','Card_images/Diamond05.png','Card_images/Diamond06.png','Card_images/Diamond07.png','Card_images/Diamond08.png','Card_images/Diamond09.png','Card_images/Diamond_M10.png','Card_images/Diamond_M11.png','Card_images/Diamond_M12.png','Card_images/Diamond_M13.png','Card_images/melon3.png')
 var Card_src_S= new Array('Card_images/BackColor_Black.png','Card_images/Diamond01.png','Card_images/Diamond02.png','Card_images/Diamond03.png','Card_images/Diamond04.png','Card_images/Diamond05.png','Card_images/Diamond06.png','Card_images/Diamond07.png','Card_images/Diamond08.png','Card_images/Diamond09.png','Card_images/Diamond10.png','Card_images/Diamond11.png','Card_images/Diamond12.png','Card_images/Diamond13.png','Card_images/Diamond01.png','Card_images/Diamond02.png','Card_images/Diamond03.png','Card_images/Diamond04.png','Card_images/Diamond05.png','Card_images/Diamond06.png','Card_images/Diamond07.png','Card_images/Diamond08.png','Card_images/Diamond09.png','Card_images/Diamond10.png','Card_images/Spider1101.png','Card_images/Spider1201.png','Card_images/Spider1301.png','Card_images/Diamond01.png','Card_images/Diamond02.png','Card_images/Diamond03.png','Card_images/Diamond04.png','Card_images/Diamond05.png','Card_images/Diamond06.png','Card_images/Diamond07.png','Card_images/Diamond08.png','Card_images/Diamond09.png','Card_images/Diamond10.png','Card_images/Spider1102.png','Card_images/Spider1202.png','Card_images/Spider1302.png','Card_images/Diamond01.png','Card_images/Diamond02.png','Card_images/Diamond03.png','Card_images/Diamond04.png','Card_images/Diamond05.png','Card_images/Diamond06.png','Card_images/Diamond07.png','Card_images/Diamond08.png','Card_images/Diamond09.png','Card_images/Diamond10.png','Card_images/Spider1103.png','Card_images/Spider1203.png','Card_images/Spider1303.png','Card_images/Diamond01.png','Card_images/Diamond02.png','Card_images/Diamond03.png','Card_images/Diamond04.png','Card_images/Diamond05.png','Card_images/Diamond06.png','Card_images/Diamond07.png','Card_images/Diamond08.png','Card_images/Diamond09.png','Card_images/Diamond10.png','Card_images/Spider1104.png','Card_images/Spider1204.png','Card_images/Spider1304.png',)
 var Path_src=new Array("Card_images/soL_room_path9.png","Card_images/soL_room_path1.png","Card_images/soL_room_path2.png","Card_images/soL_room_path3.png","Card_images/soL_room_path4.png","Card_images/soL_room_path5.png","Card_images/soL_room_path6.png","Card_images/soL_room_path7.png","Card_images/soL_room_path8.png")
-var Item_src=new Array("Card_images/BackColor_Black.png","Card_images/soL_coin.png","Card_images/soL_tomato.png","Card_images/soL_melon.png","Card_images/soL_pan.png","Card_images/soL_stone.png","Card_images/soL_desert.png","Card_images/soL_wand.png");
+var Item_src=new Array("Card_images/BackColor_Black.png","Card_images/soL_elbook.png","Card_images/soL_wand.png","Card_images/soL_desert.png","Card_images/soL_coin.png","Card_images/soL_tomato.png","Card_images/soL_melon.png","Card_images/soL_stone.png","Card_images/soL_pan.png");
 var Chara_src=new Array("soL_chara1.png","soL_chara2.png");
 var Itemswitch=0;
 var PathAry=[];
@@ -384,6 +387,7 @@ var score=0;
 var Cbt=canvas2.toDataURL();
 var Cbtlist=[];
 var Cbutton = new createjs.Bitmap(Cbt);
+var Letterbox=[];
 field.addChild(Cbutton);
 Cbtlist.push(Cbutton);
 //ボタン描画用
@@ -427,17 +431,17 @@ for(var i=0; i<achieve.length;i++){
 }
 //アイテム cleared -1->使用後, 1~所持数
 var inventory=[
-  {name:"トランプ",sub:"孤独なリティアのために狭間がつくってくれた、&絵札に色々なキャラクターが描かれたトランプ。&（ソリティアをプレイすることができる）"},
-  {name:"勝負師のコイン",sub:"金色に光るコイン。"},
-  {name:"キュアトマト",sub:"ジョイが育てていたトマト。"},
-  {name:"極上メロン",sub:"洞窟で採れるメロン。"},
-  {name:"冬の森の鍋",sub:"ジョイが使っていた調理用のお鍋。"},
-  {name:"アイスレート",sub:"波のような模様が特徴的な鉱石。"},
-  {name:"スイートポンチ",sub:"身体の抵抗力を上げる効果があるデザート。"},
-  {name:"ピッケル-プロトタイプ",sub:"狭間からの脱出に成功した証。&（装備すると、クロンダイク・マグマンタを&　通常と少し異なるルールでプレイすることができる）"},
+  {id:0,name:"トランプ",sub:"孤独なリティアのために狭間がつくってくれた、&絵札に色々なキャラクターが描かれたトランプ。&（ソリティアをプレイすることができる）"},
+  {id:8,name:"エル・コレクション・ブック",sub:"エル捜索隊について書かれた本。&（3つのソリティアをクリアした記念品。&　装備すると、狭間との会話の内容が変化する）"},
+  {id:7,name:"ピッケル-プロトタイプ",sub:"狭間からの脱出に成功した証。&（装備すると、クロンダイク・マグマンタを&　通常と少し異なるルールでプレイすることができる）"},
+  {id:6,name:"スイートポンチ",sub:"身体の抵抗力を上げる効果があるデザート。"},
+  {id:1,name:"勝負師のコイン",sub:"金色に光るコイン。"},
+  {id:2,name:"キュアトマト",sub:"ジョイが育てていたトマト。"},
+  {id:3,name:"極上メロン",sub:"洞窟で採れるメロン。"},
+  {id:5,name:"アイスレート",sub:"波のような模様が特徴的な鉱石。"},
+  {id:4,name:"冬の森の鍋",sub:"ジョイが使っていた調理用のお鍋。"},
 ];
 for(var i=0; i<inventory.length;i++){
-  inventory[i].id=i;
   inventory[i].cleared=0;
 }
 inventory[0].cleared=1;
@@ -610,7 +614,7 @@ if(p!==0){
   se10.volume(0.2*sBar);
   se11.volume(0.4*sBar);
   se12.volume(0.2*sBar);
-  se13.volume(0.12*sBar);
+  se13.volume(0.4*sBar);
   se14.volume(0.3*sBar);
   se15.volume(0.2*sBar);
   se16.volume(0.4*sBar);
@@ -669,8 +673,8 @@ var se12 = new Howl({
       volume: 0.2,
   });
 var se13 = new Howl({
-    src:"Enter.mp3",
-    volume: 0.12,
+    src:"put_bucket.mp3",
+    volume: 0.4,
     });
 var se14 = new Howl({
   src:"button25.mp3",
@@ -746,6 +750,7 @@ var queue = new createjs.LoadQueue(),
         {src:'Card_images/Card_Spore.png'},{src:'Card_images/Spade_M10.png'},{src:'Card_images/Spade_M11.png'},{src:'Card_images/Spade_M12.png'},{src:'Card_images/Spade_M13.png'},{src:'Card_images/Heart_M10.png'},{src:'Card_images/Heart_M11.png'},{src:'Card_images/Heart_M12.png'},{src:'Card_images/Heart_M13.png'},{src:'Card_images/Club_M10.png'},{src:'Card_images/Club_M11.png'},{src:'Card_images/Club_M12.png'},{src:'Card_images/Club_M13.png'},{src:'Card_images/Diamond_M10.png'},{src:'Card_images/Diamond_M11.png'},{src:'Card_images/Diamond_M12.png'},{src:'Card_images/Diamond_M13.png'},
         {src:'soL_back.png'},{src:'Don_bg2.png'},{src:'Don_bg3.png'},{src:'Don_bg4.png'},{src:'Don_bg5.png'},{src:'soL_dialogue.png'},{src:'soL_chara1.png'},{src:'soL_chara2.png'},
         {src:'Card_images/soL_room.png'},{src:'Card_images/soL_room_path.png'},{src:'Card_images/soL_room_table.png'},{src:'Card_images/soL_room_map2.png'},{src:'Card_images/soL_room_Path9.png'},{src:'Card_images/soL_room_kit4.png'},{src:'Card_images/soL_room_kit1.png'},{src:'Card_images/soL_room_kit2.png'},{src:'Card_images/soL_room_kit3.png'},{src:'Card_images/soL_room_picture2.png'},
+        {src:'Card_images/melon1.png'},{src:'Card_images/melon2.png'},{src:'Card_images/melon3.png'},
         {src:'soL_rule1.png'},{src:'soL_rule2.png'},{src:'soL_rule3.png'},{src:'soL_rule3_2.png'},{src:'soL_rule2.png'},{src:'soL_rule3.png'},{src:'soL_rule3_2.png'},
               ];
 // 同時接続数を設定
@@ -895,7 +900,7 @@ function menu(state=0){
       var Table = new createjs.Bitmap("Card_images/soL_room_table.png");
       Roomyard.addChild(Table);
       var Path = new createjs.Bitmap("Card_images/soL_room_path.png");
-      Path.x=-80;
+      Path.x=-100;
       Path.y=-67;
       Roomyard.addChild(Path);
       var Letter = new createjs.Bitmap("Card_images/soL_room_letter.png");
@@ -966,13 +971,13 @@ function menu(state=0){
       LetterA.alpha=0;
       Roomyard.addChild(LetterA);
       var PathA = new createjs.Bitmap("Card_images/soL_room_pathA.png");
-      PathA.x=-80;
+      PathA.x=-100;
       PathA.y=-67;
       PathA.alpha=0;
       Roomyard.addChild(PathA);
       for(var i=0;i<Path_src.length;i++){
         var P = new createjs.Bitmap(Path_src[i]);
-        P.x=-80;
+        P.x=-100;
         P.y=-67;
         PathAry.push(P)
         Roomyard.addChild(P);
@@ -1045,23 +1050,23 @@ function menu(state=0){
         .call(mainstep)    
         };
       createjs.Tween.get(Path,{loop:true})
-      .to({x:-83,y:-64,alpha:0.7},3000, createjs.Ease.backInOut)
-      .to({x:-85,y:-68,alpha:0.9},3000, createjs.Ease.backInOut)
-      .to({x:-83,y:-70,alpha:0.7},3000, createjs.Ease.backInOut)
-      .to({x:-80,y:-67,alpha:1},3000);
+      .to({x:-103,y:-64,alpha:0.7},3000, createjs.Ease.backInOut)
+      .to({x:-105,y:-68,alpha:0.9},3000, createjs.Ease.backInOut)
+      .to({x:-103,y:-70,alpha:0.7},3000, createjs.Ease.backInOut)
+      .to({x:-100,y:-67,alpha:1},3000);
       createjs.Tween.get(PathA,{loop:true})
-      .to({x:-83,y:-64},3000, createjs.Ease.backInOut)
-      .to({x:-85,y:-68},3000, createjs.Ease.backInOut)
-      .to({x:-83,y:-70},3000, createjs.Ease.backInOut)
-      .to({x:-80,y:-67},3000);
+      .to({x:-103,y:-64},3000, createjs.Ease.backInOut)
+      .to({x:-105,y:-68},3000, createjs.Ease.backInOut)
+      .to({x:-103,y:-70},3000, createjs.Ease.backInOut)
+      .to({x:-100,y:-67},3000);
       for(var i=0;i<PathAry.length;i++){
         var P = PathAry[i];
         if(totalcardmove>=(100+25*i)*i){P.alpha=1}else{P.alpha=0};
         createjs.Tween.get(P,{loop:true})
-        .to({x:-83,y:-64,alpha:0.8*P.alpha},3000, createjs.Ease.backInOut)
-        .to({x:-85,y:-68,alpha:P.alpha},3000, createjs.Ease.backInOut)
-        .to({x:-83,y:-70,alpha:0.7*P.alpha},3000, createjs.Ease.backInOut)
-        .to({x:-80,y:-67,alpha:P.alpha},3000);
+        .to({x:-103,y:-64,alpha:0.8*P.alpha},3000, createjs.Ease.backInOut)
+        .to({x:-105,y:-68,alpha:P.alpha},3000, createjs.Ease.backInOut)
+        .to({x:-103,y:-70,alpha:0.7*P.alpha},3000, createjs.Ease.backInOut)
+        .to({x:-100,y:-67,alpha:P.alpha},3000);
       };
       function mainstep(){
       InvConfig(0);
@@ -1240,9 +1245,10 @@ function menu(state=0){
           }
             break;
           case 5:
-            if(equipeditem==1 || inventory[1].cleared==-1){
+            var ID=inventory.findIndex(value=>value.id==1);
+            if(equipeditem==1 || InvID(1)==-1){
             equipeditem=-1;
-            inventory[1].cleared=-1;
+            InvID(1,-1)
             InvConfig(0);
             se15.play();
             field.removeAllChildren();
@@ -1253,7 +1259,7 @@ function menu(state=0){
             var Box4 = new createjs.Bitmap("Card_images/soL_room_box4.png");
             Box4.scale=0.8;
             field.addChild(Box4);
-            if(inventory[4].cleared==0){
+            if(InvID(4)==0){
               var Box3 = new createjs.Bitmap("Card_images/soL_room_box3.png");
               Box3.scale=0.8;
               field.addChild(Box3);
@@ -1267,7 +1273,7 @@ function menu(state=0){
             option_bt5.addEventListener("click", {card:4,handleEvent:Mapcross});
             return false;
             }
-            if(inventory[4].cleared!==0){
+            if(InvID(1)!==0){
               field.removeAllChildren();
               se15.play();
               var Box4 = new createjs.Bitmap("Card_images/soL_room_box4.png");
@@ -1284,7 +1290,7 @@ function menu(state=0){
             }
             break;
             case 6:
-            if(inventory[4].cleared==0){
+            if(InvID(4)==0){
             IK('冬の森の鍋')
             field.removeAllChildren();
             var Box4 = new createjs.Bitmap("Card_images/soL_room_box4.png");
@@ -1300,10 +1306,12 @@ function menu(state=0){
             break;
         }
       }
+      var KitAry=[];
       function Kitcross(){
         switch(this.card){
           case 3:
           if(opLock==0){
+          KitAry=[];
           opLock=6;
           se11.play();
           var shapeMask3 = new createjs.Shape();
@@ -1321,16 +1329,37 @@ function menu(state=0){
           Box2.x=50;
           Box2.y=30;
           field.addChild(Box2);
-          if(inventory[4].cleared<0){
-          var Box2 = new createjs.Bitmap("Card_images/soL_room_kit2.png");
-          Box2.scale=0.75;
-          Box2.x=50;
-          Box2.y=30;
-          field.addChild(Box2);
-            if(inventory[4].cleared>-3){
-            Box2.addEventListener("click", {card:6,handleEvent:Kitcross});
+          if(InvID(4)<0){
+            switch(InvID(4)){
+              //-1->コンロに置いている状態 -2->ポンチ作成済 -3→ポンチ回収済
+              case -1:
+                var Box2 = new createjs.Bitmap("Card_images/soL_room_kit2.png");
+                Box2.scale=0.75;
+                Box2.x=50;
+                Box2.y=30;
+                field.addChild(Box2);
+                KitAry.push(Box2);
+                Box2.addEventListener("click", {card:6,handleEvent:Kitcross});
+                break;
+              case -2:
+                var Box2 = new createjs.Bitmap("Card_images/soL_room_kit3.png");
+                Box2.scale=0.75;
+                Box2.x=50;
+                Box2.y=30;
+                field.addChild(Box2);
+                KitAry.push(Box2);
+                Box2.addEventListener("click", {card:7,handleEvent:Kitcross});
+                break;
+              case -3:
+                var Box2 = new createjs.Bitmap("Card_images/soL_room_kit4.png");
+                Box2.scale=0.75;
+                Box2.x=50;
+                Box2.y=30;
+                field.addChild(Box2);
+                KitAry.push(Box2);
+                break;
             }
-            if(inventory[2].cleared==-1){
+            if(InvID(2)==-1 && InvID(4)!==-3){
               var obj = new createjs.Shape();
               obj.graphics.beginFill("rgba(20,20,20,0.7)");
               obj.graphics.moveTo(190, 220);
@@ -1346,11 +1375,13 @@ function menu(state=0){
               field.addChild(obj);
               var option_bt5 = new createjs.Bitmap('Card_images/soL_tomato.png');
               option_bt5.x=170;
-              option_bt5.y=200;
+              option_bt5.y=210;
               option_bt5.scale=0.9;
               field.addChild(option_bt5);
+              KitAry.push(obj);
+              KitAry.push(option_bt5)
             }
-            if(inventory[3].cleared==-1){
+            if(InvID(3)==-1 && InvID(4)!==-3){
               var obj = new createjs.Shape();
               obj.graphics.beginFill("rgba(20,20,20,0.7)");
               obj.graphics.moveTo(190, 220);
@@ -1369,8 +1400,10 @@ function menu(state=0){
               option_bt5.y=180;
               option_bt5.scale=0.9;
               field.addChild(option_bt5);
+              KitAry.push(obj);
+              KitAry.push(option_bt5)
             }
-          if(inventory[5].cleared==-1){
+          if(InvID(5)==-1 && InvID(4)!==-3){
             var obj = new createjs.Shape();
             obj.graphics.beginFill("rgba(20,20,20,0.7)");
             obj.graphics.moveTo(190, 220);
@@ -1384,10 +1417,12 @@ function menu(state=0){
             obj.x+=185;
             field.addChild(obj);
             var option_bt5 = new createjs.Bitmap('Card_images/soL_stone.png');
-            option_bt5.x=350;
+            option_bt5.x=360;
             option_bt5.y=200;
             option_bt5.scale=0.9;
             field.addChild(option_bt5);
+            KitAry.push(obj);
+            KitAry.push(option_bt5)
           }
           }
           var option_bt5 = new createjs.Bitmap('soL_batu.png');
@@ -1399,10 +1434,9 @@ function menu(state=0){
           }
             break;
           case 5:
-            if(equipeditem==4 && inventory[4].cleared==1){
+            if(equipeditem==4 && InvID(4)==1){
             equipeditem=-1;
-            inventory[4].cleared=-1;
-            //-1->コンロに置いている状態 -2->ポンチ作成済 -3→ポンチ回収済
+            InvID(4,-1);
             InvConfig(0);
             se15.play();
             var Box4 = new createjs.Bitmap("Card_images/soL_room_kit2.png");
@@ -1411,21 +1445,34 @@ function menu(state=0){
             Box4.y=30;
             Box4.addEventListener("click", {card:6,handleEvent:Kitcross});
             field.addChild(Box4);
-            var option_bt5 = new createjs.Bitmap('soL_batu.png');
-            option_bt5.x=660;
-            option_bt5.y=50;
-            option_bt5.scale=0.4;
-            field.addChild(option_bt5);
-            option_bt5.addEventListener("click", {card:4,handleEvent:Mapcross});
+            KitAry.push(Box4);
             return false;
             }
             break;
+            case 7:
+              if(InvID(6)==0){
+                //s
+                IK("スイートポンチ");
+                var ID=inventory.findIndex(value=>value.id==4);
+                InvID(4,-3)
+                for(var i=0;i<KitAry.length;i++){
+                  field.removeChild(KitAry[i]);
+                };
+                KitAry=[];
+                var Box2 = new createjs.Bitmap("Card_images/soL_room_kit4.png");
+                Box2.scale=0.75;
+                Box2.x=50;
+                Box2.y=30;
+                field.addChild(Box2);
+              }
+              break;
             case 6:
             //アイテムを鍋に投下
-            if(equipeditem==2 && inventory[2].cleared==1){
-              inventory[2].cleared=-1;
+            if(equipeditem==2 && InvID(2)==1){
+              InvID(2,-1);
               equipeditem=-1;
               InvConfig(0);
+              se13.play();
               var obj = new createjs.Shape();
               obj.graphics.beginFill("rgba(20,20,20,0.7)");
               obj.graphics.moveTo(190, 220);
@@ -1441,14 +1488,17 @@ function menu(state=0){
               field.addChild(obj);
               var option_bt5 = new createjs.Bitmap('Card_images/soL_tomato.png');
               option_bt5.x=170;
-              option_bt5.y=200;
+              option_bt5.y=210;
               option_bt5.scale=0.9;
               field.addChild(option_bt5);
+              KitAry.push(obj);
+              KitAry.push(option_bt5)
               }
-            if(equipeditem==3 && inventory[3].cleared==1){
-              inventory[3].cleared=-1;
+            if(equipeditem==3 && InvID(3)==1){
+              InvID(3,-1)
               equipeditem=-1;
               InvConfig(0);
+              se13.play();
               var obj = new createjs.Shape();
               obj.graphics.beginFill("rgba(20,20,20,0.7)");
               obj.graphics.moveTo(190, 220);
@@ -1467,32 +1517,127 @@ function menu(state=0){
               option_bt5.y=180;
               option_bt5.scale=0.9;
               field.addChild(option_bt5);
+              KitAry.push(obj);
+              KitAry.push(option_bt5)
               }
-              if(equipeditem==5 && inventory[5].cleared==1){
-                inventory[5].cleared=-1;
+              if(equipeditem==5 && InvID(5)==1){
+                InvID(5,-1);
                 equipeditem=-1;
                 InvConfig(0);
+                se13.play();
                 var obj = new createjs.Shape();
                 obj.graphics.beginFill("rgba(20,20,20,0.7)");
                 obj.graphics.moveTo(190, 220);
                 obj.graphics.lineTo(280, 220);
                 obj.graphics.lineTo(280, 310);
-                obj.graphics.lineTo(260, 310);
-                obj.graphics.lineTo(230, 330);
-                obj.graphics.lineTo(240, 310);
+                obj.graphics.lineTo(230, 310);
+                obj.graphics.lineTo(205, 330);
+                obj.graphics.lineTo(210, 310);
                 obj.graphics.lineTo(190, 310);
                 obj.graphics.lineTo(190, 220);
                 obj.x+=185;
                 field.addChild(obj);
                 var option_bt5 = new createjs.Bitmap('Card_images/soL_stone.png');
-                option_bt5.x=350;
+                option_bt5.x=360;
                 option_bt5.y=200;
                 option_bt5.scale=0.9;
                 field.addChild(option_bt5);
+                KitAry.push(obj);
+                KitAry.push(option_bt5)
                 }
+            Pants();
             break;
         }
         //ポンチ作成
+        //アイテムが揃っていれば勝手に調理
+        function Pants(){
+          if(InvID(2)==-1 && InvID(3)==-1 && InvID(5)==-1){
+            if(InvID(4)==-1){
+              //s
+              cLock=false;
+              se9.play();
+              for(var i=0;i<KitAry.length;i++){
+                field.removeChild(KitAry[i]);
+              };
+              KitAry=[];
+              var Box2 = new createjs.Bitmap("Card_images/soL_room_kit2.png");
+              Box2.scale=0.75;
+              Box2.x=50;
+              Box2.y=30;
+              field.addChild(Box2);
+              KitAry.push(Box2);
+              createjs.Tween.get(Box2,{loop:true})
+              .to({y:Box2.y-14},40)
+              .to({y:Box2.y},100)
+              .wait(300)
+              //request
+              var DL= new createjs.Bitmap("soL_dialogue.png");
+              DL.scale=1.7;
+              DL.x=900;
+              DL.y=180;
+              field.addChild(DL);
+              KitAry.push(DL);
+              createjs.Tween.get(DL)
+              .to({x:190},150)
+              .call(cookready);
+              function cookready(){
+              var t=new createjs.Text("調理中...","bold 26px 'メイリオ'","black");
+              t.x=245;
+              t.y=200;
+              field.addChild(t);
+              KitAry.push(t);
+              var shape = new createjs.Shape();
+              shape.graphics.beginFill("black");
+              shape.graphics.drawRect(250, 365, 300, 10);
+              shape.alpha=0.7;
+              KitAry.push(shape)
+              field.addChild(shape);
+              var Box2 = new createjs.Bitmap("Card_images/soL_SDicon.png");
+              Box2.x=340;
+              Box2.y=255;
+              Box2.scale=0.9
+              field.addChild(Box2);
+              KitAry.push(Box2);
+              createjs.Tween.get(Box2,{loop:true})
+              .to({y:Box2.y-10},5)
+              .wait(800)
+              .to({y:Box2.y},5)
+              .wait(800)
+              window.requestAnimationFrame((ts)=>Cook(ts));
+              }
+              function Cook(ts,tflame=0,sf=0){
+                tflame+=1;
+                if(tflame>20){
+                  var shape = new createjs.Shape();
+                  shape.graphics.beginFill("rgb(244,177,131)");
+                  shape.graphics.drawRect(250+30*sf, 365, 30, 10);
+                  KitAry.push(shape)
+                  field.addChild(shape);
+                  sf+=1;
+                  tflame=0;
+                }
+                if(sf>10){
+                  for(var i=0;i<KitAry.length;i++){
+                    field.removeChild(KitAry[i]);
+                  };
+                  KitAry=[];
+                  InvID(4,-2);
+                  se10.play();
+                  var Box2 = new createjs.Bitmap("Card_images/soL_room_kit3.png");
+                  Box2.scale=0.75;
+                  Box2.x=50;
+                  Box2.y=30;
+                  field.addChild(Box2);
+                  KitAry.push(Box2);
+                  Box2.addEventListener("click", {card:7,handleEvent:Kitcross});
+                  cLock=true;
+                }else{
+                window.requestAnimationFrame((ts)=>Cook(ts,tflame,sf));
+                }
+              }
+            }
+          }
+        }
         
       }
       function Vasecross(){
@@ -1513,10 +1658,8 @@ function menu(state=0){
               shape.graphics.beginFill("rgba(20,20,20,0.5)");
               shape.graphics.drawRect(100, 40, 610, 450);
               field.addChild(shape);
-              var Letterbox=[];
               //test
-              Letterbox.push(["不明","no title","ありません","qr_src2"])
-              Letterbox.push(["提供","クリア記念品","ここまでのプレイ、&ありがとうございます！&脱出を記念して、装備すると&クロンダイク・マグマンタを&通常と少し異なるルールで&遊べるアイテムを贈呈します。","ピッケル"]);
+              //Letterbox.push(["提供","クリア記念品","ここまでのプレイ、&ありがとうございます！&脱出を記念して、装備すると&クロンダイク・マグマンタを&通常と少し異なるルールで&遊べるアイテムを贈呈します。","ピッケル"]);
               if(Letterbox.length){
               for(var i=0;i<Letterbox.length;i++){
               var shape = new createjs.Shape();
@@ -1553,8 +1696,7 @@ function menu(state=0){
       var Ary=[];
       function Letterdetail(){
         if(this.card==-3){
-          if(inventory[7].cleared==0){
-          inventory[0].cleared=0;
+          if(InvID(7)==0){
           var shape = new createjs.Shape();
           shape.graphics.beginFill("black");
           shape.graphics.drawRect(580, 394, 64, 64);
@@ -1643,7 +1785,7 @@ function menu(state=0){
           T.y=394;
           T.scale=0.5;
           field.addChild(T);
-          if(inventory[7].cleared ==1){
+          if(InvID(7)==1){
           var shape = new createjs.Shape();
             shape.graphics.beginFill("black");
             shape.graphics.drawRect(580, 394, 64, 64);
@@ -1858,11 +2000,14 @@ function menu(state=0){
         if(cleared[0][1]>=10){
           AK("極地のクモ");
         };
-        if(cleared[0][2]>=5){
+        if(cleared[0][2]>=7){
           AK("エリアノド守護者");
         };
         if(achieve_SS[0]>0 && achieve_SS[1]>0 && achieve_SS[2]>0){
           AK("SS魂");
+        }
+        if(cleared[0][0]>0 && cleared[0][1]>0 && cleared[0][2]>0 && totalcardmove>=2400){
+          IK("エル・コレクション・ブック");
         }
         if(achievetemp.length){
         for (var i=0;i<achievetemp.length;i++){
@@ -1874,7 +2019,7 @@ function menu(state=0){
           var P = PathAry[i];
           if(totalcardmove>=(100+25*i)*i){P.alpha=1}else{P.alpha=0};
         };
-        saveLocal();
+        PathTalk();
         break;
   }
 };
@@ -2084,46 +2229,6 @@ var t = new createjs.Text("プレイデータ", "36px serif", "white");
 t.x=360;
 t.y=60;
 field.addChild(t);
-//var cleared=[[0,0,0,0,0,0],[0,0,0,0,0,0]];//ク/マ/エ クリア回数/ ク/マ/エ 挑戦回数の順 3-5番目は予備
-field.addChild(t);
-for(var i=0;i<3;i++){
-  var t = new createjs.Text(Modename[i]+"　"+cleared[0][i]+"回クリア/挑戦回数"+cleared[1][i]+"回", "24px serif", "white");
-  t.x=700;
-  t.y=120+40*i;
-  t.textAlign = "end";
-  field.addChild(t);
-  var Z = new createjs.Bitmap('zoom650.png');
-  Z.x=705;
-  Z.y=120+40*i
-  Z.scale=0.3;
-  var shape = new createjs.Shape();
-  shape.graphics.beginFill("rgb(244,177,131)");
-  shape.graphics.beginStroke("rgb(237,125,50)");
-  shape.graphics.setStrokeStyle(3);
-  shape.graphics.drawRect(705, 120+40*i, 30, 30);
-  field.addChild(shape);
-  field.addChild(Z);
-  shape.addEventListener("click", {card:i,handleEvent:ScoreDetail});  
-}
-for(var i=0;i<2;i++){
-  var t = new createjs.Text(Modename[i+3]+"　"+cleared[0][i+3]+"回クリア/挑戦回数"+cleared[1][i+3]+"回", "24px serif", "white");
-  t.x=1500;
-  t.y=120+40*i;
-  t.textAlign = "end";
-  field.addChild(t);
-  var Z = new createjs.Bitmap('zoom650.png');
-  Z.x=1505;
-  Z.y=120+40*i
-  Z.scale=0.3;
-  var shape = new createjs.Shape();
-  shape.graphics.beginFill("rgb(244,177,131)");
-  shape.graphics.beginStroke("rgb(237,125,50)");
-  shape.graphics.setStrokeStyle(3);
-  shape.graphics.drawRect(1505, 120+40*i, 30, 30);
-  field.addChild(shape);
-  field.addChild(Z);
-  shape.addEventListener("click", {card:i+3,handleEvent:ScoreDetail});  
-}
 disp(GamestartT);
 if(hour<10){hour="0"+hour};
 if(min<10){min="0"+min};
@@ -2137,7 +2242,8 @@ t.y=80;
 field.addChild(t);
 var achieveAry=[];
 var achieveAry2=[];
-var achievepage=[0,0];
+var scoreAry2=[];
+var achievepage=[0,0,0,0];
 var T=achieve.filter(value=>value.cleared>0);
 var t = new createjs.Text("実績", "24px serif", "white");
 t.x=360;
@@ -2156,7 +2262,7 @@ var t = new createjs.Text((achievepage[0]+1)+"/"+(1+Math.floor((achieve.length-1
 t.x=670;
 t.y=505;
 field.addChild(t);
-achievepage[1]=t;
+achievepage[3]=t;
 option_arrow.addEventListener("click", {card:1,handleEvent:achieveListMove});
 var option_arrow = new createjs.Bitmap('Winedom_arrowright.png');
 option_arrow.x=710;
@@ -2164,19 +2270,102 @@ option_arrow.y=505;
 option_arrow.scale=0.2;
 field.addChild(option_arrow)
 option_arrow.addEventListener("click", {card:3,handleEvent:achieveListMove});
+if(InvID(7)==1){
+var option_arrow = new createjs.Bitmap('Winedom_arrowleft.png');
+option_arrow.x=640;
+option_arrow.y=240;
+option_arrow.scale=0.2;
+field.addChild(option_arrow)
+var t = new createjs.Text((achievepage[2]+1)+"/2", "20px serif", "white");
+t.x=670;
+t.y=240;
+field.addChild(t);
+achievepage[1]=t;
+option_arrow.addEventListener("click", {card:2,handleEvent:achieveListMove});
+var option_arrow = new createjs.Bitmap('Winedom_arrowright.png');
+option_arrow.x=710;
+option_arrow.y=240;
+option_arrow.scale=0.2;
+field.addChild(option_arrow)
+option_arrow.addEventListener("click", {card:4,handleEvent:achieveListMove});
+};
 achieveList();
 function achieveListMove(){
   se11.play();
-  if(this.card==1){
-    achievepage[0]-=1;
-    if(achievepage[0]<0){achievepage[0]=Math.floor(achieve.length/9)};
-  }else if(this.card==3){
-    achievepage[0]+=1;
-    if(achievepage[0]>Math.floor(achieve.length/9)){achievepage[0]=0};
+  switch(this.card){
+    case 1:
+      achievepage[0]-=1;
+      if(achievepage[0]<0){achievepage[0]=Math.floor(achieve.length/9)};
+      break;
+    case 3:
+      achievepage[0]+=1;
+      if(achievepage[0]>Math.floor(achieve.length/9)){achievepage[0]=0};
+      break;
+    case 2:
+      achievepage[2]+=1;
+      if(achievepage[2]>=2){achievepage[2]=0};
+      break;
+    case 4:
+      achievepage[2]-=1;
+      if(achievepage[2]<0){achievepage[2]=1};
+      break;
   }
   achieveList();
 }
 function achieveList(){
+  if(scoreAry2.length){
+    for(var i=0;i<scoreAry2.length;i++){
+      var I=scoreAry2[i];
+      field.removeChild(I)
+    }
+  };
+  if(achievepage[2]==0){
+    for(var i=0;i<3;i++){
+      var t = new createjs.Text(Modename[i]+"　"+cleared[0][i]+"回クリア/挑戦回数"+cleared[1][i]+"回", "24px serif", "white");
+      t.x=700;
+      t.y=120+40*i;
+      t.textAlign = "end";
+      field.addChild(t);
+      var Z = new createjs.Bitmap('zoom650.png');
+      Z.x=705;
+      Z.y=120+40*i
+      Z.scale=0.3;
+      var shape = new createjs.Shape();
+      shape.graphics.beginFill("rgb(244,177,131)");
+      shape.graphics.beginStroke("rgb(237,125,50)");
+      shape.graphics.setStrokeStyle(3);
+      shape.graphics.drawRect(705, 120+40*i, 30, 30);
+      field.addChild(shape);
+      field.addChild(Z);
+      shape.addEventListener("click", {card:i,handleEvent:ScoreDetail});  
+      scoreAry2.push(shape);
+      scoreAry2.push(t);
+      scoreAry2.push(Z);
+    }
+  }else{
+    for(var i=0;i<2;i++){
+      var t = new createjs.Text(Modename[i+3]+"　"+cleared[0][i+3]+"回クリア/挑戦回数"+cleared[1][i+3]+"回", "24px serif", "white");
+      t.x=700;
+      t.y=120+40*i;
+      t.textAlign = "end";
+      field.addChild(t);
+      var Z = new createjs.Bitmap('zoom650.png');
+      Z.x=705;
+      Z.y=120+40*i
+      Z.scale=0.3;
+      var shape = new createjs.Shape();
+      shape.graphics.beginFill("rgb(244,177,131)");
+      shape.graphics.beginStroke("rgb(237,125,50)");
+      shape.graphics.setStrokeStyle(3);
+      shape.graphics.drawRect(705, 120+40*i, 30, 30);
+      field.addChild(shape);
+      field.addChild(Z);
+      shape.addEventListener("click", {card:i+3,handleEvent:ScoreDetail});  
+      scoreAry2.push(shape);
+      scoreAry2.push(t);
+      scoreAry2.push(Z);
+    }
+  };
 if(achieveAry2.length){
   for(var i=0;i<achieveAry2.length;i++){
     var I=achieveAry2[i];
@@ -2204,7 +2393,11 @@ field.addChild(t);
 achieveAry2.push(shape);
 achieveAry2.push(t);
 var T=achievepage[1];
+T.text=(achievepage[2]+1)+"/2";
+if(InvID(7)==1){
+var T=achievepage[3];
 T.text=(achievepage[0]+1)+"/"+(1+Math.floor((achieve.length-1)/9));
+}
 }};
 }
 function ScoreDetail(){
@@ -2259,14 +2452,13 @@ function AchieveDetail(){
 }}
 }
 function submitPass(){
-  var T=Math.floor(Math.random()*100000)
+  var T=10000+Math.floor(Math.random()*90000)
   var Msg="狭間を開くパスワード："+T;
   playMode[2]=T;
   cx3.clearRect(0,0,800,600);
   QR_main(canvas3,Msg)
   var qr_src=canvas3.toDataURL();
   qr_src2 = new createjs.Bitmap(qr_src);
-  //field.addChild(qr_src2);
   qr_src2.alpha=0;
   cx3.clearRect(0,0,800,600);
 }
@@ -3909,7 +4101,7 @@ function handleUp(event) {
     function endPhase(){
       switch(playMode[0]){
         case 1:
-          if(playMode[0]==1 && inventory[1].cleared==0){
+          if(playMode[0]==1 && InvID(1)==0){
             //expected 50,37,13,26
             if(hands[0][hands[0].length-1]==50 && hands[2][hands[2].length-1]==37 && hands[4][hands[4].length-1]==13 && hands[6][hands[6].length-1]==26){
               if(hands[1].length==0 && hands[3].length==0 && hands[5].length==0){
@@ -4359,23 +4551,41 @@ function OptionConfig(){
   }
 }
 function InvConfig(p=-1){
-//itemyard
-//itemが7を超えそうな場合はまた考える
 if(p==0){
   //入手時には描画する
   Itemyard.removeAllChildren();
-  var shape = new createjs.Shape();
-          shape.graphics.beginFill("black");
-          shape.graphics.drawRect(700, 55, 100, 480);
-          shape.alpha=0.5;
-    Itemyard.addChild(shape);
+  var Invbar = new createjs.Shape();
+  Invbar.graphics.beginFill("black");
+  Invbar.graphics.drawRect(690, 55, 110, 480);
+  Invbar.alpha=0.5;
+  Itemyard.addChild(Invbar);
+  var Hash=inventory.filter(value=>value.cleared!==0);
+  Invbar.addEventListener("mousedown", {hash:Hash.length,handleEvent:itemDown});
+  Invbar.addEventListener("pressmove", {hash:Hash.length,handleEvent:itemMove});
+  var Itemmap = new createjs.Container();//インベントリ
+  Itemyard.addChild(Itemmap);
+  var shapeMask3 = new createjs.Shape();
+          shapeMask3.graphics
+                .beginFill("gold")
+                .drawRect(700, 55, 100, 480);
+  Itemmap.mask = shapeMask3;
     itemAry=[];
-    for(var i=0;i<7;i++){
+    function itemDown(){
+      dragPointX = stage.mouseX - Itemmap.x;
+      dragPointY = stage.mouseY - Itemmap.y;
+    }
+    function itemMove(){
+      Itemmap.y = stage.mouseY-dragPointY;
+      if(Itemmap.y>0){Itemmap.y=0};
+      if(this.hash<=7 && Itemmap.y<0){Itemmap.y=0};
+      if(this.hash>7 && Itemmap.y<-(this.hash-7)*66){Itemmap.y=-(this.hash-7)*66};
+    }
+  for(var i=0;i<7;i++){
       var shape = new createjs.Shape();
-      shape.graphics.beginFill("black");
+      shape.graphics.beginFill("white");
       shape.graphics.drawRect(710, 60+(66*i), 64, 64);
       shape.alpha=0.7;
-      Itemyard.addChild(shape);
+      Itemmap.addChild(shape);
     }
   for(var i=0;i<inventory.length;i++){
     if(inventory[i].cleared !==0){
@@ -4384,7 +4594,7 @@ if(p==0){
     shape.graphics.beginStroke("#617d68");
     shape.graphics.setStrokeStyle(2);
     shape.graphics.drawRect(710, 60+(66*itemAry.length), 64, 64);
-    Itemyard.addChild(shape);
+    Itemmap.addChild(shape);
     shape.addEventListener("click", {card:i,handleEvent:Equipitem});
     shape.addEventListener("mouseover", {card:i,handleEvent:ItemDetail});
     shape.addEventListener("mouseout", {card:-1,handleEvent:ItemDetail});
@@ -4392,17 +4602,17 @@ if(p==0){
     T.x=710;
     T.y=60+(66*itemAry.length);
     T.scale=0.5;
-    Itemyard.addChild(T);
-    if(inventory[i].cleared ==-1){
+    Itemmap.addChild(T);
+    if(inventory[i].cleared <=-1){
     var shape = new createjs.Shape();
       shape.graphics.beginFill("black");
       shape.graphics.drawRect(710, 60+(66*itemAry.length), 64, 64);
       shape.alpha=0.7;
-      Itemyard.addChild(shape);
+      Itemmap.addChild(shape);
     }
     itemAry.push(i);
     }}
-  Itemyard.addChild(Invcursor);
+    Itemmap.addChild(Invcursor);
   if(equipeditem>=0){
     var E=itemAry.indexOf(equipeditem)
     Invcursor.x=710;
@@ -4435,7 +4645,7 @@ if(Itemswitch==0){
 }else{
   se11.play();
   createjs.Tween.get(Itemyard)
-  .to({x:100},150, createjs.Ease.backOut)
+  .to({x:110},150, createjs.Ease.backOut)
   Itemswitch=0;
 }};
 function ItemDetail(){
@@ -4459,8 +4669,9 @@ function Equipitem(){
     if(equipeditem!==this.card){
       if(inventory[this.card].cleared >0){
       se11.play();
-      equipeditem=this.card;
-      var E=itemAry.indexOf(equipeditem)
+      var ID=inventory[this.card].id;
+      equipeditem=ID;
+      var E=itemAry.indexOf(this.card);
       Invcursor.x=710;
       Invcursor.y=60+(66*E);
       Invcursor.alpha=1;
@@ -4509,7 +4720,7 @@ window.addEventListener("keyup", keyupHandler, false);
     }
     if(e.keyCode==13 && key13==0){
       key13=1;//enter
-      if(opLock==10 && cLock){
+      if(opLock==11 && cLock){
         MsgNext();
       }
       }
@@ -4531,7 +4742,7 @@ window.addEventListener("keyup", keyupHandler, false);
           Dialogue("EXIT？","狭間に別れを告げてタイトルに戻ります",4,-1);
         }
       }
-      if(opLock==10 && cLock){
+      if(opLock==11 && cLock){
         MsgAry.splice(0,MsgAry.length-1);
         MsgNext();
       }
@@ -4696,10 +4907,10 @@ window.addEventListener("keyup", keyupHandler, false);
       opLock=0;
     }}};
     function Message(word,detail="　",chr=0,chrop=0,textspeed=3,first=0){
-      //chrop->差分グラフィックあれば
+      //chrop->差分グラフィックあれば -1->alpha 0
       cLock=false;
       if(first==1){
-        opLock=10;
+        opLock=11;
         Loadmap.removeAllChildren();
         Loadmap.alpha=1;
         var shape = new createjs.Shape();
@@ -4710,6 +4921,12 @@ window.addEventListener("keyup", keyupHandler, false);
         var t=new createjs.Bitmap("Esc_enter.png");
         t.scale=0.7;
         Loadmap.addChild(t);
+        if(MessageText[1].length){
+          for(var i=0;i<MessageText[1].length;i++){
+            Loadmap.removeChild(MessageText[1][i]);
+          }
+          MessageText[1]=[];
+        };
         var DL= new createjs.Bitmap(Chara_src[0]);
         DL.scale=600/768;
         DL.alpha=0;
@@ -4800,7 +5017,9 @@ window.addEventListener("keyup", keyupHandler, false);
         DL.y=5;
         Loadmap.addChild(DL);
         MessageText[1][1]=DL;
+        if(chrop!==-2){
         MessageText[1][0].alpha=0.5;
+        };
         MessageText[1][1].alpha=0.5;
         var T=MessageText[1][chr]
         createjs.Tween.get(T)
@@ -4830,6 +5049,11 @@ window.addEventListener("keyup", keyupHandler, false);
           break;
       }
         }
+      if(chrop==-1){
+        var T=MessageText[1][chr];
+        createjs.Tween.get(T)
+        .to({x:T.x-5,y:T.y+5,alpha:0},150);
+      }
       var DL= new createjs.Bitmap("window_ds.png");
       DL.scale=600/768;
       DL.y=0;
@@ -5296,7 +5520,7 @@ function Gameretry(t=0){
           field.addChild(newCard);
           Closed[i]=newCard;
         }
-        if(melonList[1]==1 && inventory[3].cleared==0){
+        if(melonList[1]==1 && InvID(3)==0){
           //console.log('melon!');
           var newCard = new createjs.Bitmap('Card_images/melon1.png');
           melonList[0]=newCard;
@@ -5560,7 +5784,7 @@ function Gameretry(t=0){
           CardTurn();
           duelLog.push({card:Ary,from:-2,to:TR})
           if(Extras[0]==5){
-            if(inventory[5].cleared==0){
+            if(InvID(5)==0){
               //mrp 65 hr 52 lab 39 lu 26 raven 13
                 var Re=0;
                 for(var i=0;i<5;i++){
@@ -5573,7 +5797,7 @@ function Gameretry(t=0){
                   return false;
                 }
                 function Coin(){
-                var A=Exlists[0][13];
+                var A=Exlists[0][12];
                 se12.play();
                 createjs.Tween.get(A)
                 .to({x:A.x-10,y:A.y-10,scale:1.2,alpha:0.8},150)
@@ -5581,7 +5805,7 @@ function Gameretry(t=0){
                 .call(Coin2);
                 }
                 function Coin2(){
-                  var A=Exlists[0][26];
+                  var A=Exlists[0][25];
                   se12.play();
                   createjs.Tween.get(A)
                   .to({x:A.x-10,y:A.y-10,scale:1.2,alpha:0.8},150)
@@ -5589,7 +5813,7 @@ function Gameretry(t=0){
                   .call(Coin3);
                   }
                 function Coin3(){
-                  var A=Exlists[0][39];
+                  var A=Exlists[0][38];
                   se12.play();
                   createjs.Tween.get(A)
                   .to({x:A.x-10,y:A.y-10,scale:1.2,alpha:0.8},150)
@@ -5597,7 +5821,7 @@ function Gameretry(t=0){
                   .call(Coin4);
                   }
                 function Coin4(){
-                  var A=Exlists[0][52];
+                  var A=Exlists[0][51];
                   se12.play();
                   createjs.Tween.get(A)
                   .to({x:A.x-10,y:A.y-10,scale:1.2,alpha:0.8},150)
@@ -5605,7 +5829,7 @@ function Gameretry(t=0){
                   .call(Coin5);
                   }
                 function Coin5(){
-                  var A=Exlists[0][65];
+                  var A=Exlists[0][64];
                   se12.play();
                   createjs.Tween.get(A)
                   .to({x:A.x-10,y:A.y-10,scale:1.2,alpha:0.8},150)
@@ -5614,8 +5838,8 @@ function Gameretry(t=0){
                   }
                 function Coin6(){
                   var A=new createjs.Bitmap("Card_images/soL_stone.png")
-                  A.x=220;
-                  A.y=90;
+                  A.x=320;
+                  A.y=200;
                   A.alpha=0;
                   field.addChild(A);
                   createjs.Tween.get(A)
@@ -5789,6 +6013,18 @@ function compareFunc(a,b){return a-b;}
           }
         }
       }
+    function InvID(p,to=0){
+      var ID=inventory.findIndex(value=>value.id==p);
+      if(ID==-1){
+        console.log('InvID error',p);
+        return 0;
+      }else{
+        if(to!==0){
+          inventory[ID].cleared=to;
+        }
+        return inventory[ID].cleared;
+      }
+    }
     function IK(name){
       //アイテム
       var A=inventory.findIndex(value=>value.name==name);
@@ -5798,6 +6034,7 @@ function compareFunc(a,b){return a-b;}
           se14.play();
           PopAnm(name+"を獲得しました！",800,120+name.length*20,35,30,95);
           InvConfig(0);
+          saveLocal();
         }
       }
     }
@@ -5996,7 +6233,7 @@ function compareFunc(a,b){return a-b;}
                   highscore[playMode[0]+2].time.splice(2,1);
                   highscore[playMode[0]+2].time.splice(A,0,TimeTemp);
                   }
-                var B=highscore[playMode[0]+2].scorefindIndex(value=>value<score);
+                var B=highscore[playMode[0]+2].score.findIndex(value=>value<score);
                 if(B !==-1){
                 highscore[playMode[0]+2].score.splice(2,1);
                 highscore[playMode[0]+2].score.splice(B,0,score);
@@ -6222,7 +6459,13 @@ function compareFunc(a,b){return a-b;}
     }};
     function PathText(){
       //狭間との会話
-    var R=Math.floor(Math.random()*12);
+      if(opLock!==0 && opLock!==11){return false};
+      if(equipeditem==8){
+    var R=9+Math.floor(Math.random()*4);
+      }else{
+    var R=Math.floor(Math.random()*9);
+      }
+    //Message(word,detail="　",chr=0,chrop=0,textspeed=3,first=0)
     switch(R){
       case 0:
         MsgAry.push(["　","――時折、空間に隙間が現れて、外の世界が見える。",-1,0,3,1])
@@ -6359,12 +6602,13 @@ function compareFunc(a,b){return a-b;}
         MsgAry.push(["リティア","ふーん、こっちがリーダーなんだ。&てっきり、エリシスがリーダーだと思ってたよ。"]);
         MsgAry.push(["狭間","エリシスは赤い騎士団の団長も兼任しているから、&エル捜索隊のリーダーに見えるのも納得がいくよ。",1])
         MsgAry.push(["リティア","せっかくなら、エル捜索隊よりも&もっとかっこいい名前にすればよかったのに。&グランドチェイス！とか。"]);
-        MsgAry.push(["狭間","彼らもここまで有名になるとは&思ってなかっただろうけど。",1])
-        MsgAry.push(["リティア","このエル・コレクション・ブックのメンバー紹介の部分、&誰が作ってるんだろう。"]);
+        MsgAry.push(["狭間","彼らもここまで有名になるとは思ってなかっただろうけど。",1])
+        MsgAry.push(["リティア","それにしても、&このエル・コレクション・ブックのメンバー紹介の部分、&誰が作ってるんだろう。"]);
         MsgAry.push(["リティア","アップの写真とか、一般人にはなかなか撮れないよね。"]);
-        MsgAry.push(["狭間","例のブラック会社コボに雇われた&カメラマンがいるらしいよ。",1])
+        MsgAry.push(["狭間","某ブラック会社に雇われたカメラマンが、&一人で取材に行って、写真も撮って、&記事を書いたらしいよ。",1])
+        MsgAry.push(["リティア","かわいそう。"]);
         MsgAry.push(["（少年の声）","オレの話、全然してねぇじゃん！",-1])
-        MsgAry.push(["リティア","びっくりした！　外の世界の会話だよね？"]);
+        MsgAry.push(["リティア","びっくりした！　&……外の世界の会話だよね？"]);
         MsgAry.push(["end"]);
         MsgNext(-1);
         break;
@@ -6375,13 +6619,80 @@ function compareFunc(a,b){return a-b;}
         MsgAry.push(["リティア","12才にして大魔法使いの称号を手にした、&レンダール家きっての天才魔法少女！&あらゆる元素魔法を同時に操ることができるという。"]);
         MsgAry.push(["リティア","……ふーん。&きっと苦労もほとんど知らずに人生育ったんだろうな。"]);
         MsgAry.push(["狭間","小さい頃は、もっとはっちゃけてたらしいよ。",1])
-        MsgAry.push(["狭間","魔力欲しさに怪しい薬を試して寝込む羽目になったり。&森の中でファイアボールを空に放って、山火事を起こしかけたり。",1])
+        MsgAry.push(["狭間","魔力欲しさに怪しい薬を試して寝込む羽目になったり。&森の中でファイアボールを空に放って、&山火事を起こしかけたり。",1])
         MsgAry.push(["狭間","ぼくも同じキャンプにいた頃に散々からかわれたよ。",1])
         MsgAry.push(["リティア","あはは、マティがよく泣きついてきたっけ。"]);
         MsgAry.push(["リティア","……ん？　今、何か気になったような……。&ま、いっか。"]);
         MsgAry.push(["end"]);
         MsgNext(-1);
         break;
+      case 12:
+        MsgAry.push(["　","レナ・エリンデルは、心優しいエルフの弓使い。年齢不詳。&隊の中ではお姉さん的な存在で、たまに怒ると怖い。&弓を射る時には、弦と矢はマナで生成している。",-1,0,3,1]);
+        MsgAry.push(["リティア","でっか……コホン。&初期メンバーは、&エルス、アイシャ、レナの3人だったんだよね。"]);
+        MsgAry.push(["狭間","当初は隊の中で一番大人だったから、&よくエルスとアイシャの面倒をみてあげていたそうだよ。",1])
+        MsgAry.push(["リティア","頼れる大人がそばにいるのは、ありがたいことだよね。"]);
+        MsgAry.push(["リティア","すごく若く見えるけど、何歳くらいなのかな。"]);
+        MsgAry.push(["狭間","うーん。エルフという種族が何百年も生きる種族だからね。&レナに限らずエル捜索隊のメンバーは&年齢不詳とされる人が少なくないよ。",1])
+        MsgAry.push(["end"]);
+        MsgNext(-1);
+        break;
     }
+    }
+    function PathTalk(){
+      //event
+      //125,300,525,800,1125,1500
+      if(opLock!==0 && opLock!==11){return false};
+      if(InvID(0)==1 && totalcardmove>=125){
+        MsgAry.push(["狭間","カード裁きが手慣れてきたね。",1,0,3,1])
+        MsgAry.push(["リティア","ふっ/ふっ/ふっ。&リティア様は物覚えも早いんだから。"])
+        MsgAry.push(["狭間","……。",1]);
+        MsgAry.push(["狭間","そこにいるのは……もしかして……。",1]);
+        MsgAry.push(["リティア","……？"])
+        MsgAry.push(["狭間","いや、なんでもないんだ。",1]);
+        MsgAry.push(["end"]);
+        MsgNext(-1);
+      InvID(0,2);
+      return true;
+      }
+      if(InvID(0)==2 && totalcardmove>=300){
+        MsgAry.push(["狭間","……。",1,0,3,1])
+        MsgAry.push(["リティア","ふー。ちょっと休憩しよ……。",0,-1])
+        MsgAry.push(["狭間","……。",1,-2]);
+        MsgAry.push(["狭間","すみません。&少し、いいかな。",1,-2]);
+        MsgAry.push(["狭間","そう、そこでリティアと一緒にソリティアをしてる&キミに向かって話しかけている。",1,-2]);
+        MsgAry.push(["狭間","お願いがあるんだ。&どうか、協力してほしい。",1,-2]);
+        MsgAry.push(["狭間","リティアを外に、エリオスに出してあげたい。",1,-2]);
+        MsgAry.push(["リティア","ううん……。"]);
+        MsgAry.push(["狭間","あっ、続きはまた詳しく話すよ。",1]);
+        MsgAry.push(["リティア","あれ、誰かとお話してた？"]);
+        MsgAry.push(["リティア","……幻聴かな。&ここにはあたししかいないはずだし。"]);
+        MsgAry.push(["狭間","休憩は終わった？",1]);
+        MsgAry.push(["リティア","うん！&さーて、もういっちょ、解決しに行こうかな！"]);
+        MsgAry.push(["end"]);
+        MsgNext(-1);
+      InvID(0,3);
+      return true;
+      }
+      if(InvID(0)==3 && totalcardmove>=525){
+        MsgAry.push(["狭間","……。",1,0,3,1])
+        MsgAry.push(["リティア","ふぁぁ……。ちょっと、ひと眠りするね。",0,-1])
+        MsgAry.push(["狭間","……。",1,-2]);
+        MsgAry.push(["狭間","さて、ぼくのことをまだ話していなかったよね。",1,-2]);
+        MsgAry.push(["狭間","リティアはぼくのことを&自分が妄想で生みだした架空の話し相手みたいに&思っているみたいだけど、そうじゃない。",1,-2]);
+        MsgAry.push(["狭間","ぼくもリティアと一緒に狭間に吸い込まれた人間だ。&ただ、肉体は外の世界にあって、&魂だけがここにいるみたいなんだ。",1,-2]);
+        MsgAry.push(["狭間","肉体を通じて外の世界と繋がっている存在だからか、&少しだけ、外の世界に干渉できるぽくて&そこにキミがいるって分かったよ。",1,-2]);
+        MsgAry.push(["狭間","というわけで、本題にうつるよ。",1,-2]);
+        MsgAry.push(["狭間","実はずっと救援信号を出していて、&既にエリオスの誰かが気づいてくれたんだ。",1,-2]);
+        MsgAry.push(["狭間","というのも、エリオスの誰かから返事が届いたんだよ。",1,-2]);
+        MsgAry.push(["狭間","ただ……その返事が読めなくて。&色々調べた結果、どうやら&他の次元の力を借りなければ解読できないようなんだ。",1,-2]);
+        MsgAry.push(["狭間","だから、キミにお願いだ。&エリオスから届いた手紙の内容を解読してくれないかな？",1,-2]);
+        MsgAry.push(["狭間","問題の手紙は、そこのレターボックスに入れておくよ。",1,-2]);
+        MsgAry.push(["end"]);
+        MsgNext(-1);
+      InvID(0,4);
+      Letterbox.push(["不明","no title","ありません","qr_src2"])
+      return true;
+      }
+      saveLocal();
     }
 };
