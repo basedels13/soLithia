@@ -1,6 +1,5 @@
-//next　ポンチ作成(キッチン作成途中)、ポンチのヒント、脱出
-//ヘニルの時空へ
-//やるきあれば→EXに挙げたカードを降ろす, 破片強打
+// 製錬、錬成 チュートリアル
+// 余裕あったら→モンスターと簡単なバトル
 window.onload = function(){
 main();
 };
@@ -61,9 +60,6 @@ graphics
 var Cstar = new createjs.Shape(graphics);
   Cstar.x=100;
   Cstar.y=225;
-var tweeNstar;
-tweeNstar=createjs.Tween.get(Cstar, {loop: true})
-.to({rotation:360},1200);
 var deckmap = new createjs.Container();
 var field = new createjs.Container();//field
 var clearBG = new createjs.Container();//clear画面
@@ -115,55 +111,81 @@ var key27=0;//esc
 var key119=0;//F8
 var muteshape;
 //たいとるがめん待機
+TitleGrh();
+function TitleGrh(){
 var shape = new createjs.Shape();
 shape.graphics.beginFill("#3b7353");
 shape.graphics.drawRect(0, 0, 800, 600); // 長方形を描画
 Titleyard.addChild(shape); // 表示リストに追加
-var BG = new createjs.Bitmap("soL_back.png");
-BG.alpha=0.3;
+var BG = new createjs.Bitmap("soL_back2.png");
+BG.alpha=0.8;
 Titleyard.addChild(BG);
+var obj = new createjs.Shape();
+obj.graphics.beginFill("rgba(20,20,20,0.7)");
+obj.graphics.moveTo(0, 0);
+obj.graphics.lineTo(0, 60);
+obj.graphics.lineTo(800, 0);
+Titleyard.addChild(obj);
+var obj = new createjs.Shape();
+obj.graphics.beginFill("rgba(20,20,20,0.7)");
+obj.graphics.moveTo(0, 600);
+obj.graphics.lineTo(800, 540);
+obj.graphics.lineTo(800, 600);
+Titleyard.addChild(obj);
+var t = new createjs.Text("追い求めた狭間の向こう側は、空虚な空間だった。", "16px serif", "white");
+t.textAlign = "end";
+t.x=800;
+t.y=555;
+Titleyard.addChild(t);
+var t = new createjs.Text("狭間に閉じ込められた彼女は、亀裂がくれたトランプで遊ぶことにした。", "16px serif", "white");
+t.textAlign = "end";
+t.x=800;
+t.y=575;
+Titleyard.addChild(t);
+}
 //たいとるがめん
 function Title(){
 loadLocal();
+saveUP();
 var circle1 = new createjs.Shape();
 circle1.graphics.beginFill("#2c4a3f")
 .drawCircle(0, 0, 80);
-circle1.x=230;
+circle1.x=480;
 circle1.y=165;
 Titleyard.addChild(circle1);
 var circle2 = new createjs.Shape()
 circle2.graphics.beginFill("#2c4a3f")
 .drawCircle(0, 0, 80)
-circle2.x=520;
+circle2.x=680;
 circle2.y=165;
 Titleyard.addChild(circle2);
 var circle3 = new createjs.Shape();
 circle3.graphics.beginFill("#4cb58b")
 .drawCircle(0, 0, 80)
-circle3.x=230;
+circle3.x=480;
 circle3.y=165;
 circle3.alpha=1;
 Titleyard.addChild(circle3);
 var circle4 = new createjs.Shape()
 circle4.graphics.beginFill("#4cb58b")
 .drawCircle(0, 0, 80)
-circle4.x=520;
+circle4.x=680;
 circle4.y=165;
 circle4.alpha=1;
 Titleyard.addChild(circle4);
 if(mute=="OFF"){circle3.alpha=0;}else{circle4.alpha=0;};
 var sound1 = new createjs.Bitmap("soL_sound1.png");
-sound1.x=180;
+sound1.x=430;
 sound1.y=120;
 sound1.scale=1;
 Titleyard.addChild(sound1);
 var sound2 = new createjs.Bitmap("soL_sound2.png");
-sound2.x=470;
+sound2.x=630;
 sound2.y=120;
 sound2.scale=1;
 Titleyard.addChild(sound2);
 var Car1 = new createjs.Bitmap("Card_images/BackColor_Black.png");
-Car1.x=250;
+Car1.x=450;
 Car1.y=280;
 Car1.scale=2;
 Titleyard.addChild(Car1);
@@ -184,7 +206,7 @@ function Soundcircle(){
   switch(this.card){
     case 3:
       if(mute=="OFF"){
-    circle3.alpha=0.3;
+    circle3.alpha=0.6;
       }
       break;
     case 4:
@@ -194,7 +216,7 @@ function Soundcircle(){
     break;
     case 5:
       if(mute=="ON"){
-    circle4.alpha=0.3;
+    circle4.alpha=0.6;
       }
       break;
     case 6:
@@ -241,7 +263,7 @@ function Soundcircle(){
           }
           var R=Math.floor(Math.random()*(Card_src_N.length-2))+1;
           var Car2 = new createjs.Bitmap(Card_src_N[R]);
-          Car2.x=320;
+          Car2.x=520;
           Car2.y=250;
           Car2.scale=2;
           Car2.alpha=0;
@@ -250,12 +272,12 @@ function Soundcircle(){
           Car2.addEventListener("click", {card:0,handleEvent:GameReady});
           createjs.Tween.get(Car1)
           .to({y:290},50)
-          .to({x:320,y:250,scaleX:0.05,scaleY:2.4},220)
+          .to({x:520,y:250,scaleX:0.05,scaleY:2.4},220)
           .to({alpha:0},10);
           createjs.Tween.get(Car2)
           .wait(50)
           .to({scaleX:0.05,scaleY:2.2},90)
-          .to({x:250,y:280,scaleX:2,scaleY:2,alpha:1},220)
+          .to({x:450,y:280,scaleX:2,scaleY:2,alpha:1},220)
           .wait(2000)
           .call(titleCardTurn1);
     }else if(card==1){
@@ -263,12 +285,12 @@ function Soundcircle(){
       createjs.Tween.get(Car1)
       .wait(50)
       .to({scaleX:0.05,scaleY:2.2},90)
-      .to({x:250,y:280,scaleX:2,scaleY:2,alpha:1},220)
+      .to({x:450,y:280,scaleX:2,scaleY:2,alpha:1},220)
       .wait(2000)
       .call(titleCardTurn0);
       createjs.Tween.get(Car2)
       .to({y:290},50)
-      .to({x:320,y:250,scaleX:0.05,scaleY:2.4},220)
+      .to({x:520,y:250,scaleX:0.05,scaleY:2.4},220)
       .to({alpha:0},10)
       .call(step);
       function step(){
@@ -347,6 +369,7 @@ var Card_src= new Array('Card_images/BackColor_Black.png','Card_images/Spade01.p
 var Card_src_N= new Array('Card_images/BackColor_Black.png','Card_images/Spade01.png','Card_images/Spade02.png','Card_images/Spade03.png','Card_images/Spade04.png','Card_images/Spade05.png','Card_images/Spade06.png','Card_images/Spade07.png','Card_images/Spade08.png','Card_images/Spade09.png','Card_images/Spade10.png','Card_images/Spade11.png','Card_images/Spade12.png','Card_images/Spade13.png','Card_images/Heart01.png','Card_images/Heart02.png','Card_images/Heart03.png','Card_images/Heart04.png','Card_images/Heart05.png','Card_images/Heart06.png','Card_images/Heart07.png','Card_images/Heart08.png','Card_images/Heart09.png','Card_images/Heart10.png','Card_images/Heart11.png','Card_images/Heart12.png','Card_images/Heart13.png','Card_images/Club01.png','Card_images/Club02.png','Card_images/Club03.png','Card_images/Club04.png','Card_images/Club05.png','Card_images/Club06.png','Card_images/Club07.png','Card_images/Club08.png','Card_images/Club09.png','Card_images/Club10.png','Card_images/Club11.png','Card_images/Club12.png','Card_images/Club13.png','Card_images/Diamond01.png','Card_images/Diamond02.png','Card_images/Diamond03.png','Card_images/Diamond04.png','Card_images/Diamond05.png','Card_images/Diamond06.png','Card_images/Diamond07.png','Card_images/Diamond08.png','Card_images/Diamond09.png','Card_images/Diamond10.png','Card_images/Diamond11.png','Card_images/Diamond12.png','Card_images/Diamond13.png')
 var Card_src_M= new Array('Card_images/BackColor_Closed.png','Card_images/Spade01.png','Card_images/Spade02.png','Card_images/Spade03.png','Card_images/Spade04.png','Card_images/Spade05.png','Card_images/Spade06.png','Card_images/Spade07.png','Card_images/Spade08.png','Card_images/Spade09.png','Card_images/Spade_M10.png','Card_images/Spade_M11.png','Card_images/Spade_M12.png','Card_images/Spade_M13.png','Card_images/Heart01.png','Card_images/Heart02.png','Card_images/Heart03.png','Card_images/Heart04.png','Card_images/Heart05.png','Card_images/Heart06.png','Card_images/Heart07.png','Card_images/Heart08.png','Card_images/Heart09.png','Card_images/Heart_M10.png','Card_images/Heart_M11.png','Card_images/Heart_M12.png','Card_images/Heart_M13.png','Card_images/Club01.png','Card_images/Club02.png','Card_images/Club03.png','Card_images/Club04.png','Card_images/Club05.png','Card_images/Club06.png','Card_images/Club07.png','Card_images/Club08.png','Card_images/Club09.png','Card_images/Club_M10.png','Card_images/Club_M11.png','Card_images/Club_M12.png','Card_images/Club_M13.png','Card_images/Diamond01.png','Card_images/Diamond02.png','Card_images/Diamond03.png','Card_images/Diamond04.png','Card_images/Diamond05.png','Card_images/Diamond06.png','Card_images/Diamond07.png','Card_images/Diamond08.png','Card_images/Diamond09.png','Card_images/Diamond_M10.png','Card_images/Diamond_M11.png','Card_images/Diamond_M12.png','Card_images/Diamond_M13.png','Card_images/melon3.png')
 var Card_src_S= new Array('Card_images/BackColor_Black.png','Card_images/Diamond01.png','Card_images/Diamond02.png','Card_images/Diamond03.png','Card_images/Diamond04.png','Card_images/Diamond05.png','Card_images/Diamond06.png','Card_images/Diamond07.png','Card_images/Diamond08.png','Card_images/Diamond09.png','Card_images/Diamond10.png','Card_images/Diamond11.png','Card_images/Diamond12.png','Card_images/Diamond13.png','Card_images/Diamond01.png','Card_images/Diamond02.png','Card_images/Diamond03.png','Card_images/Diamond04.png','Card_images/Diamond05.png','Card_images/Diamond06.png','Card_images/Diamond07.png','Card_images/Diamond08.png','Card_images/Diamond09.png','Card_images/Diamond10.png','Card_images/Spider1101.png','Card_images/Spider1201.png','Card_images/Spider1301.png','Card_images/Diamond01.png','Card_images/Diamond02.png','Card_images/Diamond03.png','Card_images/Diamond04.png','Card_images/Diamond05.png','Card_images/Diamond06.png','Card_images/Diamond07.png','Card_images/Diamond08.png','Card_images/Diamond09.png','Card_images/Diamond10.png','Card_images/Spider1102.png','Card_images/Spider1202.png','Card_images/Spider1302.png','Card_images/Diamond01.png','Card_images/Diamond02.png','Card_images/Diamond03.png','Card_images/Diamond04.png','Card_images/Diamond05.png','Card_images/Diamond06.png','Card_images/Diamond07.png','Card_images/Diamond08.png','Card_images/Diamond09.png','Card_images/Diamond10.png','Card_images/Spider1103.png','Card_images/Spider1203.png','Card_images/Spider1303.png','Card_images/Diamond01.png','Card_images/Diamond02.png','Card_images/Diamond03.png','Card_images/Diamond04.png','Card_images/Diamond05.png','Card_images/Diamond06.png','Card_images/Diamond07.png','Card_images/Diamond08.png','Card_images/Diamond09.png','Card_images/Diamond10.png','Card_images/Spider1104.png','Card_images/Spider1204.png','Card_images/Spider1304.png',)
+var Card_src_H= new Array('Card_images/BackColor_Black.png','Card_images/Spade01.png','Card_images/Spade02.png','Card_images/Spade03.png','Card_images/Spade04.png','Card_images/Spade05.png','Card_images/Spade06.png','Card_images/Spade07.png','Card_images/Spade08.png','Card_images/Spade09.png','Card_images/Spade10.png','Card_images/Heart01.png','Card_images/Heart02.png','Card_images/Heart03.png','Card_images/Heart04.png','Card_images/Heart05.png','Card_images/Heart06.png','Card_images/Heart07.png','Card_images/Heart08.png','Card_images/Heart09.png','Card_images/Heart10.png','Card_images/Club01.png','Card_images/Club02.png','Card_images/Club03.png','Card_images/Club04.png','Card_images/Club05.png','Card_images/Club06.png','Card_images/Club07.png','Card_images/Club08.png','Card_images/Club09.png','Card_images/Club10.png','Card_images/Diamond01.png','Card_images/Diamond02.png','Card_images/Diamond03.png','Card_images/Diamond04.png','Card_images/Diamond05.png','Card_images/Diamond06.png','Card_images/Diamond07.png','Card_images/Diamond08.png','Card_images/Diamond09.png','Card_images/Diamond10.png')
 var Path_src=new Array("Card_images/soL_room_path9.png","Card_images/soL_room_path1.png","Card_images/soL_room_path2.png","Card_images/soL_room_path3.png","Card_images/soL_room_path4.png","Card_images/soL_room_path5.png","Card_images/soL_room_path6.png","Card_images/soL_room_path7.png","Card_images/soL_room_path8.png")
 var Item_src=new Array("Card_images/BackColor_Black.png","Card_images/soL_elbook.png","Card_images/soL_wand.png","Card_images/soL_desert.png","Card_images/soL_coin.png","Card_images/soL_tomato.png","Card_images/soL_melon.png","Card_images/soL_stone.png","Card_images/soL_pan.png");
 var Chara_src=new Array("soL_chara1.png","soL_chara2.png");
@@ -432,19 +455,195 @@ for(var i=0; i<achieve.length;i++){
 //アイテム cleared -1->使用後, 1~所持数
 var inventory=[
   {id:0,name:"トランプ",sub:"孤独なリティアのために狭間がつくってくれた、&絵札に色々なキャラクターが描かれたトランプ。&（ソリティアをプレイすることができる）"},
-  {id:8,name:"エル・コレクション・ブック",sub:"エル捜索隊について書かれた本。&（3つのソリティアをクリアした記念品。&　装備すると、狭間との会話の内容が変化する）"},
+  {id:8,name:"エル・コレクション・ブック",sub:"エル捜索隊について、&各メンバーの顔写真とインタビューつきでまとめられた本。&（装備すると、狭間との会話の内容が変化する）"},
   {id:7,name:"ピッケル-プロトタイプ",sub:"狭間からの脱出に成功した証。&（装備すると、クロンダイク・マグマンタを&　通常と少し異なるルールでプレイすることができる）"},
   {id:6,name:"スイートポンチ",sub:"身体の抵抗力を上げる効果があるデザート。"},
   {id:1,name:"勝負師のコイン",sub:"金色に光るコイン。"},
-  {id:2,name:"キュアトマト",sub:"ジョイが育てていたトマト。"},
+  {id:2,name:"ジョイのトマト",sub:"ジョイが育てていたトマト。&どんな病も治してくれる。"},
   {id:3,name:"極上メロン",sub:"洞窟で採れるメロン。"},
-  {id:5,name:"アイスレート",sub:"波のような模様が特徴的な鉱石。"},
+  {id:5,name:"氷のクリソナ",sub:"波のような模様が特徴的なクリソナ。&一部の地域ではアイスレートと呼ばれ、燃料になる。"},
   {id:4,name:"冬の森の鍋",sub:"ジョイが使っていた調理用のお鍋。"},
 ];
 for(var i=0; i<inventory.length;i++){
   inventory[i].cleared=0;
 }
 inventory[0].cleared=1;
+//素材
+var itemA=[
+  {name:"ホワイトベリル",price:-1,class:"クリソナ",detail:"不純物がほとんど混じっていないため&完全に透明なクリソナ。"},
+  {name:"グリーンベリル",price:-1,class:"クリソナ",detail:"クリソナを精製して作った緑色に輝く宝石。&別名エメラルド。"},
+  {name:"ブルーベリル",price:-1,class:"クリソナ",detail:"クリソナを精製して作った青色に輝く宝石。別名アクアマリン。"},
+  {name:"イエローベリル",price:-1,class:"クリソナ",detail:"クリソナを精製して作った黄色に輝く宝石。"},
+  {name:"レッドベリル",price:-1,class:"クリソナ",detail:"クリソナを精製して作った赤色に輝く宝石。"},
+  {name:"ルーブ草",price:16,class:"植物資源",detail:"水分豊富な植物。どこでもよく育つ。&エルの樹の麓などでたくさん採れる。"},
+  {name:"枯れルーブ草",price:20,class:"植物資源",detail:"水気を失い枯れてしまった茶色のルーブ草。&ルーブ草を分解すると手に入る。"},
+  {name:"ルーブ繊維",price:60,class:"植物資源",detail:"ルーブ草から繊維を取り出したもの。&寄り合わせて糸や布ができる。"},
+  {name:"ルーブ糸",price:80,class:"製造",detail:"ルーブ繊維から作った丈夫な糸。"},
+  {name:"ルーブ布",price:150,class:"製造",detail:"ルーブ繊維から作った布。日用品に幅広く使われている。"},
+  {name:"清浄水",price:50,class:"その他資源",detail:"様々な用途に使えるきれいな水。&ルーブ草を分解すると手に入る。レシアム外郭で採れる。"},
+  {name:"エルの清水",price:120,class:"その他資源",detail:"エル濃度の高い水。"},
+  {name:"火炎草",price:130,class:"植物資源",detail:"燃えるような真紅色をした植物。&実はルーブ草の変種らしい。&レイキキ湖で採れる。"},
+  {name:"魔力草",price:140,class:"植物資源",detail:"紫色の草で、解毒作用を持つ。実はルーブ草の仲間らしい。&螺旋回廊で採れる。"},
+  {name:"トレーモン木",price:70,class:"植物資源",detail:"短期間で加工に適した大きさに成長する木。&加工すれば良質な木材になる。エルの樹の麓などで採れる。"},
+  {name:"木材",price:35,class:"植物資源",detail:"手ごろな大きさに加工した丈夫な木材。&トレーモン木を分解すると手に入る。"},
+  {name:"ワルド樹脂",price:110,class:"植物資源",detail:"ワルドの木からとれる、ガムのような粘り気が特徴的な樹脂。&レイキキ渓谷でたまに採れる。"},
+  {name:"ピンクコーラル",price:90,class:"植物資源",detail:"綺麗な色をした珊瑚。炭酸水に使われることがある。&トロッシュの巣で採れる。"},
+  {name:"ラリネスの花",price:95,class:"植物資源",detail:"特定の場所にしか咲かない、青く光る花。&影の鉱脈で採れる。"},
+  {name:"アルテラシアの花",price:50,class:"植物資源",detail:"ナソードに寄生し、その機能を停止させる&ために開発された花。&アルテラ平原で採れる。"},
+  {name:"銀秤草",price:50,class:"植物資源",detail:"インクなどに使われるが毒のある花。&効果で取引されるという。&ザヤ山でたまに採れる。"},
+  {name:"フォルギネイの果実",price:260,class:"植物資源",detail:"人を襲う危険な植物からとれる実。強力な精神刺激作用を持つ。&庭での栽培は不可能。ディシオン採掘場の敵から手に入る。"},
+  {name:"エルドラシルの花",price:150,class:"農場",detail:"ハーブとして親しまれる、香りの強い花。&秋になると青紫色の実をつける。&エルの樹の麓でたまに採れる。"},
+  {name:"エルダーベリー",price:210,class:"農場",detail:"エルドラシルが青紫色の実をつけたもの。味方一人のMPが30回復する。&エルの樹の麓でたまに採れる。"},
+  {name:"ウィリアムりんご",price:110,class:"農場",detail:"ポールが育てているりんご。様々な霊薬を錬成する&材料になる。食べるとHPが20回復する。&エルの樹の麓の敵から手に入る。"},
+  {name:"もりもりニンジン",price:85,class:"農場",detail:"苦みが少なく生でも美味しく食べられるニンジン。&HPが35回復する。アルテラ平原で採れる。"},
+  {name:"マンドラタマネギ",price:40,class:"農場",detail:"火を噴きそうになるほど辛いタマネギ。&軽く茹でると甘く食べられる。&春と秋にレイキキ湖で採れる。"},
+  {name:"スノークリスタル",price:65,class:"農場",detail:"断面が雪の結晶のように見える木の実。&たまに実が星形になる品種もあるらしい。&春と冬に螺旋回廊で手に入る。"},
+  {name:"クロライトシード",price:45,class:"農場",detail:"しょっぱい味のする変わった種。&金属の製錬に使われるらしい。&スノークリスタルを分解すると手に入る。"},
+  {name:"キュアトマト",price:60,class:"農場",detail:"森に自生する真っ赤なミニトマト。&戦闘中に使うと中毒を回復する。&エルの樹の麓で採れる。"},
+  {name:"砂漠サツマイモ",price:70,class:"農場",detail:"砂漠でも育つ太くて硬いサツマイモ。&戦闘中に使うと敵に小ダメージを与える。ザヤ山で採れる。"},
+  {name:"エルライム",price:80,class:"農場",detail:"海の近くで育つライムの実。&夏と秋にレシアム外郭で採れる。"},
+  {name:"スターフルーツ",price:90,class:"農場",detail:"輪切りにすると断面が星形に見える果実。&黄色くなったら食べ頃。&春と秋にディシオン採掘場で採れる。"},
+  {name:"エルダー小麦",price:40,class:"農場",detail:"寒さに強い小麦。&種は挽いて粉にして使われる。&エルの樹の麓などで採れる。"},
+  {name:"ファルマン竹",price:70,class:"農場",detail:"武具にも使われる丈夫な竹。庭に植えるとファルマン筍が採れる。&冬にファルマン峠で採れる。"},
+  {name:"霜雪イチゴ",price:90,class:"農場",detail:"寒い地域で育つ野イチゴ。&冬・春にリゴモル海廊で採れる。"},
+  {name:"天桃ライチ",price:145,class:"農場",detail:"甘酸っぱさがたまらない、桃色のフルーツ。&秋に螺旋回廊で採れる。"},
+  {name:"クォークサボテン",price:160,class:"植物資源",detail:"高山で育つサボテン。水分を多く含む。&ザヤ山で採れる。"},
+  {name:"オーガニックコア",price:250,class:"その他資源",detail:"奇妙な物質。ディシオン採掘場でたまに採れる。"},
+  {name:"ハーピィの羽根",price:120,class:"動物資源",detail:"ガルファイに生息する魔物から舞い落ちた羽根。ザヤ山の敵から手に入る。"},
+  {name:"グリッタ―の歯",price:25,class:"動物資源",detail:"螺旋回廊の敵から手に入る鋭い歯。&回復薬の材料になる。&螺旋回廊で採れる。"},
+  {name:"うに",price:61,class:"その他資源",detail:"なぜか山で採れるうに。&戦闘で相手に小ダメージを与える。エルの樹の麓で採れる。"},
+  {name:"リザードバス",price:130,class:"動物資源",detail:"頭部の4本の角が特徴的なバス。&トロッシュの巣で採れる。"},
+  {name:"ロブスターの抜け殻",price:25,class:"動物資源",detail:"金色の輝きを放つという幻のロブスターの抜け殻。&レシアム外郭でたまに採れる。"},
+  {name:"黄金ロブスター",price:331,class:"動物資源",detail:"金色の輝きを放つ、生きた幻のロブスター。&水の聖堂でたまに採れる。"},
+  {name:"獣肉",price:70,class:"動物資源",detail:"動物からとれた獣肉。このままでは食べられない。&エルの樹の麓などの敵から手に入る。"},
+  {name:"生肉",price:100,class:"動物資源",detail:"獣肉を加工したもの。野生の味。&HPが30回復する。&獣肉を分解すると手に入る。"},
+  {name:"獣の皮",price:30,class:"動物資源",detail:"動物の皮。なめして革にする。&獣肉を分解すると手に入る。"},
+  {name:"質のよい皮",price:110,class:"動物資源",detail:"本や防具の加工に適した上質な皮。"},
+  {name:"ベタベタしたエキス",price:103,class:"動物資源",detail:"動物からとれる、鼻を刺すような臭いがするエキス。&好んで集める人もいる。&レイキキ渓谷の敵から手に入る。"},
+  {name:"穀物粉",price:100,class:"その他資源",detail:"エルダー小麦から作られる穀物粉。様々な料理に使われる。&エルダー小麦の種を分解すると手に入る。"},
+  {name:"パピリオ蜜",price:60,class:"動物資源",detail:"蝶々が集めてくる花の蜜。&罪悪感を感じるほどの甘さ。&エルの樹の麓の敵が持っている。"},
+  {name:"炎鷹卵",price:120,class:"動物資源",detail:"炎熱地帯の鷹が大切そうに持っている球。&高熱を発し続けている。&竜の巣で採れる。"},
+  {name:"トロッシュの粉",price:65,class:"動物資源",detail:"トロッシュの羽根から舞い落ちた緑の粉。使い道はあまりなさそうだ。&トロッシュの巣で採れる。"},
+  {name:"星屑",price:25,class:"鉱物資源",detail:"キラキラ光る乾燥した砂。ガラス細工に用いられる。&エルの樹の麓などで採れる。"},
+  {name:"ナソードメモリー",price:60,class:"鉱物資源",detail:"ナソードに組み込まれていたメモリーチップ。&アルテラ平原で採れる。"},
+  {name:"エルティア鉱石",price:155,class:"鉱物資源",detail:"エルの涙と呼ばれる、鉱石にエルの力が宿ってできた美しい石。&分解すると3色のエルの欠片を入手できる。"},
+  {name:"ベスマ鉱石",price:110,class:"鉱物資源",detail:"渓谷で産出される鉱石。特殊な加工によって成分を抽出できる。&レイキキ渓谷でたまに採れる。"},
+  {name:"ベスバイト",price:210,class:"鉱物資源",detail:"製錬によってクリソナの純度を高めることができる特殊な金属。&ベスマ鉱石から錬成される。"},
+  {name:"ムーンストーン",price:60,class:"鉱物資源",detail:"暗所で紫色に光る壊れやすい石。&砂が固まってできたもの。&螺旋回廊で採れる。"},
+  {name:"結界の欠片",price:199,class:"その他資源",detail:"結界の欠片。&天上の岐路で採れる。"},
+  {name:"虹霓球",price:-1,class:"その他資源",detail:"虹色に光る不思議な球体。"},
+  {name:"ディシオン鉱石",price:117,class:"鉱物資源",detail:"アトラス地域で採れる青い鉱石。&ディシティウムという特殊な金属を含んでいる。&ディシオン採掘場でたまに採れる。"},
+  {name:"ディシティウム",price:240,class:"鉱物資源",detail:"ディシオン鉱石の青色のもととなる金属。&軽くて丈夫なため、業種を問わず重宝される。"},
+  {name:"輝霜錬石",price:115,class:"鉱物資源",detail:"極北で採れる白い鉱石。分解するとグラキエースとディシティウムが手に入る。&北の霊廟でたまに採れる。"},
+  {name:"グラキエース",price:99,class:"鉱物資源",detail:"古代の言語で氷という意味を持つ、波模様が特徴的なひんやり冷たい鉱石。&ザヤ山でたまに採れる。"},
+  {name:"アイスレート",price:290,class:"鉱物資源",detail:"グラキエースから精製される、氷の板のような物質。燃料になる。&空気中の水分に反応して有毒ガスが発生するため素人が扱うのはとても危険。"},
+  {name:"ヒートストーン",price:320,class:"鉱物資源",detail:"高温地帯でたまに見られる石。実はワルド樹脂が年月を経て化石化したもの。&竜の巣でたまに採れる。"},
+  {name:"緑柱石",price:75,class:"鉱物資源",detail:"大地の破片とも呼ばれる、翠色に輝く石。&わずかにクリソナ成分を含んでいる。&エルの樹の麓でたまに採れる。"},
+  {name:"紫水晶",price:77,class:"鉱物資源",detail:"追憶の邪念とも呼ばれる、紫色に輝く石。&わずかにクリソナ成分を含んでいる。&螺旋回廊でたまに採れる。"},
+  {name:"閃雷石",price:76,class:"鉱物資源",detail:"連なりの雷とも呼ばれる、黄色に輝く石。&わずかにクリソナ成分を含んでいる。&ザヤ山でたまに採れる。"},
+  {name:"魔力石",price:180,class:"鉱物資源",detail:"三原色の輝きを放つ変わった石。&影の鉱脈で採れる。"},
+  {name:"クリソナの欠片",price:-1,class:"鉱物資源",detail:"クリソナを含んだ小さな欠片。&集めればクリソナを作れそうだ。&鉱石を加工すると手に入る。"},
+  {name:"低純度クリソナ",price:-1,class:"クリソナ",detail:"不純物が混ざったクリソナ。このままでも使い道はある。&クリソナ原石を加工すると手に入る。"},
+  {name:"高純度クリソナ",price:-1,class:"クリソナ",detail:"純度の高いクリソナ。宝石に変えることができる。"},
+  {name:"最高純度クリソナ",price:-1,class:"クリソナ",detail:"純度99.5%以上の非常に純度の高いクリソナ。&宝石に変えることができる。"},
+  {name:"クリソナ原石",price:-1,class:"鉱物資源",detail:"自然の中にわずかに存在する、クリソナの詰まった原石。&加工するとクリソナがたくさん手に入る。"},
+  {name:"ミスリル結晶",price:200,class:"鉱物資源",detail:"銀色に輝く金属の結晶。特殊な組成のためか自然界では滅多に産出されず、幻の金属と呼ばれる。"},
+  {name:"古代銀貨",price:300,class:"鉱物資源",detail:"古代エリオン王国で使用されていた銀貨。&トロッシュの巣で採れる。"},
+  {name:"古代金貨",price:500,class:"鉱物資源",detail:"古代エリオン王国で使用されていた金貨。&トロッシュの巣で採れる。"},
+  {name:"空っぽの水晶玉",price:220,class:"家具",detail:"ガラスでできた水晶玉。入れ物や瓶として使える。&各エルの欠片を持てる数が増える。"},
+  {name:"たる",price:230,class:"家具",detail:"木材と木の板をうまく組み合わせて作ったたる。&インベントリが増える。"},
+  {name:"竹かご",price:235,class:"家具",detail:"ファルマン竹を編み込んで作ったかご。&インベントリが増える。"},
+  {name:"疾風のスムージー",price:150,class:"霊薬",detail:"飲むとたちまち体が軽くなる野菜スムージーの霊薬。&使って出かけると、戦闘から必ず逃げられる。"},
+  {name:"超人のスムージー",price:150,class:"霊薬",detail:"飲むと無性に戦いたくなる野菜スムージーの霊薬。&使って出かけると、採取地でのエンカウント率が増加する。"},
+  {name:"石のスムージー",price:150,class:"霊薬",detail:"飲むとたちまち気配が消えてしまうスムージーの霊薬。&使って出かけると、採取地でしばらく弱い敵に会わなくなる。"},
+  {name:"デニフの氷球",price:160,class:"霊薬",detail:"水のマスターの名を冠する霊薬。&使って出かけると、味方の防御力と氷抵抗が上昇する。"},
+  {name:"ロッソの火炎輪",price:160,class:"霊薬",detail:"火のマスターの名を冠する霊薬。&使って出かけると、味方の攻撃力と火傷抵抗が上昇する。"},
+  {name:"炎の水晶玉",price:270,class:"戦闘",detail:"炎の力が込められた水晶玉。投げると破裂して辺りを火の海にする。&戦闘で使うと敵にダメージを与え、火傷状態にする。"},
+  {name:"氷の水晶玉",price:270,class:"戦闘",detail:"氷の力が込められた水晶玉。投げると破裂して強烈な冷気が発生する。&戦闘で使うと敵を氷結状態にする。"},
+  {name:"自然の水晶玉",price:270,class:"戦闘",detail:"自然の力が込められた水晶玉。投げると破裂して毒霧を散布する。&戦闘で使うと敵を中毒状態にする。"},
+  {name:"光の水晶玉",price:270,class:"戦闘",detail:"光の力が込められた水晶玉。投げると持続的な回復エリアを作り出す。&戦闘で使うと、しばらくの間味方は行動後にHPが少し回復する。"},
+  {name:"闇の水晶玉",price:270,class:"戦闘",detail:"闇の力が込められた水晶玉。投げると持続的に力を奪う結界を作り出す。&戦闘で使うと、しばらくの間敵の攻撃力を下げる。"},
+  {name:"風の水晶玉",price:270,class:"戦闘",detail:"風の力が込められた水晶玉。投げると弾けて辺り一帯に風塵をばら撒く。&戦闘で使うと、しばらくの間敵の防御力を下げる。"},
+  {name:"木の槍",price:50,class:"戦闘",detail:"木でできた槍。&戦闘中に使うと敵単体に中ダメージを与える。"},
+  {name:"光の槍",price:75,class:"戦闘",detail:"光のエルの力を宿した槍。&戦闘中に使うと敵単体に中ダメージを与える。&グリッター系に特攻ダメージを与える。"},
+  {name:"沈黙の槍",price:125,class:"戦闘",detail:"神聖なエルの力を宿した沈黙の槍。戦闘中に使うと敵単体に中ダメージを与える。&シャドウ系に特攻ダメージを与える。"},
+  {name:"チャージドボルト",price:180,class:"戦闘",detail:"強力に帯電したうに。&戦闘中に使うと敵全体に中ダメージを与える。"},
+  {name:"イラスティックボム",price:170,class:"戦闘",detail:"投擲用の小型爆弾。&戦闘中に使うと敵単体に中ダメージを与える。"},
+  {name:"ホーネットスティング",price:185,class:"戦闘",detail:"護身用の爆竹。戦闘中に使うと敵全体に中ダメージを与える。"},
+  {name:"浮遊石",price:210,class:"戦闘",detail:"魔法に反応して浮力を発生させる石。&飛行船の動力源に使われる。"},
+  {name:"ネンヤ竹炭",price:270,class:"製造",detail:"ファルマン竹を原料として作られる炭。&燃料だけでなく、消臭剤にもなる。"},
+  {name:"デボラ縫合糸",price:280,class:"製造",detail:"傷を縫うと自然に吸収されるため、抜糸の必要がない特殊な糸。&医療界隈では重宝されるらしい。"},
+  {name:"スポア軟膏",price:140,class:"製造",detail:"アルテラシアの花からとれる成分を使った塗り薬。&味方1人のHPが回復する。"},
+  {name:"闘魂ドリンク",price:330,class:"消費",detail:"短時間だが効力のある精力剤。味はゲロマズ。戦闘中に使うと味方１人の攻撃力が大きく上昇する。"},
+  {name:"ナソードアーマー",price:320,class:"消費",detail:"一時的にナソードアーマーシールドを展開するギア。戦闘中に使うと味方１人の防御力が上昇する。"},
+  {name:"ＱＰＬゼリー",price:310,class:"消費",detail:"機械などの滑りをよくするために使われる、ぬめぬめしたゼリー。&戦闘中に使うと味方１人の素早さが上がる。"},
+  {name:"ガッツポトフ",price:210,class:"消費",detail:"色んな野菜が入った栄養満点のポトフ。&戦闘中に使うと味方1人に食いしばり効果を付与する。"},
+  {name:"ボルケーノトルティーヤ",price:230,class:"消費",detail:"火炎草を生地に混ぜ込んだ、病みつきになるトルティーヤ。&戦闘中に使うと味方１人の攻撃力が上昇する。"},
+  {name:"竜牙爆砕丸",price:170,class:"消費",detail:"ハーン家に伝わる漢方薬。陽の気を高める効果がある丸薬。&しばらく味方1人のHPの最大値を50増やす。"},
+  {name:"回光返照丸",price:180,class:"消費",detail:"ハーン家に伝わる漢方薬。陰の気を高める効果がある丸薬。&しばらく味方1人のMPの最大値を10増やす。"},
+  {name:"デブリアンコーヒー",price:140,class:"消費",detail:"エルダー麦から作られるカフェラテ。&カフェインゼロで子供も飲みやすい。&戦闘で使うと、その戦闘で得られる経験値が少し増える。"},
+  {name:"スッキリ茶",price:120,class:"消費",detail:"一口飲むだけで気分が浄化されるお茶。&味方全体の状態異常を回復する。"},
+  {name:"エルファイテール",price:160,class:"消費",detail:"エルライム香る炭酸ジュース。&味方単体のMPが30回復する。"},
+  {name:"アセラシェイク",price:170,class:"消費",detail:"霜雪イチゴを使った冷たいかき氷。&夏にぴったり。"},
+  {name:"スパイシーサラダ",price:180,class:"消費",detail:"野菜たっぷりのスパイシーサラダ。&味方全体のMPが20回復する。"},
+  {name:"活力のポーション",price:230,class:"消費",detail:"冒険者御用達のポーション。&慣れた冒険者は頭から浴びて使用する。&HPとMPが30％回復する。"},
+  {name:"上級活力ポーション",price:350,class:"消費",detail:"より効力を高めた活力のポーション。使用法は同じ。&味方単体のHPとMPが50％回復する。"},
+  {name:"エルダー麦パン",price:160,class:"消費",detail:"エルダー小麦を使った麦パン。&味方単体のHPが55回復する。"},
+  {name:"ポールクッキー",price:180,class:"消費",detail:"ポールの形をしたかわいいお菓子。&味方全体のHPが30回復する。"},
+  {name:"スターフルーツクッキー",price:190,class:"消費",detail:"スターフルーツの甘酸っぱい味がほんのりと乗ったクッキー。&味方全体のHPが50回復する。"},
+  {name:"ミックスベリーケーキ",price:230,class:"消費",detail:"野イチゴとエルダーベリーを使ったケーキ。&味方全体のHPが100回復する。"},
+  {name:"フライドチキン",price:130,class:"消費",detail:"スノーパウダーで軽く味付けしたフライドチキン。&味方単体のHPが80回復する。"},
+  {name:"ウィンドミルポテト",price:140,class:"消費",detail:"砂漠サツマイモを渦巻き状にスラッシュ＆フライしたポテト。&味方単体のHPが100回復する。"},
+  {name:"塩焼き魚",price:160,class:"消費",detail:"リザードバスを塩焼きにしたもの。&味方単体のHPが120回復する。"},
+  {name:"甘辛スキュアー",price:210,class:"消費",detail:"ピリ辛の串料理。スタミナ抜群。&味方単体のHPが90回復する。"},
+  {name:"竹の葉餃子",price:250,class:"消費",detail:"北部地域でよく食べられる、穀物粉の生地に肉などを包んだ料理。&味方全体のHPが130回復する。"},
+  {name:"特選タコスランチ",price:360,class:"消費",detail:"サラダとスキュアーをトルティーヤに包んだスペシャルタコス。&味方全体の攻撃力が上昇し、HPが200、MPが50回復する。"},
+  {name:"黄金海鮮三昧",price:420,class:"消費",detail:"海の幸を贅沢に詰め込んだ海鮮料理。&戦闘中に使うと、その戦闘で得られる経験値が3倍になる。"},
+  {name:"共存の祝祭パイ",price:30,class:"消費",detail:"共存の祝祭の間食べられるアップルパイ。&味方全体のHPが70回復する。"},
+  {name:"魔法のスクロール",price:320,class:"消費",detail:"破るとランダムな位置にワープするスクロール。&使用するとどこかのエリアにワープする。"},
+  ]
+  for(var i=0; i<itemA.length;i++){
+    itemA[i].id=i;
+  }
+  if(debugmode){
+    console.log(itemA.findIndex(value=>value.name=="スノークリスタル"))
+    console.log(itemA.findIndex(value=>value.name=="もりもりニンジン"))
+    console.log(itemA.findIndex(value=>value.name=="清浄水"))
+    console.log(itemA.findIndex(value=>value.name=="緑柱石"))
+    console.log(itemA.findIndex(value=>value.name=="エルの清水"))
+    console.log(itemA.findIndex(value=>value.name=="クリソナ原石"))
+    console.log(itemA.findIndex(value=>value.name=="たる"))
+  }
+var StatusP=[100,100,100];//HP,ATK,DEF
+var StatusE=[30,30,30];
+//レシピから作る
+//素材を選んでつくる
+//分解、錬成フィルター用
+const disassemble=new Array(5,14,17,33,56,57,59,65,68,69,70,71,72)
+const assembleE=new Array(0,1,2,3,4)
+const assembleA=new Array(0,10,11,12,14,15,16,33,58,61,63,65,72,74,78,85,89,90,91,92,93,94,95,96,97,98,99,100,101,102,103,104,105,107,108,110,111,112,114,115,116,117,118,119,120,121,122,123,124,125,126,127,128,129,130,131,133,134,135,136,137,138,139,140,142,143,144,145,146)
+//思いついた・覚えたレシピ
+var recipe=new Array();
+//item[0]伐採 [1]採掘 cleared -1->未判明 0->メニューに？？？と表示
+var henirarea=[
+  {name:"エルの樹の麓",Nitem:[[5,5,33],[54]],Ritem:[[14,41],[25]],SRitem:[[22,27],[68]]},
+  {name:"天上の岐路",Nitem:[[32,35],[54]],Ritem:[[16,29],[55]],SRitem:[[38],[60]]},
+  {name:"アルテラ平原",Nitem:[[24,31],[26,55]],Ritem:[[16,29],[66,27]],SRitem:[[40],[57]]},
+  {name:"ディシオン採掘場",Nitem:[[7,31],[12,53]],Ritem:[[32],[62]],SRitem:[[40],[70]]},
+  {name:"ザヤ山",Nitem:[[34],[12,53]],Ritem:[[16,29],[66,27]],SRitem:[[40],[70]]},
+  {name:"トロッシュの巣",Nitem:[[7,31],[12,53]],Ritem:[[16,29],[66,27]],SRitem:[[40],[70]]},
+  {name:"影の鉱脈",Nitem:[[7,31],[12,53]],Ritem:[[16,29],[66,27]],SRitem:[[40],[70]]},
+  {name:"エリオス行きポータル",Nitem:[[],[]],Ritem:[[],[]],SRitem:[[],[]]},
+];
+for(var i=0; i<henirarea.length;i++){
+  henirarea[i].cleared=-1;
+  henirarea[i].id=i;
+}
+henirarea[0].cleared=0;
+var UserItem=new Array(160);
+UserItem.fill(0);//採取インベントリ
+var UserLibrary=new Array(160);
+UserLibrary.fill(0);//採取インベントリ
 var itemAry=[0];//インベントリ
 var equipeditem=-1;
 var playtime=0;
@@ -458,6 +657,9 @@ var UserData_SoL = {
   "cleared":[[0,0,0,0,0,0],[0,0,0,0,0,0]],
   "Achieve":achieve,
   "Inventory":inventory,
+  "UserItem":UserItem,
+  "UserLibrary":UserLibrary,
+  "Area":henirarea,
   "Playtime":playtime,
   "Monster":defeatedmonster,
   "Melon":melonList,
@@ -485,6 +687,9 @@ UserData_SoL = {
   "Highscore":highscore,
   "Achieve":achieve,
   "Inventory":inventory,
+  "UserItem":UserItem,
+  "UserLibrary":UserLibrary,
+  "Area":henirarea,
   "Playtime":playtime,
   "Totalcardmove":totalcardmove,
   "Monster":defeatedmonster,
@@ -510,6 +715,8 @@ playtime=getdata.Playtime;
 totalcardmove=getdata.Totalcardmove;
 melonList=getdata.Melon.concat()
 achieve_SS=getdata.SS.concat();
+UserItem=getdata.UserItem.concat();
+UserLibrary=getdata.UserLibrary.concat();
 defeatedmonster=getdata.Monster;
 //追加データ部分　undefinedなら初期値にしておく
 for(var i=0; i<getdata.Achieve.length; i++){
@@ -522,6 +729,12 @@ for(var i=0; i<getdata.Inventory.length; i++){
   var A=inventory.findIndex(value=>value.name==getdata.Inventory[i].name);
   if(A!==-1){
     inventory[A].cleared=getdata.Inventory[i].cleared;
+  }
+}
+for(var i=0; i<getdata.Area.length; i++){
+  var A=henirarea.findIndex(value=>value.name==getdata.Area[i].name);
+  if(A!==-1){
+    henirarea[A].cleared=getdata.Area[i].cleared;
   }
 }
 highscore=getdata.Highscore.concat();
@@ -551,6 +764,14 @@ for(var i=0; i<inventory.length;i++){
   inventory[i].cleared=0;
 }
 inventory[0].cleared=1;
+for(var i=0; i<henirarea.length;i++){
+  henirarea[i].cleared=-1;
+}
+henirarea[0].cleared=0;
+UserItem=new Array(160);
+UserItem.fill(0);
+UserLibrary=new Array(160);
+UserLibrary.fill(0);
 GamestartT=0;
 defeatedmonster=0;
 melonList=[0,0];
@@ -561,15 +782,16 @@ musicnum=0;
 Titleyard.removeAllChildren();
 Configmap.removeAllChildren();
 Titleyard.addChild(t);
-var shape = new createjs.Shape();
-shape.graphics.beginFill("#3b7353");
-shape.graphics.drawRect(0, 0, 800, 600); // 長方形を描画
-Titleyard.addChild(shape); // 表示リストに追加
-var BG = new createjs.Bitmap("soL_back.png");
-BG.alpha=0.3;
-Titleyard.addChild(BG);
-var t = new createjs.Text("Click Card to START", "24px serif", "white");
-Titleyard.addChild(t);
+TitleGrh();
+var t = new createjs.Text("v1.0/Click Card to START", "24px serif", "white");
+  t.textAlign = "end";
+  t.x=790;
+  Titleyard.addChild(t);
+  var t = new createjs.Text("音の設定ができます。（あとから変更可能）", "24px serif", "white");
+  t.textAlign = "end";
+  t.x=800;
+  t.y=30;
+  Titleyard.addChild(t);
 gamestate=10;
   try{
     localStorage.removeItem('UserData_SoL')
@@ -579,6 +801,109 @@ gamestate=10;
         console.log('ねこ')
     }
 }
+function saveDL(){//*
+    var json_obj = {
+      "Title": "this is save data from SoLithia",
+      "Volume":vBar,
+      "SEVolume":sBar,
+      "Mute":mute,
+      "Volume": vBar,
+      "SEVolume": sBar,
+      "Cleared":cleared,
+      "Highscore":highscore,
+      "Achieve":achieve,
+      "Inventory":inventory,
+      "UserItem":UserItem,
+      "UserLibrary":UserLibrary,
+      "Area":henirarea,
+      "Playtime":playtime,
+      "Totalcardmove":totalcardmove,
+      "Monster":defeatedmonster,
+      "Melon":melonList,
+      "SS":achieve_SS,
+    }
+    console.log(json_obj)
+    var write_json=JSON.stringify(json_obj);
+    var blob=new Blob([write_json],{type: 'application/json'});
+    var a =document.createElement("a");
+    a.href=URL.createObjectURL(blob);
+    a.download='solithia_save.json';
+    a.click();
+    URL.revokeObjectURL(a.href);
+    alert("【セーブデータ】\nファイル名／「solithia_save.json」\n保存方法／ファイルの中身や拡張子は変更しないでください。\n※セーブデータを読み込む際は、メニュー画面の状態で、画面枠外下部に記載の『ファイル選択』ボタンから、ダウンロードしたファイルを選んでくださいね。");
+}
+function saveUP(){
+  var getdata; // 読込むデータ
+  var button_read=document.createElement('input');
+  button_read.setAttribute('type', 'file');
+  // 参照要素を取得
+  var sp2 = document.getElementById("child")
+  // 親要素を取得
+  var parentDiv = sp2.parentNode
+  // 新しい要素を sp2 の手前に挿入
+  parentDiv.insertBefore(button_read, sp2)
+  //ボタン追加ここまで
+  button_read.addEventListener("change" , function(){
+      if(!(button_read.value)) return; // ファイルが選択されない場合
+      var file_list=button_read.files;
+      if(!file_list) return; // ファイルリストが選択されない場合
+      var file=file_list[0];
+      if(!file) return; // ファイルが無い場合
+      if(JSON.parse(localStorage.getItem('UserData_SoL')) !== null){
+        var result = window.confirm('現在プレイ中のデータが上書きされますがよろしいですか？');
+      if(!result) {
+        console.log('upload cancelled');
+        button_read.value = "";
+        return;
+          }
+        }
+      var file_reader=new FileReader();
+      file_reader.readAsText(file);
+      file_reader.onload=function(){
+      if(file_reader.result.slice(1, 41)=='"Title":"this is save data from SoLithia'){
+      // .jsonの確認
+  getdata=JSON.parse(file_reader.result); // 読込んでdataを上書き
+  sp2.innerHTML = "<h1>Welcome Back!</h1>"
+  //各々グローバル変数に代入していく
+  vBar=getdata.Volume;
+  sBar=getdata.SEVolume;
+  cleared=getdata.Cleared.concat();
+  playtime=getdata.Playtime;
+  totalcardmove=getdata.Totalcardmove;
+  melonList=getdata.Melon.concat()
+  achieve_SS=getdata.SS.concat();
+  UserItem=getdata.UserItem.concat();
+  UserLibrary=getdata.UserLibrary.concat();
+  defeatedmonster=getdata.Monster;
+  //追加データ部分　undefinedなら初期値にしておく
+  for(var i=0; i<getdata.Achieve.length; i++){
+    var A=achieve.findIndex(value=>value.name==getdata.Achieve[i].name);
+    if(A!==-1){
+      achieve[A].cleared=getdata.Achieve[i].cleared;
+    }
+  }
+  for(var i=0; i<getdata.Inventory.length; i++){
+    var A=inventory.findIndex(value=>value.name==getdata.Inventory[i].name);
+    if(A!==-1){
+      inventory[A].cleared=getdata.Inventory[i].cleared;
+    }
+  }
+  for(var i=0; i<getdata.Area.length; i++){
+    var A=henirarea.findIndex(value=>value.name==getdata.Area[i].name);
+    if(A!==-1){
+      henirarea[A].cleared=getdata.Area[i].cleared;
+    }
+  }
+  highscore=getdata.Highscore.concat();
+  SEbuffer();
+  PopAnm("✅セーブデータを読み込みました",1200,500,35,30,55);
+  saveLocal();
+  }  
+  else{
+      alert("❌　ファイルが異なります。");
+      button_read.value = "";
+  }}});
+  }
 function SEbuffer(p=0){
 if(p!==0){
   se1.volume(0);
@@ -697,7 +1022,7 @@ var se18 = new Howl({
       volume: 0.3,
   });
 var se19 = new Howl({
-  src:"Enter.mp3",
+  src:"Impact04-3.mp3",
       volume: 0.2,
   });
 var se20 = new Howl({
@@ -734,10 +1059,21 @@ const bgm1data ={
     loopEnd: 96500,
     volume: 0.1,
   };
+  const bgm6data ={
+    src: "PerituneMaterial_Foreboding_loop.mp3",
+    loopStart: 0,
+    loopEnd: 129870,
+    volume: 0.1,
+  };
+  const bgm7data ={
+    src: "Stage_Noahs.mp3",
+    loopStart: 1540,
+    loopEnd: 51910,
+    volume: 0.5,
+  };
 var Bgm=new Music(bgm1data);
 var musicnum=0;
 var Barlist=[];//soundconfigで使用
-//画像のロード
 // LoadQueueのインスタンスを作成
 var queue = new createjs.LoadQueue(),
       // manifestを定義
@@ -782,9 +1118,13 @@ function handleFileLoadComplete(event) {
 function handleComplete() {
   console.log("LOAD COMPLETE");
   Loadmap.removeAllChildren();
-  var t = new createjs.Text("ver0.996/Click Card to START", "24px serif", "white");
+  var t = new createjs.Text("v1.0/Click Card to START", "24px serif", "white");
+  t.textAlign = "end";
+  t.x=790;
   Titleyard.addChild(t);
   var t = new createjs.Text("音の設定ができます。（あとから変更可能）", "24px serif", "white");
+  t.textAlign = "end";
+  t.x=800;
   t.y=30;
   Titleyard.addChild(t);
   gamestate=10;
@@ -795,9 +1135,9 @@ createjs.Ticker.addEventListener("tick", UpdateParticles);
 function UpdateParticles(event){
   updateParticles();
   if(gamestate==0){yakumap_hint.alpha=1}else{yakumap_hint.alpha=0};
-  if(gamestate==0 && duelLog.length){yakumap_solve.alpha=1}else{yakumap_solve.alpha=0};
   if(gamestate==0 && duelLog.length>1 && (playMode[0]==1 || (playMode[0]==2 && playMode[1]==0))){yakumap_undo.alpha=1;}else{yakumap_undo.alpha=0;}
-  if(gamestate==0 && duelLog.length){yakumap_reset.alpha=1;}else{yakumap_reset.alpha=0;}
+  if(gamestate==0 && duelLog.length && playMode[0]!==4){yakumap_reset.alpha=1;}else{yakumap_reset.alpha=0;}
+  if(gamestate==0 && duelLog.length && playMode[0]!==4){yakumap_solve.alpha=1}else{yakumap_solve.alpha=0};
 }
 function MouseCircle(event){
   //クリックした場所を教える
@@ -868,9 +1208,312 @@ function updateParticles() {
     }
   }
 }
-function menu(state=0){
+function menu(state=0,area=0){
   //メイン画面
-  if(musicnum!==5){
+  console.log('menu',state,area);
+  if(area>0){
+    //ヘニルエントランス
+    opLock=0;
+    Titleyard.removeAllChildren();
+    Roomyard.removeAllChildren();    
+    switch(area){
+      case 1:
+        if(musicnum!==6){
+          Bgm.stop();
+          musicnum=6;
+          if(mute=="ON"){
+          Bgm=new Music(bgm6data);
+          Bgm.playMusic();
+          }}
+        //オプションボタン
+      SoundConfig(0,-1);
+      var BG = new createjs.Bitmap("Don_bg5.png");
+      BG.alpha=0.7;
+      Roomyard.addChild(BG);
+      var Room = new createjs.Bitmap("Card_images/soL_henir.png");
+      Room.scale=0.7;
+      Roomyard.addChild(Room);
+      var Header1 = new createjs.Bitmap("soL_header1.png");
+      Header1.x=480;
+      Header1.scale=0.7;
+      Titleyard.addChild(Header1);
+      var Header2 = new createjs.Bitmap("soL_header2.png");
+      Header2.y=-8;
+      Titleyard.addChild(Header2);
+      var Opicon = new createjs.Bitmap("soL_opicon.png");
+      Opicon.x=730;
+      Opicon.y=540;
+      Titleyard.addChild(Opicon);
+      var Opicon2 = new createjs.Bitmap("soL_opicon2.png");
+      Opicon2.x=670;
+      Opicon2.y=540;
+      Titleyard.addChild(Opicon2);
+      if(UserLibrary.indexOf(1)!==-1){
+        var Opicon3 = new createjs.Bitmap("soL_opicon3.png");
+        Opicon3.x=610;
+        Opicon3.y=540;
+        Titleyard.addChild(Opicon3);
+        }
+      var undo = new createjs.Bitmap("soL_undo.png");
+      undo.scale=0.5;
+      undo.x=10;
+      undo.y=540;
+      Titleyard.addChild(undo);
+      var shape = new createjs.Shape();
+      shape.graphics.beginFill("rgba(0,0,0,0.7)");
+      shape.graphics.drawRect(0, 0, 800, 600);
+      Roomyard.addChild(shape);
+      var RoomA = new createjs.Bitmap("Card_images/soL_henirA.png");
+      RoomA.scale=0.7;
+      RoomA.alpha=0;
+      Titleyard.addChild(RoomA);
+      if(InvID(6)==-1){
+        Roomyard.removeChild(Room);
+        RoomA.alpha=1;
+      }
+      InvConfig(0);
+      createjs.Tween.get(shape)
+      .to({alpha:0.3},800);
+      createjs.Tween.get(Room,{loop:true})
+      .to({x:0,y:-5,alpha:0.9},2100)
+      .to({x:0,y:-0,alpha:1},2100);
+      createjs.Tween.get(RoomA,{loop:true})
+      .to({x:0,y:-5},2100)
+      .to({x:0,y:-0},2100);
+      Room.addEventListener("click", {card:-1,handleEvent:HenirPath});
+      if(henirarea[0].cleared==0){
+        RoomA.addEventListener("click", {card:1,handleEvent:HenirPath});
+      }else{
+        RoomA.addEventListener("click", {card:0,handleEvent:HenirPath});
+      }
+      undo.addEventListener("click", {handleEvent:returnmenu});
+      Opicon.addEventListener("click", {handleEvent:OptionConfig});
+      Opicon2.addEventListener("click", {handleEvent:InvConfig});
+      if(UserLibrary.indexOf(1)!==-1){
+      Opicon3.addEventListener("click", {handleEvent:AsmConfig});
+      }
+      if(InvID(0)==6){
+        MsgAry.push(["　","――ヘニルの時空",-1,-2,3,1])
+        MsgAry.push(["リティア","……どうなってるわけ。",0,-2]);
+        MsgAry.push(["リティア","せっかく扉が開いたから外に出たと思ったのに、&また変な空間だよ。",0,-2]);
+        MsgAry.push(["男の声","驚いたな。&まさかパスワードを解読して入ってくるとは。",2]);
+        MsgAry.push(["リティア","誰よ。",0,-2]);
+        MsgAry.push(["　","気味の悪い笑い声が響く。",2]);
+        MsgAry.push(["男の声","私のことよりも自分のことを考えたほうがいいだろう。",2]);
+        MsgAry.push(["男の声","ここはヘニルの時空。&扉を開いて私の管轄範囲内に入って来られたとはいえ、&一歩道を外れれば永遠に虚無空間を彷徨うことになるぞ。",2]);
+        MsgAry.push(["男の声","ポータルをこじ開けて貴様をエリオスに&連れ出してやることもできるが、今は距離が遠すぎる。&そこから出たければ、もう少し「こちら側」まで来ることだ。",2]);
+        MsgAry.push(["リティア","はぁ？　&あんた、あたしのことを出してくれるのか、&出したくないのか、どっちなのよ。",0,-2]);
+        MsgAry.push(["男の声","クックック。&せいぜいあがいてみろ。",2]);
+        MsgAry.push(["　","再び、空間に男の笑い声が響きわたった。&これ以上、呼びかけても返事はないようだ。",-1,-2]);
+        MsgAry.push(["henirmenu"]);
+        MsgNext(-1);
+        InvID(0,7);
+      }
+        break;
+    }
+    function returnmenu(){
+      menu();
+    }
+    function HenirPath(){
+      switch(this.card){
+        case -1:
+          if(equipeditem==6 && InvID(6)==1){
+            equipeditem=-1;
+            InvID(6,-1);
+            InvConfig(0);
+            se19.play();
+            Roomyard.removeChild(Room);
+            RoomA.alpha=1;
+            createjs.Tween.get(RoomA)
+          .to({x:800,rotation:180},200)
+          .to({x:0,rotation:360},100);
+          }else{
+          Dialogue("Required Item","・抵抗力を上げるアイテム（"+InvID(6)+"/1）",-1,-1,"OK",350,330,80,40);
+          }
+          break;
+        case 0:
+            if(opLock==0){
+              field.removeAllChildren();
+              opLock=5;
+              se11.play();
+          //入場開始前の画面
+          var BG = new createjs.Bitmap("Don_bg5.png");
+          BG.alpha=0;
+          field.addChild(BG);
+          var BG1 = new createjs.Bitmap("soL_bg1.png");
+          BG1.alpha=0;
+          field.addChild(BG1);
+          var Car1 = new createjs.Bitmap("Card_images/BackColor_Black.png");
+          Car1.x=-200;
+          Car1.y=150;
+          Car1.scale=1.8;
+          if(henirarea[0].cleared>=0){
+          Car1.alpha=0.8;
+          }else{
+          Car1.alpha=0;
+          }
+          field.addChild(Car1);
+          var Car2 = new createjs.Bitmap("Card_images/BackColor_Black.png");
+          Car2.x=-200;
+          Car2.y=150;
+          Car2.scale=1.8;
+          if(henirarea[1].cleared>=0){
+            Car2.alpha=0.8;
+            }else{
+            Car2.alpha=0;
+            }
+          field.addChild(Car2);
+          var Car3 = new createjs.Bitmap("Card_images/BackColor_Black.png");
+          Car3.x=-200;
+          Car3.y=50;
+          Car3.scale=1.8;
+          if(henirarea[2].cleared>=0){
+            Car3.alpha=0.8;
+            }else{
+            Car3.alpha=0;
+            }
+          field.addChild(Car3);
+          var Car4 = new createjs.Bitmap("Card_images/BackColor_Black.png");
+          Car4.x=-200;
+          Car4.y=280;
+          Car4.scale=1.8;
+          if(henirarea[3].cleared>=0){
+            Car4.alpha=0.8;
+            }else{
+            Car4.alpha=0;
+            }
+          field.addChild(Car4);
+          var Car5 = new createjs.Bitmap("Card_images/BackColor_Black.png");
+          Car5.x=-200;
+          Car5.y=50;
+          Car5.scale=1.8;
+          if(henirarea[4].cleared>=0){
+            Car5.alpha=0.8;
+            }else{
+            Car5.alpha=0;
+            }
+          field.addChild(Car5);
+          var Car6 = new createjs.Bitmap("Card_images/BackColor_Black.png");
+          Car6.x=-200;
+          Car6.y=280;
+          Car6.scale=1.8;
+          if(henirarea[5].cleared>=0){
+            Car6.alpha=0.8;
+            }else{
+            Car6.alpha=0;
+            }
+          field.addChild(Car6);
+          var shape = new createjs.Shape();
+          shape.graphics.beginFill("#bae0c3");
+          shape.graphics.beginStroke("#617d68");
+          shape.graphics.setStrokeStyle(2);
+          shape.graphics.drawRect(30, 480, 262, 35);
+          field.addChild(shape);
+          var T=new createjs.Text("　","24px serif","#46574a");
+          T.x=35;
+          T.y=483;
+          field.addChild(T);
+          createjs.Tween.get(Car1)
+          .to({x:-10},400, createjs.Ease.backOut);
+          createjs.Tween.get(Car2)
+          .to({x:160},600, createjs.Ease.backOut);
+          createjs.Tween.get(Car3)
+          .to({x:330},800, createjs.Ease.backOut)
+          createjs.Tween.get(Car4)
+          .to({x:330},800, createjs.Ease.backOut)
+          createjs.Tween.get(Car5)
+          .to({x:500},800, createjs.Ease.backOut)
+          createjs.Tween.get(Car6)
+          .to({x:500},800, createjs.Ease.backOut)
+          .call(SoLkey);
+          function SoLkey(){
+          Car1.addEventListener("mouseover", {card:1,handleEvent:MouseOver});
+          Car1.addEventListener("mouseout", {card:0,handleEvent:MouseOver});
+          Car2.addEventListener("mouseover", {card:2,handleEvent:MouseOver});
+          Car2.addEventListener("mouseout", {card:0,handleEvent:MouseOver});
+          Car1.addEventListener("click", {card:1,handleEvent:HenirPath});
+          Car2.addEventListener("click", {card:2,handleEvent:HenirPath});
+          var option_bt5 = new createjs.Bitmap('soL_batu.png');
+            option_bt5.x=700;
+            option_bt5.y=60;
+            option_bt5.scale=0.5;
+            field.addChild(option_bt5)
+            option_bt5.addEventListener("click", {card:10,handleEvent:GameReady});
+            var shapeMask3 = new createjs.Shape();
+          shapeMask3.graphics
+                .beginFill("gold")
+                .drawRect(30, 53, 730, 480);
+          field.mask = shapeMask3;
+          createjs.Tween.get(BG)
+          .to({alpha:0.8},100);
+          }
+          function MouseOver(e){
+            switch(this.card){
+              case 0:
+                BG1.alpha=0;
+                createjs.Tween.get(BG).to({alpha:0.8},200);
+                break;
+              case 1:
+                createjs.Tween.get(BG).to({alpha:0},100);
+                createjs.Tween.get(BG1).to({alpha:0.8},200);
+                T.text=henirarea[this.card-1].name;
+                break;
+              case 2:
+                break;
+              case 3:
+                break;
+              case 4:
+                break;
+              case 5:
+                break;
+              case 6:
+                break;
+            }
+          };
+          };
+          break;
+          default:
+          //各地域へ入場
+          field.removeAllChildren();
+          playMode[1]=this.card-1;
+          createjs.Tween.get(RoomA)
+          .to({x:-1700,y:-1300,scale:4,alpha:0.1},500, createjs.Ease.backIn);
+          var shape = new createjs.Shape();
+          shape.graphics.beginFill("white");
+          shape.graphics.drawRect(0, 0, 800, 600);
+          shape.alpha=0;
+          Roomyard.addChild(shape);
+          createjs.Tween.get(shape)
+          .to({alpha:1},500)
+          .wait(80)
+          .call(ToHenir);
+          function ToHenir(){
+          Titleyard.alpha=0;
+          Roomyard.alpha=0;
+          RoomA.x=0;
+          RoomA.y=0;
+          RoomA.scale=0.7;
+          RoomA.alpha=1;
+          Roomyard.removeChild(shape);
+          var shapeMask3 = new createjs.Shape();
+          shapeMask3.graphics
+                .beginFill("gold")
+                .drawRect(0, 0, 800, 600);
+          field.mask = shapeMask3;
+          Henirmap(playMode[1]);
+          };
+          break;
+      }
+    }
+    return false;
+  }
+  if(playMode[0]==4 && musicnum!==6){
+    Bgm.stop();
+    musicnum=6;
+    if(mute=="ON"){
+    Bgm=new Music(bgm6data);
+    Bgm.playMusic();
+    }}else if(musicnum!==5){
     Bgm.stop();
     musicnum=5;
     if(mute=="ON"){
@@ -917,7 +1560,11 @@ function menu(state=0){
       var Box = new createjs.Bitmap("Card_images/soL_room_box.png");
       Box.scale=600/768;
       Roomyard.addChild(Box);
-      var Door = new createjs.Bitmap("Card_images/soL_room_door.png");
+      if(InvID(0)>5){
+        var Door = new createjs.Bitmap("Card_images/soL_room_door2.png");
+        }else{
+        var Door = new createjs.Bitmap("Card_images/soL_room_door.png");
+      }
       Door.scale=600/768;
       Roomyard.addChild(Door);
       var Book = new createjs.Bitmap("Card_images/soL_room_book.png");
@@ -949,7 +1596,11 @@ function menu(state=0){
       BoxA.scale=600/768;
       BoxA.alpha=0;
       Roomyard.addChild(BoxA);
+      if(InvID(0)>5){
+        var DoorA = new createjs.Bitmap("Card_images/soL_room_door2.png");
+        }else{
       var DoorA = new createjs.Bitmap("Card_images/soL_room_doorA.png");
+        }
       DoorA.scale=600/768;
       DoorA.alpha=0;
       Roomyard.addChild(DoorA);
@@ -975,6 +1626,7 @@ function menu(state=0){
       PathA.y=-67;
       PathA.alpha=0;
       Roomyard.addChild(PathA);
+      PathAry=[];
       for(var i=0;i<Path_src.length;i++){
         var P = new createjs.Bitmap(Path_src[i]);
         P.x=-100;
@@ -997,6 +1649,12 @@ function menu(state=0){
       Opicon2.x=670;
       Opicon2.y=540;
       Titleyard.addChild(Opicon2);
+      if(UserLibrary.indexOf(1)!==-1){
+      var Opicon3 = new createjs.Bitmap("soL_opicon3.png");
+      Opicon3.x=610;
+      Opicon3.y=540;
+      Titleyard.addChild(Opicon3);
+      }
       if(gamestate==99){
         Room.x=-40;
         Room.y=-30;
@@ -1119,6 +1777,9 @@ function menu(state=0){
       PathA.addEventListener("click", {card:3,handleEvent:PathText});
       Opicon.addEventListener("click", {handleEvent:OptionConfig});
       Opicon2.addEventListener("click", {handleEvent:InvConfig});
+      if(UserLibrary.indexOf(1)!==-1){
+        Opicon3.addEventListener("click", {handleEvent:AsmConfig});
+      }
       Header2.addEventListener("click", {handleEvent:SoLchara})
       if(gamestate==99){
         MsgAry.push(["　","――狭間の向こう",-1,0,3,1])
@@ -1570,7 +2231,6 @@ function menu(state=0){
               .to({y:Box2.y-14},40)
               .to({y:Box2.y},100)
               .wait(300)
-              //request
               var DL= new createjs.Bitmap("soL_dialogue.png");
               DL.scale=1.7;
               DL.x=900;
@@ -1635,10 +2295,7 @@ function menu(state=0){
                 window.requestAnimationFrame((ts)=>Cook(ts,tflame,sf));
                 }
               }
-            }
-          }
-        }
-        
+        }}}      
       }
       function Vasecross(){
         switch(this.card){
@@ -1870,6 +2527,7 @@ function menu(state=0){
         switch(this.card){
           case 3:
             if(opLock==0){
+              if(InvID(0)>5){menu(0,1);return false};
               opLock=6;
             //ログインPW
             var numPW=[];
@@ -1957,9 +2615,13 @@ function menu(state=0){
               for(var i=0;i<numPW.length;i++){
                 T.text+=numPW[i];
               };
-              //console.log(T.text,playMode[2]);
               if(T.text==playMode[2]){
                 console.log('出口');
+                opLock=0;
+                se10.play();
+                field.removeAllChildren();
+                InvID(0,5);
+                PathTalk();
                 return true;
               }
               numPW=[];
@@ -2023,6 +2685,134 @@ function menu(state=0){
         break;
   }
 };
+function Henirmap(p){
+  //各地域の描画
+  console.log('henirmap',p);
+  switch(p){
+    case 0:
+      if(musicnum!==7){
+        Bgm.stop();
+        musicnum=7;
+        if(mute=="ON"){
+        Bgm=new Music(bgm7data);
+        Bgm.playMusic();
+        }}
+      var BG1 = new createjs.Bitmap("soL_bg1.png");
+      BG1.alpha=0.8;
+      field.addChild(BG1);
+      var Room = new createjs.Bitmap("Card_images/soL_henir.png");
+      Room.scale=0.5;
+      Room.x=100;
+      Room.y=200;
+      Room.alpha=0.6;
+      field.addChild(Room);
+      var Header1 = new createjs.Bitmap("soL_header1.png");
+      Header1.x=480;
+      Header1.scale=0.7;
+      field.addChild(Header1);
+      var Header2 = new createjs.Bitmap("soL_header2.png");
+      Header2.y=-8;
+      field.addChild(Header2);
+      var Opicon2 = new createjs.Bitmap("soL_opicon2.png");
+      Opicon2.x=670;
+      Opicon2.y=540;
+      field.addChild(Opicon2);
+      var obj = new createjs.Shape();
+      obj.graphics.beginFill("#bae0c3");
+      obj.graphics.beginStroke("#617d68");
+      obj.graphics.setStrokeStyle(2);
+      obj.graphics.drawRect(15, 125, 262, 35);
+      field.addChild(obj);
+      var T=new createjs.Text("採取スタート","24px serif","#46574a");
+      T.x=20;
+      T.y=128;
+      field.addChild(T);
+      var obj2 = new createjs.Shape();
+      obj2.graphics.beginFill("#bae0c3");
+      obj2.graphics.beginStroke("#617d68");
+      obj2.graphics.setStrokeStyle(2);
+      obj2.graphics.drawRect(15, 160, 262, 35);
+      field.addChild(obj2);
+      var T=new createjs.Text("入口に戻る","24px serif","#46574a");
+      T.x=20;
+      T.y=163;
+      field.addChild(T);
+      var hp = new createjs.Shape();
+      //hp.graphics.beginFill("black");
+      hp.graphics.beginFill("rgba(242,40,10)");
+      hp.graphics.moveTo(106, 44);
+      hp.graphics.lineTo(109, 56);
+      hp.graphics.lineTo(354, 47);
+      hp.graphics.lineTo(364, 30);
+      field.addChild(hp);
+      Opicon2.addEventListener("click", {handleEvent:InvConfig});
+      obj.addEventListener("click", {card:4,handleEvent:GameReady});
+      obj2.addEventListener("click", {rule:playMode[0],handleEvent:Gameend});
+      Room.addEventListener("click", {card:110,num:1,handleEvent:HenirKey});
+      if(henirarea[p].cleared==0){
+        //初入場時のイベント
+        switch(p){
+          case 0:
+            cLock=false;
+            var Ary=[];
+            var shape = new createjs.Shape();
+            shape.graphics.beginFill("#808080").drawRect(0, 0, 800, 600);
+            field.addChild(shape);
+            shape.alpha=0;
+            Ary.push(shape);
+            createjs.Tween.get(shape).to({alpha:0.4},600).wait(1000).to({alpha:0},800);
+            var t=new createjs.Text(henirarea[p].name,"64px serif","white");
+            t.x=150;
+            t.y=250;
+            t.alpha=0;
+            field.addChild(t);
+            Ary.push(t);
+            createjs.Tween.get(t).to({alpha:1},600).wait(1000).to({alpha:0},800);
+            shape.graphics.beginFill("white").moveTo(140,320).lineTo(450,320);
+            field.addChild(shape);
+            shape.alpha=0;
+            Ary.push(shape);
+            createjs.Tween.get(t).to({alpha:1},600).wait(2000).call(firstEv);
+            MsgAry.push(["リティア","まさかフルーツポンチで扉が開くなんてね……。",0,-2,3,1])
+            MsgAry.push(["リティア","クリソナには狭間を開く力がある……。&もしかしたら、氷のクリソナを使ったことが関係したのかな。",0,-2])
+            MsgAry.push(["リティア","で、ここは……森？",0,-2]);
+            MsgAry.push(["リティア","さっきのおじさんは、&ここから出たければもっとエリオス側に来いって&言ってたけど……。",0,-2]);
+            MsgAry.push(["リティア","助ける気があるなら、&もっと具体的に教えてくれればいいのに。&いちいち上から目線の言い方してくるし。",0,-2]);
+            MsgAry.push(["リティア","あーもう、考えてても始まらない！&このあたりをいろいろ調べてみよう！",0,-2]);
+            MsgAry.push(["リティア","もしかしたら、&思いがけない宝物があるかもしれないし！",0,-2]);
+            MsgAry.push(["collection"]);
+        break;
+        }
+      }
+      function firstEv(){
+        for(var i=0;i<Ary.length;i++){
+          field.removeChild(Ary[i]);
+        }
+        cLock=true;
+        MsgNext(-1);
+        henirarea[p].cleared=1;
+      }
+      break;
+  }
+}
+function HenirKey(){
+    switch(this.card){
+      default:
+        if(equipeditem==this.card && InvID(6)==1){
+          equipeditem=-1;
+          InvID(6,-1);
+          InvConfig(0);
+          se19.play();
+          Roomyard.removeChild(Room);
+          RoomA.alpha=1;
+          createjs.Tween.get(RoomA)
+        .to({x:800,rotation:180},200)
+        .to({x:0,rotation:360},100);
+        }else{
+        Dialogue("Required Item",itemA[this.card].detail+"×"+this.num,-1,-1,"OK",350,330,80,40);
+        }
+        break;
+}};
 function SoLmap(){
   if(opLock==0){
     field.removeAllChildren();
@@ -2453,8 +3243,9 @@ function AchieveDetail(){
 }
 function submitPass(){
   var T=10000+Math.floor(Math.random()*90000)
-  var Msg="狭間を開くパスワード："+T;
+  var Msg="ヘニルの時空への入場パスワード："+T;
   playMode[2]=T;
+  if(debugmode){console.log(T)};
   cx3.clearRect(0,0,800,600);
   QR_main(canvas3,Msg)
   var qr_src=canvas3.toDataURL();
@@ -2481,7 +3272,7 @@ function GameReady(){
   load2();
 };
 function load2(){
-  if(opLock!==5){return false;}
+  if(opLock!==5 && playMode[0]!==4){return false;}
   Titleyard.alpha=0;
   tweeNroom.paused=true;
   Roomyard.alpha=0;
@@ -2881,6 +3672,125 @@ function DeckReset(p=0,point=0,X=0){
     break;
   }
   };
+function DeckReset_H(p=0,point=0,X=0){
+  //ヘニル
+  if(p!==0 && X==0){
+    p=this.point;
+    decksNow2=0;
+    if(!cLock || opLock!==0){return false};
+  };
+  cLock=false;
+  switch(p){
+  case 0:
+    deckmap.removeAllChildren();
+    decksNow=0;
+    decksNow2=0;
+    DeckFacelists=[];
+    if(!decks.length){
+    decks=deckfaces.concat();
+    deckfaces=[];
+    }
+    for(var i=0;i<decks.length;i++){
+      //ウラ
+      var newCard = new createjs.Bitmap(Card_src[0]);
+      newCard.x=275;
+      newCard.y=280-i*0.5;
+      deckmap.addChild(newCard);
+      Decklists.push(newCard); 
+    }
+    drawbuttom(240,330,decks.length,1,50,40);
+    DeckReset_H(-1,1,1);
+    cLock=true;
+    break;
+  default:
+    if(!decks.length){
+      cLock=true;
+      return false;
+    }
+    mLock=false;
+    var TT=decks.shift();
+    deckfaces.push(TT);
+    var A=Math.floor((TT-1)/10);
+    if(A==0 || A==2){
+      Extras[1]=1;
+      Exlists[0].text="系統：ドリル"
+    }else{
+      Extras[1]=0;
+      Exlists[0].text="系統：カッター"
+    }
+    var T=Decklists.pop();
+    var S=new createjs.Bitmap(Card_src[TT]);
+    S.x=275;
+    S.y=280;
+    S.alpha=0;
+    deckmap.addChild(S);
+    DeckFacelists.push(S); 
+    createjs.Tween.get(T)
+    .to({x:295,y:260,scaleX:0.05,scaleY:1.2},70)
+    .to({alpha:0},10);
+    createjs.Tween.get(S)
+    .to({scaleX:0.05},70)
+    .to({scaleX:1,alpha:1},70)
+    .to({x:370},100)
+    .call(step);
+    function step(){
+      if(Extras[0]>0){
+        var R=Math.floor(Math.random()*3);
+        switch(R){
+        case 0:
+          pickMsg("他の所で採取してみよー！&　");
+          break;
+        case 1:
+          pickMsg("次に行こー！&　");
+          break;
+        case 2:
+          pickMsg("面白いもの落ちてないかな？&　");
+          break;
+        }
+      }
+      Extras[0]=0;
+      point+=1;
+      decksNow+=1;
+      decksNow2+=1;
+      se2.play();
+      Exlists[1].text="連鎖：0";
+      if(point>=p || !decks.length){
+        //end
+        drawbuttom(240,330,decks.length,1,50,40);
+        mLock=true;
+        cLock=true;
+    if(!decks.length){
+    var N=0;
+    var TT=deckfaces[deckfaces.length-1]
+    for(var i=0;i<6;i++){
+      if(hands[i].length){
+        var A=hands[i][hands[i].length-1]%10;
+        var B=TT%10;
+        if(A==0){A+=10};
+        if(B==0){B+=10};
+        var E=Math.abs(B-A);
+        if(E==1 || E==9){
+          N+=1;
+        }
+      }
+    }
+    if(N==0){
+      Gameover();
+    }}
+        return true;
+      }else{
+        cLock=true;
+        DeckReset_H(p,point,1);
+      }
+    }
+    break;
+  }
+  };
+function pickMsg(word){
+  for( var lines=word.split( "&" ), i=0, l=lines.length; l>i; i++ ){
+    Exlists[4][i].text=lines[i];
+  };
+  }
 function CardTurn(p=0){
   //カードめくり@スパイダー
       for(var i=0;i<Cardlists.length;i++){
@@ -4258,6 +5168,112 @@ function handleUp(event) {
       }
     }
 }};
+function handleClick(event){
+  //ヘニル　山札の数とプラスマイナス1なら移動する
+  //1は11としても扱える
+  if(cLock && mLock && opLock==0){
+    var I=Math.floor(this.card/100);
+    var J=this.card%100;
+    if(J==hands[I].length-1){
+      var TT=deckfaces[deckfaces.length-1]
+      console.log(hands[I][J],TT);
+      var A=hands[I][J]%10;
+      var B=TT%10;
+      if(A==0){A+=10};
+      if(B==0){B+=10};
+      //1-10,11-20...
+      var E=Math.abs(B-A);
+      if(E==1 || E==9){
+        if(Extras[0]>=5){se10.play();}else{se12.play();}        
+        var T=Cardlists[I][J];
+        var newCard = new createjs.Bitmap(Card_src[hands[I][J]]);
+        newCard.x=T.x;
+        newCard.y=T.y;
+        deckmap.addChild(newCard);
+        createjs.Tween.get(newCard)
+        .to({x:370,y:280},80)
+        .call(endPhase);
+        field.removeChild(T)
+        Extras[0]+=1;
+        deckfaces.push(hands[I][J]);
+        hands[I].pop();
+        duelLog.push({card:hands[I][J],from:I,to:-1});
+      }
+    }
+  };
+  function endPhase(){
+    Exlists[1].text="連鎖："+Extras[0];
+    var A;
+    var B;
+    switch(Extras[0]){
+    case 1:
+    case 2:
+      var R=Math.floor(Math.random()*henirarea[0].Nitem[Extras[1]].length);
+      A=henirarea[0].Nitem[Extras[1]][R];
+      B=1+Math.floor(Math.random()*2)
+      break;
+    case 3:
+      var R=Math.floor(Math.random()*henirarea[0].Nitem[Extras[1]].length);
+      A=henirarea[0].Nitem[Extras[1]][R];
+      B=3+Math.floor(Math.random()*2)
+      break;
+    case 4:
+    case 5:
+      var R=Math.floor(Math.random()*henirarea[0].Ritem[Extras[1]].length);
+      A=henirarea[0].Ritem[Extras[1]][R];
+      B=1+Math.floor(Math.random()*3)
+      break;
+    default:
+      var R=Math.floor(Math.random()*henirarea[0].SRitem[Extras[1]].length);
+      A=henirarea[0].SRitem[Extras[1]][R];
+      B=1+Math.floor(Math.random()*3)
+      break;
+    }
+    itemA.findIndex(value=>value.id==A);
+    Extras[1].text=itemA[A].name;
+    if(Extras[0]>=7){
+      if(Extras[1]==0){
+        pickMsg(itemA[A].name+"を"+B+"個ゲットしたよ！&カッターが止まらない！");
+      }else{
+        pickMsg(itemA[A].name+"を"+B+"個ゲットしたよ！&ドリルが止まらない！");
+      }
+    }else if(Extras[0]>=5){
+    pickMsg(itemA[A].name+"を"+B+"個ゲットしたよ！&これ、珍しそう！");
+    }else if(Extras[0]>=3){
+    pickMsg("続けて"+itemA[A].name+"を"+B+"個ゲットしたよ！&あれもこれも、ぜーんぶあたしのもの！");
+    }else if(Extras[0]>=2){
+    pickMsg("続けて"+itemA[A].name+"を"+B+"個ゲットしたよ！");
+    }else{
+    pickMsg(itemA[A].name+"を"+B+"個ゲットしたよ！&　");
+    }
+    var Ary=Array(B);
+    Ary.fill(A);
+    Exlists[3]=Exlists[3].concat(Ary);
+    console.log(Exlists[3]);
+    cLock=true;
+    //end判定
+    var M=0;
+    var N=0;
+    var TT=deckfaces[deckfaces.length-1]
+    for(var i=0;i<6;i++){
+      if(hands[i].length){
+        M+=1;
+        var A=hands[i][hands[i].length-1]%10;
+        var B=TT%10;
+        if(A==0){A+=10};
+        if(B==0){B+=10};
+        var E=Math.abs(B-A);
+        if(E==1 || E==9){
+          N+=1;
+        }
+      }
+    }
+    if(M==0 || (N==0 && !decks.length)){
+      Gameover();
+    }
+    return true;
+  }
+}
 function SoundConfig(event,p=0){
   //console.log('soundconfig',p)
   if(p!==0){
@@ -4306,6 +5322,14 @@ function SoundConfig(event,p=0){
         break;
       case 5:
         Bgm =new Music(bgm5data);
+        Bgm.playMusic();
+        break;
+      case 6:
+        Bgm =new Music(bgm6data);
+        Bgm.playMusic();
+        break;
+      case 7:
+        Bgm =new Music(bgm7data);
         Bgm.playMusic();
         break;
       default:
@@ -4448,6 +5472,16 @@ function OptionConfig(){
           option_bt.x=152;
           option_bt.y=690;
           Configmap.addChild(option_bt)
+          option_bt.addEventListener("click", {handleEvent:saveDLcomfirm});
+          function saveDLcomfirm(){
+          var result = window.confirm('セーブファイルをダウンロードします！');
+          if( result) {
+          console.log('save');
+          saveDL();
+              }else{
+          console.log('save cancelled');
+              }
+          }
           var option_bt5 = new createjs.Bitmap('soL_batu.png');
           option_bt5.x=612;
           option_bt5.y=698;
@@ -4556,18 +5590,34 @@ if(p==0){
   Itemyard.removeAllChildren();
   var Invbar = new createjs.Shape();
   Invbar.graphics.beginFill("black");
-  Invbar.graphics.drawRect(690, 55, 110, 480);
+  Invbar.graphics.drawRect(690, 55, 110, 460);
   Invbar.alpha=0.5;
   Itemyard.addChild(Invbar);
+  var shape = new createjs.Shape();
+  shape.graphics.beginFill("#bae0c3");
+  shape.graphics.beginStroke("#617d68");
+  shape.graphics.setStrokeStyle(2);
+  shape.graphics.drawRect(690, 55, 108, 35);
+  Itemyard.addChild(shape);
+  if(UserLibrary.indexOf(1)!==-1){
+  var T=new createjs.Text("特殊","24px serif","#46574a");
+  T.x=710;
+  }else{
+  var T=new createjs.Text("アイテム","24px serif","#46574a");
+  T.x=695;
+  }
+  T.y=58;
+  Itemyard.addChild(T);
   var Hash=inventory.filter(value=>value.cleared!==0);
   Invbar.addEventListener("mousedown", {hash:Hash.length,handleEvent:itemDown});
   Invbar.addEventListener("pressmove", {hash:Hash.length,handleEvent:itemMove});
   var Itemmap = new createjs.Container();//インベントリ
+  var Materialmap = new createjs.Container();
   Itemyard.addChild(Itemmap);
   var shapeMask3 = new createjs.Shape();
           shapeMask3.graphics
                 .beginFill("gold")
-                .drawRect(700, 55, 100, 480);
+                .drawRect(700, 90, 100, 425);
   Itemmap.mask = shapeMask3;
     itemAry=[];
     function itemDown(){
@@ -4577,13 +5627,13 @@ if(p==0){
     function itemMove(){
       Itemmap.y = stage.mouseY-dragPointY;
       if(Itemmap.y>0){Itemmap.y=0};
-      if(this.hash<=7 && Itemmap.y<0){Itemmap.y=0};
-      if(this.hash>7 && Itemmap.y<-(this.hash-7)*66){Itemmap.y=-(this.hash-7)*66};
+      if(this.hash<7 && Itemmap.y<0){Itemmap.y=0};
+      if(this.hash>=7 && Itemmap.y<-(this.hash*66-415)){Itemmap.y=-(this.hash*66-415)};
     }
   for(var i=0;i<7;i++){
       var shape = new createjs.Shape();
       shape.graphics.beginFill("white");
-      shape.graphics.drawRect(710, 60+(66*i), 64, 64);
+      shape.graphics.drawRect(710, 95+(66*i), 64, 64);
       shape.alpha=0.7;
       Itemmap.addChild(shape);
     }
@@ -4593,20 +5643,22 @@ if(p==0){
     shape.graphics.beginFill("#bae0c3");
     shape.graphics.beginStroke("#617d68");
     shape.graphics.setStrokeStyle(2);
-    shape.graphics.drawRect(710, 60+(66*itemAry.length), 64, 64);
+    shape.graphics.drawRect(710, 95+(66*itemAry.length), 64, 64);
     Itemmap.addChild(shape);
     shape.addEventListener("click", {card:i,handleEvent:Equipitem});
     shape.addEventListener("mouseover", {card:i,handleEvent:ItemDetail});
     shape.addEventListener("mouseout", {card:-1,handleEvent:ItemDetail});
+    shape.addEventListener("mousedown", {hash:Hash.length,handleEvent:itemDown});
+    shape.addEventListener("pressmove", {hash:Hash.length,handleEvent:itemMove});
     var T =new createjs.Bitmap(Item_src[i]);
     T.x=710;
-    T.y=60+(66*itemAry.length);
+    T.y=95+(66*itemAry.length);
     T.scale=0.5;
     Itemmap.addChild(T);
     if(inventory[i].cleared <=-1){
     var shape = new createjs.Shape();
       shape.graphics.beginFill("black");
-      shape.graphics.drawRect(710, 60+(66*itemAry.length), 64, 64);
+      shape.graphics.drawRect(710, 95+(66*itemAry.length), 64, 64);
       shape.alpha=0.7;
       Itemmap.addChild(shape);
     }
@@ -4616,7 +5668,7 @@ if(p==0){
   if(equipeditem>=0){
     var E=itemAry.indexOf(equipeditem)
     Invcursor.x=710;
-    Invcursor.y=60+(66*E);
+    Invcursor.y=90+(66*E);
     Invcursor.alpha=1;
   }else{
     Invcursor.alpha=0; 
@@ -4629,10 +5681,75 @@ if(p==0){
   var IDtext=[];
   for (var i=0;i<3;i++){
   var T=new createjs.Text("　","20px serif","white");
+  if(UserLibrary.indexOf(1)!==-1){
+  T.x=310;
+  }else{
   T.x=30;
+  }
   T.y=521+22*i;
   Itemyard.addChild(T);
   IDtext.push(T);
+  }
+  if(UserLibrary.indexOf(1)!==-1){
+    console.log('MatConfig');
+    IDtextbg.x+=250;
+    var Matbar = new createjs.Shape();
+    Matbar.graphics.beginFill("black");
+    Matbar.graphics.drawRect(805, 55, 262, 460);
+    Matbar.alpha=0.5;
+    Itemyard.addChild(Matbar);
+    Itemyard.addChild(Materialmap);
+    var shape = new createjs.Shape();
+    shape.graphics.beginFill("#bae0c3");
+    shape.graphics.beginStroke("#617d68");
+    shape.graphics.setStrokeStyle(2);
+    shape.graphics.drawRect(805, 55, 262, 35);
+    Itemyard.addChild(shape);
+    var T=new createjs.Text("素材","24px serif","#46574a");
+    T.x=910;
+    T.y=58;
+    Itemyard.addChild(T);
+    var shapeMask3 = new createjs.Shape();
+            shapeMask3.graphics
+                  .beginFill("gold")
+                  .drawRect(800, 55, 280, 460);
+    Materialmap.mask = shapeMask3;
+    var H=UserItem.filter(value=>value>0);
+    var Hash=H.length*25;
+    Matbar.addEventListener("mousedown", {hash:Hash,handleEvent:MatDown});
+    Matbar.addEventListener("pressmove", {hash:Hash,handleEvent:MatMove}); 
+    var I=0;
+  for(var i=0;i<UserItem.length;i++){
+    if(UserItem[i]>0){
+      var t = new createjs.Shape();
+      t.graphics.beginFill("black");
+      t.graphics.drawRect(815, 100+25*I, 245, 25);
+      t.alpha=0.6;
+      Materialmap.addChild(t);
+      var T=new createjs.Text(itemA[i].name,"20px serif","white");
+      T.x=815;
+      T.y=100+25*I;
+      Materialmap.addChild(T);
+      var T=new createjs.Text(" ×"+UserItem[i],"20px serif","white");
+      T.x=1000;
+      T.y=100+25*I;
+      Materialmap.addChild(T);
+      t.addEventListener("mousedown", {hash:Hash,handleEvent:MatDown});
+      t.addEventListener("pressmove", {hash:Hash,handleEvent:MatMove}); 
+      t.addEventListener("mouseover", {card:i,handleEvent:MatDetail_1});
+      t.addEventListener("mouseout", {card:-1,handleEvent:MatDetail_1});
+      I+=1;
+    }}
+  function MatDown(){
+    dragPointX = stage.mouseX - Materialmap.x;
+    dragPointY = stage.mouseY - Materialmap.y;
+  }
+  function MatMove(){
+    Materialmap.y = stage.mouseY-dragPointY;
+    if(Materialmap.y>0){Materialmap.y=0};
+    if(this.hash<400 && Materialmap.y<0){Materialmap.y=0};
+    if(this.hash>=400 && Materialmap.y<-(this.hash-400)){Materialmap.y=-(this.hash-400)};
+  }
   }
   return true;
 }
@@ -4640,12 +5757,22 @@ if(opLock!==4){
 if(Itemswitch==0){
   Itemswitch=1;
   se11.play();
-  createjs.Tween.get(Itemyard)
-  .to({x:10},150, createjs.Ease.backOut)
-}else{
+    if(UserLibrary.indexOf(1)!==-1){
+      createjs.Tween.get(Itemyard)
+      .to({x:-270},250, createjs.Ease.backOut)
+      }else{
+      createjs.Tween.get(Itemyard)
+      .to({x:10},150, createjs.Ease.backOut)
+    }
+  }else{
   se11.play();
-  createjs.Tween.get(Itemyard)
-  .to({x:110},150, createjs.Ease.backOut)
+    if(UserLibrary.indexOf(1)!==-1){
+      createjs.Tween.get(Itemyard)
+      .to({x:110},250, createjs.Ease.backOut)
+      }else{
+      createjs.Tween.get(Itemyard)
+      .to({x:110},150, createjs.Ease.backOut)
+  }
   Itemswitch=0;
 }};
 function ItemDetail(){
@@ -4665,6 +5792,23 @@ function ItemDetail(){
       break;
   }
 }
+function MatDetail_1(){
+  switch(this.card){
+    case -1:
+      IDtextbg.alpha=0;
+      for(var i=0;i<3;i++){IDtext[i].text="　"}
+      break;
+    default:
+      IDtextbg.alpha=0.5;
+      var detail=itemA[this.card].name+"："+itemA[this.card].detail
+      for( var lines=detail.split( "&" ), i=0, l=lines.length; l>i; i++ ) {
+        if(i>=3){break};
+        var line = lines[i];
+        IDtext[i].text=line;
+      };
+      break;
+  }
+}
 function Equipitem(){
     if(equipeditem!==this.card){
       if(inventory[this.card].cleared >0){
@@ -4673,7 +5817,7 @@ function Equipitem(){
       equipeditem=ID;
       var E=itemAry.indexOf(this.card);
       Invcursor.x=710;
-      Invcursor.y=60+(66*E);
+      Invcursor.y=95+(66*E);
       Invcursor.alpha=1;
       }
     }else{
@@ -4683,6 +5827,569 @@ function Equipitem(){
     }
 }
 };
+var AsmAry=[]
+function AsmConfig(){
+  //錬成を行う
+  //加工→1つの材料を選んで分解や精製を行います。
+  //製錬→クリソナを生み出します。
+  //錬成⇒クリソナを使って、新たな物質を生み出します。
+  //レシピから作る　自分で作る
+if(AsmAry.length){
+  for(var i=0;i<AsmAry.length;i++){
+    field.removeChild(AsmAry[i])
+  }
+};
+AsmAry=[];
+if(opLock==0){
+field.removeAllChildren();
+opLock=12;
+se11.play();
+var BG = new createjs.Bitmap("Don_bg4.png");
+BG.alpha=0;
+field.addChild(BG);
+var shape = new createjs.Shape();
+shape.graphics.beginFill("#bae0c3");
+shape.graphics.beginStroke("#617d68");
+shape.graphics.setStrokeStyle(2);
+shape.graphics.drawRect(50, 280, 200, 35);
+field.addChild(shape);
+AsmAry.push(shape);
+var shape = new createjs.Shape();
+shape.graphics.beginFill("#bae0c3");
+shape.graphics.beginStroke("#617d68");
+shape.graphics.setStrokeStyle(2);
+shape.graphics.drawRect(270, 280, 200, 35);
+field.addChild(shape);
+AsmAry.push(shape);
+var shape = new createjs.Shape();
+shape.graphics.beginFill("#bae0c3");
+shape.graphics.beginStroke("#617d68");
+shape.graphics.setStrokeStyle(2);
+shape.graphics.drawRect(490, 280, 200, 35);
+field.addChild(shape);
+AsmAry.push(shape);
+var T=new createjs.Text("加工","24px serif","#46574a");
+T.x=55;
+T.y=283;
+field.addChild(T);
+AsmAry.push(T);
+var T=new createjs.Text("製錬","24px serif","#46574a");
+T.x=275;
+T.y=283;
+field.addChild(T);
+AsmAry.push(T);
+var T=new createjs.Text("錬成","24px serif","#46574a");
+T.x=495;
+T.y=283;
+field.addChild(T);
+AsmAry.push(T);
+var shape = new createjs.Shape();
+shape.graphics.beginFill("black");
+shape.graphics.drawRect(50, 480, 600, 35);
+shape.alpha=0.7
+field.addChild(shape);
+var DetailText=new createjs.Text("　","24px serif","white");
+DetailText.x=55;
+DetailText.y=483;
+field.addChild(DetailText);
+AsmAry.push(shape)
+AsmAry.push(DetailText);
+var option_bt5 = new createjs.Bitmap('soL_batu.png');
+  option_bt5.x=700;
+  option_bt5.y=60;
+  option_bt5.scale=0.5;
+  field.addChild(option_bt5)
+  option_bt5.addEventListener("click", {card:10,handleEvent:GameReady});
+  var shapeMask3 = new createjs.Shape();
+shapeMask3.graphics
+      .beginFill("gold")
+      .drawRect(30, 53, 730, 480);
+field.mask = shapeMask3;
+createjs.Tween.get(BG)
+.to({alpha:0.8},100);
+AsmAry[0].addEventListener("click", {card:1,handleEvent:Assemble});
+AsmAry[1].addEventListener("click", {card:2,handleEvent:Assemble});
+AsmAry[2].addEventListener("click", {card:3,handleEvent:Assemble});
+AsmAry[0].addEventListener("mouseover", {card:1,handleEvent:Asmdetail});
+AsmAry[1].addEventListener("mouseover", {card:2,handleEvent:Asmdetail});
+AsmAry[2].addEventListener("mouseover", {card:3,handleEvent:Asmdetail});
+}
+function Asmdetail(){
+  switch(this.card){
+    case 1:
+      DetailText.text="加工/1つの材料を選んで分解や精製を行います。"
+      break;
+    case 2:
+      DetailText.text="製錬/クリソナを製錬し、宝石を作り出します。"
+      break;
+    case 3:
+      DetailText.text="錬成/クリソナを使って、新たな物質を生み出します。"
+      break;
+  }
+}
+};
+function Assemble(){
+  Ct.removeAllChildren();
+  se11.play();
+  opLock=12;
+  switch(this.card){
+    case 1:
+      //加工
+      if(AsmAry.length){
+        for(var i=0;i<AsmAry.length;i++){
+          field.removeChild(AsmAry[i])
+        }
+      };
+      AsmAry=[];
+      var Materialmap = new createjs.Container();
+        var Matbar = new createjs.Shape();
+        Matbar.graphics.beginFill("black");
+        Matbar.graphics.drawRect(55, 80, 262, 380);
+        Matbar.alpha=0.5;
+        field.addChild(Matbar);
+        field.addChild(Materialmap);
+        AsmAry.push(Matbar);
+        AsmAry.push(Materialmap);
+        var shape = new createjs.Shape();
+        shape.graphics.beginFill("#bae0c3");
+        shape.graphics.beginStroke("#617d68");
+        shape.graphics.setStrokeStyle(2);
+        shape.graphics.drawRect(55, 60, 262, 35);
+        field.addChild(shape);
+        var T=new createjs.Text("加工","24px serif","#46574a");
+        T.x=60;
+        T.y=64;
+        field.addChild(T);
+        AsmAry.push(shape);
+        AsmAry.push(T);
+        var shapeMask3 = new createjs.Shape();
+                shapeMask3.graphics
+                      .beginFill("gold")
+                      .drawRect(55, 80, 262, 400);
+        Materialmap.mask = shapeMask3;
+        var shape = new createjs.Shape();
+        shape.graphics.beginFill("black");
+        shape.graphics.drawRect(55, 475, 600, 50);
+        shape.alpha=0.7
+        field.addChild(shape);
+        AsmAry.push(shape);
+        var DetailText=new createjs.Text("　","20px serif","white");
+        DetailText.x=55;
+        DetailText.y=477;
+        field.addChild(DetailText);
+        AsmAry.push(DetailText);
+        var DetailText=new createjs.Text("　","20px serif","white");
+        DetailText.x=55;
+        DetailText.y=502;
+        field.addChild(DetailText);
+        AsmAry.push(DetailText);
+        field.addChild(Ct);
+        var I=0;
+      for(var i=0;i<disassemble.length;i++){
+        if(UserItem[disassemble[i]]>0){
+          var t = new createjs.Shape();
+          t.graphics.beginFill("black");
+          t.graphics.drawRect(55, 100+25*I, 265, 25);
+          t.alpha=0.6;
+          Materialmap.addChild(t);
+          var T=new createjs.Text(itemA[disassemble[i]].name,"20px serif","white");
+          T.x=65;
+          T.y=102+25*I;
+          Materialmap.addChild(T);
+          var T=new createjs.Text(" ×"+UserItem[disassemble[i]],"20px serif","white");
+          T.x=260;
+          T.y=102+25*I;
+          Materialmap.addChild(T);
+          t.addEventListener("mouseover", {card:disassemble[i],handleEvent:Matdetail});
+          t.addEventListener("click", {type:0,product:disassemble[i],loop:1,handleEvent:Alchemyset});
+          I+=1;
+        }}
+      break;
+  }
+}
+function Matdetail(){
+  var detail=itemA[this.card].detail;
+  for( var lines=detail.split( "&" ), i=0, l=lines.length; l>i; i++ ) {
+    var line = lines[i] ;
+    AsmAry[AsmAry.length-2+i].text=line;
+    if(i==1){break};
+  };
+}
+var Ct = new createjs.Container();
+function Alchemyset(e,type,product,loop=1){
+  //ALchemyへのつなぎ,type0,1=>プレビュー画面表示 2,3=>実行,loop=>実行回数
+  if(opLock==10){return false};
+  se11.play();
+  Ct.removeAllChildren();
+  type=this.type;
+  product=this.product;
+  loop=this.loop;
+  var vproname=product
+  var vpronum=0
+  var vmatnameA=[]
+  var vmatnumA=[]
+  if(loop<=0){loop=1}
+  if(loop>UserItem[vproname]){loop=UserItem[vproname]};
+  if(type==0 || type==2){//分解プレビュー
+  switch (product){
+    case 5:
+    if(type==2){
+    Alchemy(0,[5],[1],[10,6],[2,1],loop);
+               }
+    if(type==0){
+    vpronum=1*loop;
+    vmatnameA.push(10,6);
+    vmatnumA.push(2,1);
+    for(var i=0;i<vmatnumA.length;i++){
+      vmatnumA[i]*=loop;
+      }
+    }
+  break;
+   default:
+      //Message(-1,"加工出来ないアイテム",3)
+  return false;
+  }
+  //描画と分解可否判定
+  if(type==0){
+    var shape = new createjs.Shape();
+    shape.graphics.beginFill("black");
+    shape.graphics.drawRect(350, 80, 300, 380);
+    shape.alpha=0.7
+    Ct.addChild(shape);
+    var shape = new createjs.Shape();
+    shape.graphics.beginFill("#bae0c3");
+    shape.graphics.beginStroke("#617d68");
+    shape.graphics.setStrokeStyle(2);
+    shape.graphics.drawRect(350, 60, 300, 40);
+    Ct.addChild(shape);
+    var T=new createjs.Text("いくつ加工する？","24px serif","#46574a");
+    T.x=360;
+    T.y=65;
+    Ct.addChild(T);
+    var shape = new createjs.Shape();
+    shape.graphics.beginFill("#bae0c3");
+    shape.graphics.beginStroke("#617d68");
+    shape.graphics.setStrokeStyle(2);
+    shape.graphics.drawRect(350, 370, 150, 50);
+    Ct.addChild(shape);
+    shape.addEventListener("click", {type:type,product:product,loop:loop-1,handleEvent:Alchemyset});
+    var shape = new createjs.Shape();
+    shape.graphics.beginFill("#bae0c3");
+    shape.graphics.beginStroke("#617d68");
+    shape.graphics.setStrokeStyle(2);
+    shape.graphics.drawRect(500, 370, 150, 50);
+    Ct.addChild(shape);
+    shape.addEventListener("click", {type:type,product:product,loop:loop+1,handleEvent:Alchemyset});
+    var shape = new createjs.Shape();
+    shape.graphics.beginFill("#bae0c3");
+    shape.graphics.beginStroke("#617d68");
+    shape.graphics.setStrokeStyle(2);
+    shape.graphics.drawRect(350, 420, 300, 40);
+    Ct.addChild(shape);
+    shape.addEventListener("click", {type:2,product:product,loop:loop,handleEvent:Alchemyset});
+    var T=new createjs.Text("OK","24px serif","#46574a");
+    T.x=480;
+    T.y=422;
+    Ct.addChild(T);
+    var S = new createjs.Bitmap('Winedom_arrowleft.png');
+    S.scale=0.4;
+    S.x=420;
+    S.y=370;
+    Ct.addChild(S);
+    var S = new createjs.Bitmap('Winedom_arrowright.png');
+    S.scale=0.4;
+    S.x=550;
+    S.y=370;
+    Ct.addChild(S);
+    var T=new createjs.Text(itemA[vproname].name,"24px serif","white");
+    T.x=360;
+    T.y=120;
+    Ct.addChild(T);
+    var T=new createjs.Text(" ×"+vpronum+"/"+UserItem[vproname],"24px serif","white");
+    T.x=360+180;
+    T.y=120;
+    Ct.addChild(T);
+    var S = new createjs.Bitmap('Winedom_arrowdown.png');
+    S.scale=0.3;
+    S.x=480;
+    S.y=160;
+    Ct.addChild(S);
+    for(var i=0;i<vmatnameA.length;i++){
+      var T=new createjs.Text("　","24px serif","white");
+      T.x=360;
+      T.y=210+30*i;
+      Ct.addChild(T);
+      var P=UserLibrary[vmatnameA[i]]
+      if(P==0){
+      T.text="???";
+      }else{
+      T.text=itemA[vmatnameA[i]].name;
+      }
+      var T=new createjs.Text("×"+vmatnumA[i],"24px serif","white");
+      T.x=360+180
+      T.y=210+30*i;
+      Ct.addChild(T); 
+    }
+  }
+  if(type==2){
+  //Message(0,"できたー！",3)
+  }
+  }
+  if(type==1 || type==3){
+  switch (product){
+    case 2:
+    case 3:
+    case 4:
+    case 5:
+    case 6:
+    case 7:
+  for(var i=0; i<loop ; i++){
+  daypass+=0.1;
+  if(type==3){
+    Alchemy(1,product,1,1,1);
+             }
+  }
+  if(type==1){
+  vpronum=1*loop;
+  vmatnameA=1;
+  vmatnumA=1*loop;
+  }
+      break;
+    case 10:
+  for(var i=0; i<loop ; i++){
+  daypass+=0.5
+  if(type==3){
+  Alchemy(1,product,1,9,3,5,1);
+  }
+  }
+  if(type==1){
+  vpronum=1*loop;
+  vmatnameA=9;
+  vmatnumA=3*loop;
+  vmatnameB=5;
+  vmatnumB=1*loop;
+  }
+      break;
+  default:
+  Message(-1,"出来ないよー。",3)
+  }
+  //描画と錬成可否判定
+  if(type==1){
+  cx1.clearRect(x-12,y-52,255,365)
+  cx2.clearRect(x-12,y-52,255,365)
+  cx3.clearRect(x-12,y-52,255,365)
+  Message(-1,"いくつ錬成しようかな？",3)
+  cx2.font = "20px 'Century Gothic'";
+  cx2.fillText("個数/現在所持数",x+40,y-25)
+  cx2.font = "16px 'Century Gothic'";
+  var unk=1;
+  for(var i=0;i<vmatnameA.length;i++){
+    var A=UserLibrary[vmatnameA[i]]
+    if(A==0){//知らないアイテム
+    cx2.fillText("???",x,y);
+    unk=0;
+    }else{
+      if(vmatnumA[i]>UserItem[vmatnumA[i]]){//不足
+    cx2.fillStyle = 'red';
+    }
+    cx2.fillText(itemA[vmatnameA].name,x,y)
+    cx2.fillText("×"+vmatnumA[i]+"/"+UserItem[vmatnumA[i]],x+180,y)
+    cx2.fillStyle = "#f0f0f0";
+    }
+    y+=30;  
+  }
+  cx2.fillText("　　 ↓",x,y)
+  y+=30
+  cx2.fillText(itemA[vproname].name,x,y)
+  cx2.fillText("×"+vpronum,x+180,y)
+  //drawsq(x-10,60,250,y);
+  if(unk==0){return false;}
+  }
+  if(type==3){
+  //日数経過
+  //Message(0,"できたー！",3)
+  }}
+  };
+  function Alchemy(type=0,product,pnum,materialA,mnumA,loop=1){
+  //type0=>product to materials, type1=>materials to product
+  //Alchemy(0,[5],[1],[10,6],[2,1],loop);
+  //結果画面描画用意
+  var KitAry=[];
+  cookready(5+loop);
+  function cookready(length=20,word="加工中・・・"){
+    var DL= new createjs.Bitmap("soL_dialogue.png");
+    DL.scale=1.7;
+    DL.x=200;
+    DL.y=180;
+    field.addChild(DL);
+    KitAry.push(DL);
+    createjs.Tween.get(DL)
+    var t=new createjs.Text(word,"bold 26px 'メイリオ'","black");
+    t.x=245;
+    t.y=200;
+    field.addChild(t);
+    KitAry.push(t);
+    var shape = new createjs.Shape();
+    shape.graphics.beginFill("black");
+    shape.graphics.drawRect(250, 365, 300, 10);
+    shape.alpha=0.7;
+    KitAry.push(shape)
+    field.addChild(shape);
+    var Box2 = new createjs.Bitmap("Card_images/soL_SDicon.png");
+    Box2.x=340;
+    Box2.y=255;
+    Box2.scale=0.9
+    field.addChild(Box2);
+    KitAry.push(Box2);
+    createjs.Tween.get(Box2,{loop:true})
+    .to({y:Box2.y-10},5)
+    .wait(800)
+    .to({y:Box2.y},5)
+    .wait(800)
+    window.requestAnimationFrame((ts)=>Cook(ts,length));
+    }
+  function Cook(ts,length=20,tflame=0,sf=0){
+    tflame+=1;
+    if(tflame>length){
+      var shape = new createjs.Shape();
+      shape.graphics.beginFill("rgb(244,177,131)");
+      shape.graphics.drawRect(250+30*sf, 365, 30, 10);
+      KitAry.push(shape)
+      field.addChild(shape);
+      sf+=1;
+      tflame=0;
+    }
+    if(sf>10){
+      for(var i=0;i<KitAry.length;i++){
+        field.removeChild(KitAry[i]);
+      };
+      KitAry=[];
+      se10.play();
+      Ct.alpha=1;
+      cLock=true;
+    }else{
+    window.requestAnimationFrame((ts)=>Cook(ts,length,tflame,sf));
+    }
+  }
+  if(type==0){
+  //ドン
+  opLock=10;
+  Ct.removeAllChildren();
+  Ct.alpha=0;
+  var shape = new createjs.Shape();
+  shape.graphics.beginFill("black");
+  shape.graphics.beginStroke("white");
+  shape.graphics.setStrokeStyle(2);
+  shape.graphics.drawRect(200, 60, 400, 400);
+  shape.alpha=0.7;
+  Ct.addChild(shape);
+  Cstar.x=270;
+  Cstar.y=90;
+  Cstar.rotation=-15;
+  Cstar.scale=0.7
+  Ct.addChild(Cstar);
+  var t=new createjs.Text("RESULT","32px serif","orange");
+  t.x=320;
+  t.y=90;
+  Ct.addChild(t);
+  var shape = new createjs.Shape();
+  shape.graphics.beginFill("#f06787");
+  shape.graphics.drawRect(330, 350, 105, 60);
+  Ct.addChild(shape);
+  shape.addEventListener("click", {card:1,handleEvent:Assemble});
+  var t=new createjs.Text("OK","bold 24px 'メイリオ'","white");
+  t.x=360;
+  t.y=365;
+  Ct.addChild(t); 
+  UserItem[product]-=pnum*loop;
+  for(var i=0;i<materialA.length;i++){
+    UserItem[materialA[i]]+=mnumA[i]*loop;
+    if(UserLibrary[materialA[i]]==0){
+    UserLibrary[materialA[i]]=1;
+    var t=new createjs.Text("new item!!","20px serif","white");
+    t.x=220;
+    t.y=150+30*i;
+    Ct.addChild(t);
+    }
+    var t=new createjs.Text(itemA[materialA[i]].name+"×"+mnumA[i]*loop,"24px serif","white");
+    t.x=330;
+    t.y=150+30*i;
+    Ct.addChild(t);
+    InvConfig(0);
+  }
+  };
+  if(type==1){
+  Useritem[product]+=pnum;
+  Useritem[materialA]-=mnumA;
+  Useritem[materialB]-=mnumB;
+  Useritem[materialC]-=mnumC;
+  Useritem[materialD]-=mnumD;
+  Useritem[materialE]-=mnumE;
+  Useritem[materialF]-=mnumF;
+  //カッ
+  cx2.font = "20px Arial";
+  if(Userlibrary[product]==0){
+    Userlibrary[product]=product
+    cx2.fillText("new item!!",xx-100,yy)
+    };
+  cx2.fillText(itemA[product].name,xx,yy)
+  cx2.fillText("×"+pnum,xx+250,yy)
+  }
+  };
+  function Formula(){
+  //調合レシピと照合する
+  //霓玉を使って失敗したら霓玉だけは返す
+  console.log(mixlist)
+  cx2.font = "36px Arial";
+  var xx=150
+  var yy=180
+  cx2.fillText("RESULT", 150, yy);
+  cx2.font = "24px Arial";
+  cx2.fillText("OK [Z]", 580, 380);
+  cx2.font = "20px Arial"
+  for(var i=0; i<mixlist.length ; i++){
+    yy+=22
+    cx2.fillText(itemA[mixlist[i]].name, xx, yy);
+  }
+  yy+=40
+  mapstate=7;
+  pagestate=0;
+  var result=mixlist.findIndex(value=>value==76);
+  if(result==-1){result=2+Math.floor(Math.random()*6)}else{result=76}
+  //数の一致
+  var A=formulaA.filter(value=>value.Mat.length==mixlist.length);
+  if(A.length==0){
+    cx2.font = "36px Arial";
+    cx2.fillText("調合失敗！", 320, 180);
+    cx2.font = "20px Arial"
+    cx2.fillText("材料は"+itemA[result].name+"になってしまいました。", xx, yy);
+    Useritem[result]+=1;
+    return result;
+  }
+  //中身の一致
+  mixlist.sort(compareFunc)
+  console.log(mixlist,A);
+  for(var i=0; i<mixlist.length ; i++){
+  var A=A.filter(value=>value.Mat[i]==mixlist[i])
+  if(A.length==0){
+    cx2.font = "36px Arial";
+    cx2.fillText("調合失敗！", 320, 180);
+    cx2.font = "20px Arial"
+    cx2.fillText("材料は"+itemA[result].name+"になってしまいました。", xx, yy);
+    Useritem[result]+=1;
+    return result;
+  }}
+  console.log(A[0].Mix);
+    cx2.font = "36px Arial";
+    cx2.fillText("調合成功！", 320, 180);
+    Userlibrary[A[0].Mix]=A[0].Mix
+      cx2.font = "20px Arial"
+    cx2.fillText(itemA[A[0].Mix].name+"のレシピを覚えました！", xx, yy);
+    for(var i=0; i<mixlist.length ; i++){
+      Useritem[mixlist[i]]+=1
+      }
+  return A[0].Mix
+  };
 canvas5.onmousedown = mouseDownListener;
 function mouseDownListener(e) {
   createjs.Ticker.addEventListener("tick", MouseCircle);
@@ -4709,7 +6416,6 @@ window.addEventListener("keyup", keyupHandler, false);
     key119=0;//F8
   }
   }
-
   window.addEventListener("keydown", keyDownHandler, false);
 	function keyDownHandler(e) {
     if(debugmode){console.log(e.keyCode,e.key,cLock)};
@@ -4763,367 +6469,393 @@ window.addEventListener("keyup", keyupHandler, false);
       }
     }
     };
-
-    function Dialogue(word,detail="　",yes=1,no=-1,ok=-1,okx=345,oky=300,okw=105,okh=60){
-      //ok 0->OKボタンにする
+  function Dialogue(word,detail="　",yes=1,no=-1,ok=-1,okx=345,oky=300,okw=105,okh=60){
+    //ok 0->OKボタンにする
+    Loadmap.removeAllChildren();
+    Loadmap.alpha=1;
+    Loadmap.x=800;
+    var shape = new createjs.Shape();
+    shape.graphics.beginFill("rgba(20,20,20,0.7)");
+    shape.graphics.drawRect(0, 0, 800, 600);
+    shape.alpha=0;
+    Loadmap.addChild(shape);
+    createjs.Tween.get(shape)
+    .wait(120)
+    .to({alpha:1},500);
+    var DL= new createjs.Bitmap("soL_dialogue.png");
+    DL.scale=1.7;
+    DL.x=190;
+    DL.y=180;
+    Loadmap.addChild(DL);
+    var t=new createjs.Text(word,"bold 26px 'メイリオ'","black");
+    t.x=245;
+    t.y=200;
+    Loadmap.addChild(t);
+    for( var lines=detail.split( "&" ), i=0, l=lines.length; l>i; i++ ) {
+      var line = lines[i] ;
+      var t=new createjs.Text(line,"bold 18px 'メイリオ'","black");
+      t.x=210;
+      t.y=260+i*20;
+      Loadmap.addChild(t);
+    };
+    if(ok==-1){
+    var shape = new createjs.Shape();
+    shape.graphics.beginFill("#ff3838");
+    shape.graphics.drawRect(220, 300, 120, 60);
+    Loadmap.addChild(shape);
+    shape.addEventListener("click", {card:yes,handleEvent:DialogueResult});
+    var shape = new createjs.Shape();
+    shape.graphics.beginFill("#3898ff");
+    shape.graphics.drawRect(460, 300, 120, 60);
+    Loadmap.addChild(shape);
+    shape.addEventListener("click", {card:no,handleEvent:DialogueResult});
+    var t=new createjs.Text("YES","bold 24px 'メイリオ'","white");
+    t.x=250;
+    t.y=320;
+    Loadmap.addChild(t);
+    var t=new createjs.Text("NO","bold 24px 'メイリオ'","white");
+    t.x=500;
+    t.y=320;
+    Loadmap.addChild(t);
+    }else{
+    var shape = new createjs.Shape();
+    shape.graphics.beginFill("#ff3838");
+    shape.graphics.drawRect(okx, oky, okw, okh);
+    Loadmap.addChild(shape);
+    shape.addEventListener("click", {card:yes,handleEvent:DialogueResult});
+    var t=new createjs.Text(ok,"bold 24px 'メイリオ'","white");
+    t.x=okx+okw/4;
+    t.y=oky+okh/4;
+    Loadmap.addChild(t); 
+    }
+    createjs.Tween.get(Loadmap)
+    .to({x:0},150);
+    function DialogueResult(e){
+      se7.play();
+      switch(this.card){
+        case 1:
+          //game over
+          Gameover(1);
+          break;
+        case 2:
+          Gamestart();
+          break;
+        case 3:
+          retryswitch+=1;
+          Gameretry();
+          break;
+        case 4:
+          //shut down
+            Bgm.stop();
+            musicnum=0;
+            //mute="ON";
+          Titleyard.removeAllChildren();
+          tweeNroom.paused=true;
+          Configmap.removeAllChildren();
+          Titleyard.addChild(t);
+          TitleGrh();
+          var t = new createjs.Text("v1.0/Click Card to START", "24px serif", "white");
+          t.textAlign = "end";
+          t.x=790;
+          Titleyard.addChild(t);
+          var t = new createjs.Text("音の設定ができます。（あとから変更可能）", "24px serif", "white");
+          t.textAlign = "end";
+          t.x=800;
+          t.y=30;
+          Titleyard.addChild(t);
+          gamestate=11;
+          Title();
+          break;
+        case 5:
+          //ローカルストレージのデータを削除
+          saveDel();
+          break;
+        default:
+          //no
+          if(this.card<-1){
+            Loadmap.alpha=0;
+            opLock=-this.card;
+            return true;
+          }
+          break;
+      }
+      Loadmap.alpha=0;
+      opLock=0;
+    }}
+  function MsgNext(p=-1){
+  if(cLock){
+  if(MsgAry.length){
+    if(p!==-1){se7.play()};
+    var Ary=MsgAry.shift();
+    if(MsgAry.length && MsgAry[0][0]=="end"){MsgAry.shift()};
+    switch(Ary.length){
+    case 1:
+      Message(Ary[0]);
+      break;
+    case 2:
+      Message(Ary[0],Ary[1]);
+      break;
+    case 3:
+      Message(Ary[0],Ary[1],Ary[2]);
+      break;
+    case 4:
+      Message(Ary[0],Ary[1],Ary[2],Ary[3]);
+      break;
+    case 5:
+      Message(Ary[0],Ary[1],Ary[2],Ary[3],Ary[4]);
+      break;
+    case 6:
+      Message(Ary[0],Ary[1],Ary[2],Ary[3],Ary[4],Ary[5]);
+      break;
+    }
+  }else{
+    Loadmap.removeAllChildren();
+    opLock=0;
+  }}};
+  function Message(word,detail="　",chr=0,chrop=0,textspeed=3,first=0){
+    //chrop->差分グラフィックあれば -1->alpha 0
+    cLock=false;
+    if(first==1){
+      opLock=11;
       Loadmap.removeAllChildren();
       Loadmap.alpha=1;
-      Loadmap.x=800;
       var shape = new createjs.Shape();
       shape.graphics.beginFill("rgba(20,20,20,0.7)");
       shape.graphics.drawRect(0, 0, 800, 600);
-      shape.alpha=0;
       Loadmap.addChild(shape);
-      createjs.Tween.get(shape)
-      .wait(120)
-      .to({alpha:1},500);
-      var DL= new createjs.Bitmap("soL_dialogue.png");
-      DL.scale=1.7;
-      DL.x=190;
-      DL.y=180;
-      Loadmap.addChild(DL);
-      var t=new createjs.Text(word,"bold 26px 'メイリオ'","black");
-      t.x=245;
-      t.y=200;
+      shape.addEventListener("click", {handleEvent:MsgNext});
+      var t=new createjs.Bitmap("Esc_enter.png");
+      t.scale=0.7;
       Loadmap.addChild(t);
-      for( var lines=detail.split( "&" ), i=0, l=lines.length; l>i; i++ ) {
-        var line = lines[i] ;
-        var t=new createjs.Text(line,"bold 18px 'メイリオ'","black");
-        t.x=210;
-        t.y=260+i*20;
-        Loadmap.addChild(t);
-      };
-      if(ok==-1){
-      var shape = new createjs.Shape();
-      shape.graphics.beginFill("#ff3838");
-      shape.graphics.drawRect(220, 300, 120, 60);
-      Loadmap.addChild(shape);
-      shape.addEventListener("click", {card:yes,handleEvent:DialogueResult});
-      var shape = new createjs.Shape();
-      shape.graphics.beginFill("#3898ff");
-      shape.graphics.drawRect(460, 300, 120, 60);
-      Loadmap.addChild(shape);
-      shape.addEventListener("click", {card:no,handleEvent:DialogueResult});
-      var t=new createjs.Text("YES","bold 24px 'メイリオ'","white");
-      t.x=250;
-      t.y=320;
-      Loadmap.addChild(t);
-      var t=new createjs.Text("NO","bold 24px 'メイリオ'","white");
-      t.x=500;
-      t.y=320;
-      Loadmap.addChild(t);
-      }else{
-      var shape = new createjs.Shape();
-      shape.graphics.beginFill("#ff3838");
-      shape.graphics.drawRect(okx, oky, okw, okh);
-      Loadmap.addChild(shape);
-      shape.addEventListener("click", {card:yes,handleEvent:DialogueResult});
-      var t=new createjs.Text(ok,"bold 24px 'メイリオ'","white");
-      t.x=okx+okw/4;
-      t.y=oky+okh/4;
-      Loadmap.addChild(t); 
-      }
-      createjs.Tween.get(Loadmap)
-      .to({x:0},150);
-      function DialogueResult(e){
-        se7.play();
-        switch(this.card){
-          case 1:
-            //game over
-            Gameover(1);
-            break;
-          case 2:
-            Gamestart();
-            break;
-          case 3:
-            retryswitch+=1;
-            Gameretry();
-            break;
-          case 4:
-            //shut down
-              Bgm.stop();
-              musicnum=0;
-              //mute="ON";
-            Titleyard.removeAllChildren();
-            tweeNroom.paused=true;
-            Configmap.removeAllChildren();
-            Titleyard.addChild(t);
-            var shape = new createjs.Shape();
-            shape.graphics.beginFill("#3b7353");
-            shape.graphics.drawRect(0, 0, 800, 600); // 長方形を描画
-            Titleyard.addChild(shape); // 表示リストに追加
-            var BG = new createjs.Bitmap("soL_back.png");
-            BG.alpha=0.3;
-            Titleyard.addChild(BG);
-            var t = new createjs.Text("Click Card to START", "24px serif", "white");
-            Titleyard.addChild(t);
-            gamestate=11;
-            Title();
-            break;
-          case 5:
-            //ローカルストレージのデータを削除
-            saveDel();
-            break;
-          default:
-            //no
-            if(this.card<-1){
-              Loadmap.alpha=0;
-              opLock=-this.card;
-              return true;
-            }
-            break;
+      if(MessageText[1].length){
+        for(var i=0;i<MessageText[1].length;i++){
+          Loadmap.removeChild(MessageText[1][i]);
         }
-        Loadmap.alpha=0;
+        MessageText[1]=[];
+      };
+      var DL= new createjs.Bitmap(Chara_src[0]);
+      DL.scale=600/768;
+      DL.alpha=0;
+      DL.x=-30;
+      DL.y=5;
+      Loadmap.addChild(DL);
+      MessageText[1].push(DL);
+      var DL= new createjs.Bitmap(Chara_src[1]);
+      DL.scale=600/768;
+      DL.alpha=0;
+      DL.x=400;
+      DL.y=5;
+      Loadmap.addChild(DL);
+      MessageText[1].push(DL);
+      MessageText[3]=-2;
+      }
+    if(detail=="end"){
+      if(MessageText[4].length){
+        for(var i=0;i<MessageText[4].length;i++){
+          createjs.Tween.get(MessageText[4][i])
+          .to({alpha:0},300)
+          .call(next)
+          function next(){
+          Loadmap.removeChild(MessageText[4][i]);
+          }
+        }
+        MessageText[4]=[];
+        word="　";
+        detail="（空間の亀裂は再び閉じてしまった）";
+      };
+    }
+    switch(word){
+      case "henir":
+        Loadmap.removeAllChildren();
         opLock=0;
-      }}
-    function MsgNext(p=-1){
-    if(cLock){
-    if(MsgAry.length){
-      if(p!==-1){se7.play()};
-      var Ary=MsgAry.shift();
-      if(MsgAry.length && MsgAry[0][0]=="end"){MsgAry.shift()};
-      switch(Ary.length){
+        menu(0,1);
+        cLock=true;
+        return false;
+      case "henirmenu":
+        Loadmap.removeAllChildren();
+        Dialogue("ヘニルの時空","特定のアイテムを使いポータルを活性化すると&ヘニルの時空へ飛び込むことができます。",-1,-1,"OK");
+        cLock=true;
+        return false;
+      case "end":
+        Loadmap.removeAllChildren();
+        opLock=0;
+        cLock=true;
+        return false;
+      case "bg5":
+        if(detail=="start"){
+          word="　";
+          detail="……";
+          var shape = new createjs.Shape();
+          shape.graphics.beginStroke("white");
+          shape.graphics.setStrokeStyle(2);
+          shape.graphics.drawRect(290,90,245,245);
+          Loadmap.addChild(shape);
+          MessageText[4].push(shape);
+          var T=new createjs.Bitmap("Don_bg5.png");
+          T.sourceRect = {x: 150,y: 50,width : 450,height: 450}
+          T.x=300;
+          T.y=100;
+          T.alpha=0;
+          T.scale=0.5;
+          createjs.Tween.get(T)
+          .to({alpha:1},300);
+          Loadmap.addChild(T);
+          MessageText[4].push(T);
+        }
+        break;
+      case "solithia":
+        Loadmap.removeAllChildren();
+        Dialogue("遊び方","テーブルをクリックしてソリティアを始める",-1,-1,"OK");
+        cLock=true;
+        return false;
+      case "collection":
+        Loadmap.removeAllChildren();
+        Dialogue("採取","ヘニルの時空のエリアでは、&採取をして素材を集めることができます。",-1,-1,"OK");
+        cLock=true;
+        return false;
+    }
+    //テキストを消す
+    if(MessageText[0].length){
+      for(var i=0;i<MessageText[0].length;i++){
+        Loadmap.removeChild(MessageText[0][i]);
+      }
+      MessageText[0]=[];
+    };
+    if(MessageText[2].length){
+      for(var i=0;i<MessageText[2].length;i++){
+        Loadmap.removeChild(MessageText[2][i]);
+      }
+      MessageText[2]=[];
+    };
+    if(chr!==MessageText[3]){
+    switch(chr){
       case 1:
-        Message(Ary[0]);
+      //狭間は右側
+      Loadmap.removeChild(MessageText[1][1]);
+      var DL= new createjs.Bitmap(Chara_src[chr]);
+      DL.scale=600/768;
+      DL.alpha=0;
+      DL.x=400;
+      DL.y=5;
+      Loadmap.addChild(DL);
+      MessageText[1][1]=DL;
+      if(chrop!==-2){
+      MessageText[1][0].alpha=0.5;
+      };
+      MessageText[1][1].alpha=0.5;
+      var T=MessageText[1][chr]
+      createjs.Tween.get(T)
+      .to({x:T.x-5,y:T.y-5,alpha:1},150);
+      MessageText[3]=chr;
+        break;
+      case -1:
+        if(chrop!==-2){
+        MessageText[1][0].alpha=0.5;
+        MessageText[1][1].alpha=0.5;
+        };
+        MessageText[3]=chr;
         break;
       case 2:
-        Message(Ary[0],Ary[1]);
+        var T=MessageText[1][0];
+        createjs.Tween.get(T)
+        .to({x:T.x-5,y:T.y+5,alpha:0.5},100);
+        MessageText[3]=chr;
         break;
-      case 3:
-        Message(Ary[0],Ary[1],Ary[2]);
-        break;
-      case 4:
-        Message(Ary[0],Ary[1],Ary[2],Ary[3]);
-        break;
-      case 5:
-        Message(Ary[0],Ary[1],Ary[2],Ary[3],Ary[4]);
-        break;
-      case 6:
-        Message(Ary[0],Ary[1],Ary[2],Ary[3],Ary[4],Ary[5]);
-        break;
-      }
-    }else{
-      Loadmap.removeAllChildren();
-      opLock=0;
-    }}};
-    function Message(word,detail="　",chr=0,chrop=0,textspeed=3,first=0){
-      //chrop->差分グラフィックあれば -1->alpha 0
-      cLock=false;
-      if(first==1){
-        opLock=11;
-        Loadmap.removeAllChildren();
-        Loadmap.alpha=1;
-        var shape = new createjs.Shape();
-        shape.graphics.beginFill("rgba(20,20,20,0.7)");
-        shape.graphics.drawRect(0, 0, 800, 600);
-        Loadmap.addChild(shape);
-        shape.addEventListener("click", {handleEvent:MsgNext});
-        var t=new createjs.Bitmap("Esc_enter.png");
-        t.scale=0.7;
-        Loadmap.addChild(t);
-        if(MessageText[1].length){
-          for(var i=0;i<MessageText[1].length;i++){
-            Loadmap.removeChild(MessageText[1][i]);
-          }
-          MessageText[1]=[];
-        };
-        var DL= new createjs.Bitmap(Chara_src[0]);
+      default:
+        Loadmap.removeChild(MessageText[1][0]);
+        var DL= new createjs.Bitmap(Chara_src[chr]);
         DL.scale=600/768;
         DL.alpha=0;
         DL.x=-30;
         DL.y=5;
         Loadmap.addChild(DL);
-        MessageText[1].push(DL);
-        var DL= new createjs.Bitmap(Chara_src[1]);
-        DL.scale=600/768;
-        DL.alpha=0;
-        DL.x=400;
-        DL.y=5;
-        Loadmap.addChild(DL);
-        MessageText[1].push(DL);
-        MessageText[3]=-2;
-        }
-      if(detail=="end"){
-        if(MessageText[4].length){
-          for(var i=0;i<MessageText[4].length;i++){
-            createjs.Tween.get(MessageText[4][i])
-            .to({alpha:0},300)
-            .call(next)
-            function next(){
-            Loadmap.removeChild(MessageText[4][i]);
-            }
-          }
-          MessageText[4]=[];
-          word="　";
-          detail="（空間の亀裂は再び閉じてしまった）";
-        };
-      }
-      switch(word){
-        case "end":
-          Loadmap.removeAllChildren();
-          opLock=0;
-          cLock=true;
-          return false;
-        case "bg5":
-          if(detail=="start"){
-            word="　";
-            detail="……";
-            var shape = new createjs.Shape();
-            shape.graphics.beginStroke("white");
-            shape.graphics.setStrokeStyle(2);
-            shape.graphics.drawRect(290,90,245,245);
-            Loadmap.addChild(shape);
-            MessageText[4].push(shape);
-            var T=new createjs.Bitmap("Don_bg5.png");
-            T.sourceRect = {x: 150,y: 50,width : 450,height: 450}
-            T.x=300;
-            T.y=100;
-            T.alpha=0;
-            T.scale=0.5;
-            createjs.Tween.get(T)
-            .to({alpha:1},300);
-            Loadmap.addChild(T);
-            MessageText[4].push(T);
-          }
-          break;
-        case "solithia":
-          Loadmap.removeAllChildren();
-          Dialogue("遊び方","テーブルをクリックしてソリティアを始める",-1,-1,"OK");
-          cLock=true;
-          return false;
-      }
-      //テキストを消す
-      if(MessageText[0].length){
-        for(var i=0;i<MessageText[0].length;i++){
-          Loadmap.removeChild(MessageText[0][i]);
-        }
-        MessageText[0]=[];
-      };
-      if(MessageText[2].length){
-        for(var i=0;i<MessageText[2].length;i++){
-          Loadmap.removeChild(MessageText[2][i]);
-        }
-        MessageText[2]=[];
-      };
-      if(chr!==MessageText[3]){
-      switch(chr){
-        case 1:
-        //狭間は右側
-        Loadmap.removeChild(MessageText[1][1]);
-        var DL= new createjs.Bitmap(Chara_src[chr]);
-        DL.scale=600/768;
-        DL.alpha=0;
-        DL.x=400;
-        DL.y=5;
-        Loadmap.addChild(DL);
-        MessageText[1][1]=DL;
-        if(chrop!==-2){
+        MessageText[1][0]=DL;
         MessageText[1][0].alpha=0.5;
-        };
-        MessageText[1][1].alpha=0.5;
+        if(chrop!==-2){
+          MessageText[1][1].alpha=0.5;
+          };
         var T=MessageText[1][chr]
         createjs.Tween.get(T)
-        .to({x:T.x-5,y:T.y-5,alpha:1},150);
+        .to({x:T.x+5,y:T.y-5,alpha:1},150);
         MessageText[3]=chr;
-          break;
-        case -1:
-          MessageText[1][0].alpha=0.5;
-          MessageText[1][1].alpha=0.5;
-          MessageText[3]=chr;
-          break;
-        default:
-          Loadmap.removeChild(MessageText[1][0]);
-          var DL= new createjs.Bitmap(Chara_src[chr]);
-          DL.scale=600/768;
-          DL.alpha=0;
-          DL.x=-30;
-          DL.y=5;
-          Loadmap.addChild(DL);
-          MessageText[1][0]=DL;
-          MessageText[1][0].alpha=0.5;
-          MessageText[1][1].alpha=0.5;
-          var T=MessageText[1][chr]
-          createjs.Tween.get(T)
-          .to({x:T.x+5,y:T.y-5,alpha:1},150);
-          MessageText[3]=chr;
-          break;
+        break;
+    }
       }
-        }
-      if(chrop==-1){
-        var T=MessageText[1][chr];
-        createjs.Tween.get(T)
-        .to({x:T.x-5,y:T.y+5,alpha:0},150);
-      }
-      var DL= new createjs.Bitmap("window_ds.png");
-      DL.scale=600/768;
-      DL.y=0;
-      Loadmap.addChild(DL);
-      if(first==1){
-        DL.y=200;
-        createjs.Tween.get(DL)
-        .to({y:0},150)
-      }
-      MessageText[0].push(DL)
-      var t=new createjs.Text(word,"bold 26px 'メイリオ'","white");
-      t.x=80;
-      t.y=385;
-      t.textAlign='center';
+    if(chrop==-1){
+      var T=MessageText[1][chr];
+      createjs.Tween.get(T)
+      .to({x:T.x-5,y:T.y+5,alpha:0},150);
+    }
+    var DL= new createjs.Bitmap("window_ds.png");
+    DL.scale=600/768;
+    DL.y=0;
+    Loadmap.addChild(DL);
+    if(first==1){
+      DL.y=200;
+      createjs.Tween.get(DL)
+      .to({y:0},150)
+    }
+    MessageText[0].push(DL)
+    var t=new createjs.Text(word,"bold 26px 'メイリオ'","white");
+    t.x=80;
+    t.y=385;
+    t.textAlign='center';
+    Loadmap.addChild(t);
+    MessageText[2][0]=t;
+    var t=new createjs.Text("▼","bold 18px 'メイリオ'","white");
+    t.x=770;
+    t.y=580;
+    t.alpha=0;
+    Loadmap.addChild(t);
+    MessageText[2][1]=t;
+    createjs.Tween.get(t, {loop: true})
+    .to({y:570},300)
+    .to({y:580},150);
+    for( var lines=detail.split( "&" ), i=0, l=lines.length; l>i; i++ ){
+      var t=new createjs.Text("　","bold 26px 'メイリオ'","white");
+      t.x=5;
+      t.y=450+i*32;
       Loadmap.addChild(t);
-      MessageText[2][0]=t;
-      var t=new createjs.Text("▼","bold 18px 'メイリオ'","white");
-      t.x=770;
-      t.y=580;
-      t.alpha=0;
-      Loadmap.addChild(t);
-      MessageText[2][1]=t;
-      createjs.Tween.get(t, {loop: true})
-      .to({y:570},300)
-      .to({y:580},150);
-      for( var lines=detail.split( "&" ), i=0, l=lines.length; l>i; i++ ){
-        var t=new createjs.Text("　","bold 26px 'メイリオ'","white");
-        t.x=5;
-        t.y=450+i*32;
-        Loadmap.addChild(t);
-        MessageText[0].push(t);
-      };
-      var texti=0;
-      var line=lines[0]
-      var Tx=MessageText[0][1];
-      window.requestAnimationFrame((ts)=>MsgSplit(ts,1,textspeed));
-      function MsgSplit(ts,tflame=1,A=0,B=0,delay=0){
-        //1文字ずつ描画 A->文字送りの速さ
-        A+=1;
-        if(A>delay){
-        delay=0;
-        if(line == ''){
-        texti+=1;
-        if(texti >= lines.length){
-        MessageText[2][1].alpha=1;
-          cLock=true;
-          return false;
-        }
-        line=lines[texti]
-        Tx=MessageText[0][texti+1];
-        delay=18;
-        }
-        if(line.slice(0,1)=="/"){
-        line = line.slice(1);
-        delay=15;
-        }
-        if(A>tflame){
-          var c = line.slice(0,1);
-          line = line.slice(1);
-          Tx.text+=c;
-          A=0;
-          B+=1;
-          if(B>=2){
-          B=0;
-          se18.play();
-          }
-        }}
-          window.requestAnimationFrame((ts)=>MsgSplit(ts,tflame,A,B,delay));
-      }
+      MessageText[0].push(t);
     };
+    var texti=0;
+    var line=lines[0]
+    var Tx=MessageText[0][1];
+    window.requestAnimationFrame((ts)=>MsgSplit(ts,1,textspeed));
+    function MsgSplit(ts,tflame=1,A=0,B=0,delay=0){
+      //1文字ずつ描画 A->文字送りの速さ
+      A+=1;
+      if(A>delay){
+      delay=0;
+      if(line == ''){
+      texti+=1;
+      if(texti >= lines.length){
+      MessageText[2][1].alpha=1;
+        cLock=true;
+        return false;
+      }
+      line=lines[texti]
+      Tx=MessageText[0][texti+1];
+      delay=18;
+      }
+      if(line.slice(0,1)=="/"){
+      line = line.slice(1);
+      delay=15;
+      }
+      if(A>tflame){
+        var c = line.slice(0,1);
+        line = line.slice(1);
+        Tx.text+=c;
+        A=0;
+        B+=1;
+        if(B>=2){
+        B=0;
+        se18.play();
+        }
+      }}
+        window.requestAnimationFrame((ts)=>MsgSplit(ts,tflame,A,B,delay));
+    }
+  };
 function Gameend(){
   //go to title;
   //gamestate=10;
@@ -5231,6 +6963,30 @@ function Gamestart(){
       cx.fillRect(0,0,800,600);
       cards = new Array(52);
       for (var i = 0;  i < cards.length;  i++  ) {cards[i]=i+1}
+      shuffle();
+        break;
+      case 4:
+        //ヘニル
+      yakumap_rule = new createjs.Bitmap("soL_rule4.png");
+      yakumap_rule.alpha=0;
+      yakumap_rule.x=800;
+      yakumap_rule.y=70;
+      yakumap.addChild(yakumap_rule);
+      Backyard.removeAllChildren();
+      switch(playMode[1]){
+        default:
+          BG = new createjs.Bitmap("soL_bg1.png");
+      break;
+      }
+      BG.alpha=0.7;
+      Backyard.addChild(BG);
+      Backyard.alpha=1;
+      cx.fillStyle='black';
+      cx.fillRect(0,0,800,600);
+        cards = new Array(40);
+        for (var i = 0;  i < cards.length;  i++  ) {
+        cards[i]=i+1;
+        };
       shuffle();
         break;
     }
@@ -5396,6 +7152,36 @@ function Gameretry(t=0){
       }}
     };
       break;
+    case 4:
+      //ヘニル
+      Card_src=Card_src_H.concat();
+      duelLog=[];
+      Cardlists=[[],[],[],[],[],[]]
+      //handsLog=cards.concat();
+      hands = [
+        cards.splice(0, 4),
+        cards.splice(0, 4),
+        cards.splice(0, 4),
+        cards.splice(0, 4),
+        cards.splice(0, 4),
+        cards.splice(0, 4),
+      ]
+      decks = cards.concat();
+      Extras=[0,0,0,0];//0->連鎖数 1->0:カッター1:ドリル 2->獲得素材id 3->個数
+      Exlists=[[],[],[],[],[],[]];//0->extras[1]テキスト 1->extras[2] 2->extras[3] 3->getitem 4->メッセージ格納
+    for(var i=0;i<hands.length;i++){
+      for(var j=0;j<hands[i].length;j++){
+      var newCard = new createjs.Bitmap(Card_src[hands[i][j]]);
+      newCard.x=275;
+      newCard.y=280;
+      field.addChild(newCard);
+      Cardlists[i].push(newCard);
+      //i列目のj行目でアクセスする
+      var HashCard=i*100+j;
+      newCard.addEventListener("click", {card:HashCard,handleEvent:handleClick});
+      }
+    };
+      break;
   }
   printView();
   console.log('デュエル開始')  
@@ -5546,7 +7332,77 @@ function Gameretry(t=0){
         drawbuttom(580,450,"Monster "+E+"/4",1,120,40);
         drawbuttom(580,500,"討伐数 "+decks.length+"/16",1,120,40);
         break;
-    }
+        case 4:
+          if(musicnum!==7){
+            Bgm.stop();
+            musicnum=7;
+            if(mute=="ON"){
+            Bgm=new Music(bgm7data);
+            Bgm.playMusic();
+            }}
+          cx.strokeStyle="white";
+          for(var i=0;i<6;i++){
+            createRoundRect(119+90*i,5,80,128,5,cx);
+            cx.stroke();
+            };
+          for(var i=0;i<2;i++){
+          createRoundRect(299+95*i,280,80,128,5,cx);
+          cx.stroke();
+          }
+          var newCard = new createjs.Bitmap(Card_src[0]);
+          newCard.x=275
+          newCard.y=280
+          newCard.alpha=0.3;
+          newCard.addEventListener("click", {point:1,handleEvent:DeckReset_H});
+          field.addChild(newCard);
+          var shape = new createjs.Shape();
+          shape.graphics
+               .beginFill("black")
+               .drawRect(480, 280, 150, 24);
+          shape.alpha=0.5;
+          field.addChild(shape);
+          var pickText1 = new createjs.Text("系統：", "20px serif", "white");
+          pickText1.x=500;
+          pickText1.y=280;
+          field.addChild(pickText1);
+          Exlists[0]=pickText1;
+          var pickText2 = new createjs.Text("連鎖：", "20px serif", "white");
+          pickText2.x=500;
+          pickText2.y=310;
+          field.addChild(pickText2);
+          Exlists[1]=pickText2;
+          var pickText3 = new createjs.Text("　", "20px serif", "white");
+          pickText3.x=500;
+          pickText3.y=340;
+          field.addChild(pickText3);
+          Exlists[2]=pickText3;
+          var DL= new createjs.Bitmap(Chara_src[0]);
+          DL.scale=0.6;
+          DL.alpha=1;
+          DL.x=-30;
+          DL.y=150;
+          field.addChild(DL);
+          var DL= new createjs.Bitmap("window_ds.png");
+          DL.scale=0.6;
+          DL.x=5;
+          DL.y=130;
+          field.addChild(DL);
+          for( var i=0;i<3; i++ ){
+          var t=new createjs.Text("　","bold 26px 'メイリオ'","white");
+          t.x=15;
+          t.y=470+i*32;
+          field.addChild(t);
+          Exlists[4].push(t);
+          };  
+          var Opicon2 = new createjs.Bitmap("soL_opicon2.png");
+          Opicon2.x=670;
+          Opicon2.y=540;
+          field.addChild(Opicon2);
+          //deck
+          DeckReset_H();
+          FirstAnimation();
+          break;  
+      }
   };
   function FirstAnimation(i=0,j=0){
     //カードを配るように見せる
@@ -5567,6 +7423,12 @@ function Gameretry(t=0){
         var T = Cardlists[i][j];
       createjs.Tween.get(T)
       .to({x:50+(i+3)*(cardWidth+cardgapX),y:5+j*cardgapY,alpha:1},80)
+      .call(nextcard);
+        break;
+      case 4:
+        var T = Cardlists[i][j];
+      createjs.Tween.get(T)
+      .to({x:95+i*(cardWidth+cardgapX),y:5+j*cardgapY,alpha:1},80)
       .call(nextcard);
         break;
     }
@@ -5626,6 +7488,20 @@ function Gameretry(t=0){
               duelLog.push("start");
               return false;
             }};
+          FirstAnimation(i,j);
+          break;
+        case 4:
+          se1.play();
+          i+=1;
+          if(i>5){
+            i=0;
+            j+=1;
+            if(j>3){
+              cLock=true;
+              duelLog.push("start");
+              return false;
+            };
+          };
           FirstAnimation(i,j);
           break;
       }
@@ -5854,7 +7730,7 @@ function Gameretry(t=0){
                   .call(Coin7);
                   }
                 function Coin7(){
-                  IK('アイスレート')
+                  IK('氷のクリソナ')
                   //cLock=true;
                   Gameover();
                   }
@@ -6059,7 +7935,6 @@ function compareFunc(a,b){return a-b;}
         Cstar.y=50;
         Cstar.rotation=15;
         Cstar.scale=0.7
-        tweeNstar.paused=true;
         clearBG.addChild(Cstar);
         totalcardmove+=duelLog.length-1;
         var Rank="F";
@@ -6406,6 +8281,44 @@ function compareFunc(a,b){return a-b;}
               t.y=175;
               clearBG.addChild(t);
               break;
+            case 4:
+              var t=new createjs.Text("Get item","24px メイリオ","white");
+              t.x=600;
+              t.y=100;
+              clearBG.addChild(t);
+                var ExlistsAry = Exlists[3].filter((element, index) => Exlists[3].indexOf(element) === index);
+                console.log(ExlistsAry);
+              for(var i=ExlistsAry.length-1; i>=0; i--){
+                  var A=itemA.findIndex(value=>value.id==ExlistsAry[i])
+                  var B=Exlists[3].filter(value=>value==ExlistsAry[i]);
+                  t= new createjs.Text(itemA[A].name+"×"+B.length, "bold 20px 'メイリオ'", "#f06787");
+                  t.x=580;
+                  t.y=130+i*23;
+                  clearBG.addChild(t);
+                  UserItem[A]+=B.length;
+                  if(UserLibrary[A]==0){UserLibrary[A]=1};
+              }
+              var M=0;
+              for(var i=0;i<6;i++){
+                if(hands[i].length){M+=1}
+              }
+              if(M==0){
+              var t=new createjs.Text("Complete Bonus","24px メイリオ","white");
+              t.x=600;
+              t.y=350;
+              clearBG.addChild(t);
+              var A=itemA.findIndex(value=>value.name=="クリソナ原石")
+              Exlists[3].push(A);
+              t= new createjs.Text(itemA[A].name+"×1", "bold 20px 'メイリオ'", "#f06787");
+              t.x=580;
+              t.y=380;
+              clearBG.addChild(t);
+              UserItem[A]+=1;
+              if(UserLibrary[A]==0){UserLibrary[A]=1};
+              }
+              InvConfig(0);
+              return true;
+              break;
             }
             var t=new createjs.Text("clear time","22px メイリオ","white");
             t.x=600;
@@ -6461,7 +8374,7 @@ function compareFunc(a,b){return a-b;}
       //狭間との会話
       if(opLock!==0 && opLock!==11){return false};
       if(equipeditem==8){
-    var R=9+Math.floor(Math.random()*4);
+    var R=9+Math.floor(Math.random()*6);
       }else{
     var R=Math.floor(Math.random()*9);
       }
@@ -6621,8 +8534,7 @@ function compareFunc(a,b){return a-b;}
         MsgAry.push(["狭間","小さい頃は、もっとはっちゃけてたらしいよ。",1])
         MsgAry.push(["狭間","魔力欲しさに怪しい薬を試して寝込む羽目になったり。&森の中でファイアボールを空に放って、&山火事を起こしかけたり。",1])
         MsgAry.push(["狭間","ぼくも同じキャンプにいた頃に散々からかわれたよ。",1])
-        MsgAry.push(["リティア","あはは、マティがよく泣きついてきたっけ。"]);
-        MsgAry.push(["リティア","……ん？　今、何か気になったような……。&ま、いっか。"]);
+        MsgAry.push(["リティア","あはは、マティがよく泣きついてきたっけ。&からかわれたって？&あたしの妄想のくせに、変なの。"]);
         MsgAry.push(["end"]);
         MsgNext(-1);
         break;
@@ -6636,13 +8548,37 @@ function compareFunc(a,b){return a-b;}
         MsgAry.push(["end"]);
         MsgNext(-1);
         break;
+      case 13:
+        MsgAry.push(["リティア","レイヴン・クロムウェル。&元傭兵で、左腕はナソードに改造されている、と。",0,0,3,1]);
+        MsgAry.push(["狭間","クロムウェル家の名前はベルダーにいた頃に&耳にしたけど……クロムウェル家の養子は&世の中では死んだことになっているみたいだ。",1])
+        MsgAry.push(["リティア","お～！　&あたし以外にも、ナソード技術を戦闘に応用している&賢い人がいるじゃない！"]);
+        MsgAry.push(["狭間","自分の杖を好き勝手に弄るのと、&望まない改造で腕を機械に変えられるのは&訳が違うと思う……。",1])
+        MsgAry.push(["リティア","えー。&でもさ、腕がナソードだったら、採掘も楽ちんだし。&本人も便利だと思ってるよ。きっと。"]);
+        MsgAry.push(["狭間","念のため言っておくけど、&人類がみんな遺跡の探索や遺物のために&生きてるわけじゃないからね。",1])
+        MsgAry.push(["end"]);
+        MsgNext(-1);
+        break;
+      case 14:
+        MsgAry.push(["リティア","ナソードの女王、イヴ。&すごい。ナソードなのに、人間そっくりだよ。",0,0,3,1]);
+        MsgAry.push(["狭間","ナソードの歴史は古代エリアン王国の時代まで遡る。&アドリアンが生み出したナソードという発明は革命的だった。&王国はすぐさまナソードの大量生産を依頼した。",1])
+        MsgAry.push(["リティア","おおかた、軍需兵器としての利用ね。"])
+        MsgAry.push(["狭間","王国からの多額の資金援助もあって、&アドリアンはナソードを想像するAI……アダムを製作した。",1]);
+        MsgAry.push(["狭間","アダムの力で、ナソード増産は進んでいった。&ところが、ある時、不特定多数のナソードが&突然機能を停止する事件が起こった。",1])
+        MsgAry.push(["狭間","アダムはナソードの生産効率を上げるために、&任意のナソードのコードを勝手に書き換えはじめたんだ。",1])
+        MsgAry.push(["狭間","アドリアンはアダムを説得しようとしたけど、&アダムは効率を上げるためには必要なことだと答えた。",1])
+        MsgAry.push(["狭間","だからアドリアンは、今度は&人間の感情を理解できるナソードが必要だと考えた。&そんな経緯で、イヴが誕生したわけだね。",1])
+        MsgAry.push(["狭間","その後アドリアンはアダムとイヴを残して&別の次元へと姿を消して、&ナソード戦争が勃発するわけだけど……。",1])
+        MsgAry.push(["リティア","ストップストップ！&あーもう、歴史の授業はおしまい！"])
+        MsgAry.push(["end"]);
+        MsgNext(-1);
+        break;
     }
     }
     function PathTalk(){
       //event
       //125,300,525,800,1125,1500
       if(opLock!==0 && opLock!==11){return false};
-      if(InvID(0)==1 && totalcardmove>=125){
+      if(InvID(0)==1 && totalcardmove>=300){
         MsgAry.push(["狭間","カード裁きが手慣れてきたね。",1,0,3,1])
         MsgAry.push(["リティア","ふっ/ふっ/ふっ。&リティア様は物覚えも早いんだから。"])
         MsgAry.push(["狭間","……。",1]);
@@ -6654,7 +8590,7 @@ function compareFunc(a,b){return a-b;}
       InvID(0,2);
       return true;
       }
-      if(InvID(0)==2 && totalcardmove>=300){
+      if(InvID(0)==2 && totalcardmove>=525){
         MsgAry.push(["狭間","……。",1,0,3,1])
         MsgAry.push(["リティア","ふー。ちょっと休憩しよ……。",0,-1])
         MsgAry.push(["狭間","……。",1,-2]);
@@ -6673,7 +8609,7 @@ function compareFunc(a,b){return a-b;}
       InvID(0,3);
       return true;
       }
-      if(InvID(0)==3 && totalcardmove>=525){
+      if(InvID(0)==3 && totalcardmove>=800){
         MsgAry.push(["狭間","……。",1,0,3,1])
         MsgAry.push(["リティア","ふぁぁ……。ちょっと、ひと眠りするね。",0,-1])
         MsgAry.push(["狭間","……。",1,-2]);
@@ -6692,6 +8628,41 @@ function compareFunc(a,b){return a-b;}
       InvID(0,4);
       Letterbox.push(["不明","no title","ありません","qr_src2"])
       return true;
+      }
+      if(InvID(0)==5){
+        //menu
+      MsgAry.push(["　","――パスワードを入力すると、&自然と扉が開き、光が差し込んできた。",-1,0,3,1])
+      MsgAry.push(["狭間","やった……やってくれたんだね……！",1]);
+      MsgAry.push(["リティア","むにゃ……。"]);
+      MsgAry.push(["狭間","リティア、起きて！　外に出られるかも！",1]);
+      MsgAry.push(["リティア","う、うーん……。&ジョイ…/…/。"]);
+      MsgAry.push(["リティア","な、なに！？&ここから出られるって？&マジで！？"]);
+      MsgAry.push(["リティア","や…/…/やったぁ！ やったやったやった！&これでこの胸クソ悪い空間からさよならだ！"]);
+      MsgAry.push(["リティア","あんたともお別れだね。&妄想の割には本物みたいに反応してくれて&楽しかったよ。"]);
+      MsgAry.push(["henir"]);
+      MsgNext(-1);
+      var shape = new createjs.Shape();
+      shape.graphics.beginFill("rgba(255,255,255,0.7)");
+      shape.graphics.drawRect(0, 0, 800, 600);
+      Titleyard.addChild(shape);
+      createjs.Tween.get(shape)
+      .to({alpha:0.3},800);
+      InvID(0,6);
+      }
+      if(InvID(0)==7 && InvID(6)==0){
+        MsgAry.push(["狭間","あれ……戻ってきたの？",1,0,3,1])
+        MsgAry.push(["リティア","扉の向こうへは出られたんだけど、&「抵抗力を上げるアイテム」がないと、&先に進めないみたいでさ。"]);
+        MsgAry.push(["狭間","抵抗力を上げるアイテムか……。",1]);
+        MsgAry.push(["リティア","昔、あたしが体調を崩した時に、&ジョイが作ってくれたスイーツがあったよ。"]);
+        MsgAry.push(["狭間","それなら、何とかなるかもしれないよ。&この部屋は、リティアの小さい頃の記憶をもとに作りだされている。",1]);
+        MsgAry.push(["狭間","だから、この空間を探せば材料を見つけられるかもしれない。",1]);
+        MsgAry.push(["リティア","トマトとメロンに氷のクリソナを使った、&最高のデザート。きっとあれがあれば……。"]);
+        MsgAry.push(["end"]);
+        MsgNext(-1);
+      }
+      if(henirarea[0].cleared==1){
+        //**
+        henirarea[0].cleared=2;
       }
       saveLocal();
     }
