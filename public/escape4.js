@@ -2301,7 +2301,7 @@ function menu(state=0,area=0){
         switch(this.card){
           case 3:
             if(opLock==0){
-          IK('キュアトマト')}
+          IK('ジョイのトマト')}
             break;
         }
       }
@@ -5593,18 +5593,24 @@ if(p==0){
   Invbar.graphics.drawRect(690, 55, 110, 460);
   Invbar.alpha=0.5;
   Itemyard.addChild(Invbar);
+  if(UserLibrary.indexOf(1)!==-1){
   var shape = new createjs.Shape();
   shape.graphics.beginFill("#bae0c3");
   shape.graphics.beginStroke("#617d68");
   shape.graphics.setStrokeStyle(2);
   shape.graphics.drawRect(690, 55, 108, 35);
   Itemyard.addChild(shape);
-  if(UserLibrary.indexOf(1)!==-1){
   var T=new createjs.Text("特殊","24px serif","#46574a");
-  T.x=710;
+  T.x=715;
   }else{
+  var shape = new createjs.Shape();
+  shape.graphics.beginFill("#bae0c3");
+  shape.graphics.beginStroke("#617d68");
+  shape.graphics.setStrokeStyle(2);
+  shape.graphics.drawRect(690, 55, 98, 35);
+  Itemyard.addChild(shape);
   var T=new createjs.Text("アイテム","24px serif","#46574a");
-  T.x=695;
+  T.x=690;
   }
   T.y=58;
   Itemyard.addChild(T);
@@ -5630,7 +5636,7 @@ if(p==0){
       if(this.hash<7 && Itemmap.y<0){Itemmap.y=0};
       if(this.hash>=7 && Itemmap.y<-(this.hash*66-415)){Itemmap.y=-(this.hash*66-415)};
     }
-  for(var i=0;i<7;i++){
+  for(var i=0;i<6;i++){
       var shape = new createjs.Shape();
       shape.graphics.beginFill("white");
       shape.graphics.drawRect(710, 95+(66*i), 64, 64);
@@ -7072,7 +7078,7 @@ function Gameretry(t=0){
       }}
       Extras=[0,0,0,0];
       Exlists=[[],[],[],[]];
-      if(cleared[0][2]>0 && cleared[1][1]>0 && cleared[1][1]%5==0 && melonList[1]==0){
+      if(cleared[0][1]>0 && cleared[1][1]>0 && cleared[1][1]%5==0 && melonList[1]==0){
       var T = new createjs.Bitmap('Card_images/melon1.png');
       T.x=-20+2*(cardWidth+cardgapX)
       T.y=70
