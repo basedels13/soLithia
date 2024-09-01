@@ -1,5 +1,9 @@
-// 製錬、錬成 チュートリアル
-// 余裕あったら→モンスターと簡単なバトル
+// 錬成　状態異常　消費アイテム　錬成のレシピ　次のエリアへ
+// レシピの産物を1よりも大きいものを作っておきたい
+// 採取のハプニングカード
+// picture の真ん中円形に変えたい
+// 加工・錬成後にセーブ
+// 余裕あったら→図鑑、錬成のヘルプ画面、モンスターの画像、装備、レシピメモ
 window.onload = function(){
 main();
 };
@@ -61,7 +65,7 @@ var Cstar = new createjs.Shape(graphics);
   Cstar.x=100;
   Cstar.y=225;
 var deckmap = new createjs.Container();
-var field = new createjs.Container();//field
+var field = new createjs.Container();//メイン
 var clearBG = new createjs.Container();//clear画面
 var yakumap = new createjs.Container();//ヒントボタン等
 var Titleyard = new createjs.Container();//タイトル
@@ -70,14 +74,16 @@ var Itemyard = new createjs.Container();//インベントリ
 var Backyard = new createjs.Container();//背景
 var Configmap = new createjs.Container();//soundボタン・オプション等
 var Loadmap = new createjs.Container();//ダイアログ
+var battlefield = new createjs.Container();//
+var Ct = new createjs.Container();//錬成時バッファ的レイヤ
 stage.addChild(Backyard);
 stage.addChild(Roomyard);
 stage.addChild(Titleyard);
 stage.addChild(field);
-stage.addChild(Itemyard);
 stage.addChild(deckmap);
-stage.addChild(clearBG);
 stage.addChild(yakumap);
+stage.addChild(Itemyard);
+stage.addChild(clearBG);
 stage.addChild(Configmap);
 stage.addChild(Loadmap);
 Itemyard.x=110;
@@ -96,9 +102,9 @@ var dragPointY;
 var mute="ON"
 var debugmode=true;//出荷時にfalseにする
 var cLock=true;//true->操作可能
-var opLock=0;//漫然と使っている 10->×ボタンを禁止する
+var opLock=0;//漫然と使っている -1->gamestartまで 10->×ボタンを禁止する　その他いろいろ
 var mLock=true;//deckめくっている最中falseとする
-var gamestate=-1;//-1:load中 10:title 11:title/2回目以降 100:menu 0:now playing 1:game over
+var gamestate=-1;//-1:load中 10:title 11:title/2回目以降 100:menu 0:now playing 1:game over 2-3:in battle 5:採取エリア
 var GamestartT = 0;//総プレイ時間計算用
 var startT = 0;
 var clearT = 0;
@@ -325,10 +331,16 @@ yakumap_solve.alpha=0
 yakumap_solve.scale=0.6;
 yakumap_solve.x=720;
 yakumap_solve.y=270;
+var yakumap_giveup = new createjs.Bitmap("soL_giveup.png");
+yakumap_giveup.alpha=0
+yakumap_giveup.scale=0.6;
+yakumap_giveup.x=720;
+yakumap_giveup.y=335;
 yakumap.addChild(yakumap_hint);
 yakumap.addChild(yakumap_undo);
 yakumap.addChild(yakumap_reset);
 yakumap.addChild(yakumap_solve);
+yakumap.addChild(yakumap_giveup);
 var yakumap_rule = new createjs.Bitmap("soL_rule1.png");
 yakumap_rule.alpha=0;
 yakumap.addChild(yakumap_rule)
@@ -340,6 +352,7 @@ clear_2.scale=600/768;
 var clear_3 = new createjs.Bitmap("soL_clear_3.png");
 var clear_4 = new createjs.Bitmap("soL_clear_4.png");
 var retry_bt = new createjs.Bitmap("soL_retry_bt.png");
+var retry_bt3 = new createjs.Bitmap("soL_retry_bt3.png");
 var retry_bt2 = new createjs.Bitmap("soL_retry_bt2.png");
 var effect1 = {
   images : ["Card_images/Card_delete.png"],
@@ -372,6 +385,7 @@ var Card_src_S= new Array('Card_images/BackColor_Black.png','Card_images/Diamond
 var Card_src_H= new Array('Card_images/BackColor_Black.png','Card_images/Spade01.png','Card_images/Spade02.png','Card_images/Spade03.png','Card_images/Spade04.png','Card_images/Spade05.png','Card_images/Spade06.png','Card_images/Spade07.png','Card_images/Spade08.png','Card_images/Spade09.png','Card_images/Spade10.png','Card_images/Heart01.png','Card_images/Heart02.png','Card_images/Heart03.png','Card_images/Heart04.png','Card_images/Heart05.png','Card_images/Heart06.png','Card_images/Heart07.png','Card_images/Heart08.png','Card_images/Heart09.png','Card_images/Heart10.png','Card_images/Club01.png','Card_images/Club02.png','Card_images/Club03.png','Card_images/Club04.png','Card_images/Club05.png','Card_images/Club06.png','Card_images/Club07.png','Card_images/Club08.png','Card_images/Club09.png','Card_images/Club10.png','Card_images/Diamond01.png','Card_images/Diamond02.png','Card_images/Diamond03.png','Card_images/Diamond04.png','Card_images/Diamond05.png','Card_images/Diamond06.png','Card_images/Diamond07.png','Card_images/Diamond08.png','Card_images/Diamond09.png','Card_images/Diamond10.png')
 var Path_src=new Array("Card_images/soL_room_path9.png","Card_images/soL_room_path1.png","Card_images/soL_room_path2.png","Card_images/soL_room_path3.png","Card_images/soL_room_path4.png","Card_images/soL_room_path5.png","Card_images/soL_room_path6.png","Card_images/soL_room_path7.png","Card_images/soL_room_path8.png")
 var Item_src=new Array("Card_images/BackColor_Black.png","Card_images/soL_elbook.png","Card_images/soL_wand.png","Card_images/soL_desert.png","Card_images/soL_coin.png","Card_images/soL_tomato.png","Card_images/soL_melon.png","Card_images/soL_stone.png","Card_images/soL_pan.png");
+var SoLbg_src=new Array("soL_bg1.png","soL_bg2.png","soL_bg3.png","soL_bg4.png","soL_bg5.png","soL_bg6.png","soL_bg7.png","soL_bg8.png");
 var Chara_src=new Array("soL_chara1.png","soL_chara2.png");
 var Itemswitch=0;
 var PathAry=[];
@@ -411,6 +425,8 @@ var Cbt=canvas2.toDataURL();
 var Cbtlist=[];
 var Cbutton = new createjs.Bitmap(Cbt);
 var Letterbox=[];
+var HenirPathT=[];//選択中のヘニルパスを格納
+var HenirPathS=[];
 field.addChild(Cbutton);
 Cbtlist.push(Cbutton);
 //ボタン描画用
@@ -418,9 +434,10 @@ yakumap_hint.addEventListener("click", {rule:playMode[0],handleEvent:ruleButton}
 yakumap_reset.addEventListener("click", {rule:playMode[0],handleEvent:resetButton});
 yakumap_undo.addEventListener("click", {rule:playMode[0],handleEvent:undoButton});
 yakumap_solve.addEventListener("click", {rule:playMode[0],handleEvent:solveButton});
+yakumap_giveup.addEventListener("click", {rule:playMode[0],handleEvent:giveupButton});
 retry_bt.addEventListener("click", {rule:playMode[0],handleEvent:Gamestart});
 retry_bt2.addEventListener("click", {rule:playMode[0],handleEvent:Gameend});
-
+retry_bt3.addEventListener("click", {rule:playMode[0],handleEvent:ToGameretry});
 //保存するデータ
 var vBar=0.6;
 var sBar=1;
@@ -470,169 +487,250 @@ for(var i=0; i<inventory.length;i++){
 inventory[0].cleared=1;
 //素材
 var itemA=[
-  {name:"ホワイトベリル",price:-1,class:"クリソナ",detail:"不純物がほとんど混じっていないため&完全に透明なクリソナ。"},
-  {name:"グリーンベリル",price:-1,class:"クリソナ",detail:"クリソナを精製して作った緑色に輝く宝石。&別名エメラルド。"},
-  {name:"ブルーベリル",price:-1,class:"クリソナ",detail:"クリソナを精製して作った青色に輝く宝石。別名アクアマリン。"},
-  {name:"イエローベリル",price:-1,class:"クリソナ",detail:"クリソナを精製して作った黄色に輝く宝石。"},
-  {name:"レッドベリル",price:-1,class:"クリソナ",detail:"クリソナを精製して作った赤色に輝く宝石。"},
-  {name:"ルーブ草",price:16,class:"植物資源",detail:"水分豊富な植物。どこでもよく育つ。&エルの樹の麓などでたくさん採れる。"},
+  {name:"ホワイトベリル",price:-1,class:"クリソナ",detail:"不純物がほとんど混ざっていない&無色透明なクリソナ。&あらゆる錬成で使用でき、必ず成功する。"},
+  {name:"グリーンベリル",price:-1,class:"クリソナ",detail:"クリソナを精製して作った緑色に輝く宝石。&2種類の素材を使った錬成に使用すると&必ず錬成が成功する。"},
+  {name:"ブルーベリル",price:-1,class:"クリソナ",detail:"クリソナを精製して作った青色に輝く宝石。&3種類以下の素材を使った錬成に使用すると&必ず錬成が成功する。"},
+  {name:"イエローベリル",price:-1,class:"クリソナ",detail:"クリソナを精製して作った黄色に輝く宝石。&4種類以下の素材を使った錬成に使用すると&必ず錬成が成功する。"},
+  {name:"レッドベリル",price:-1,class:"クリソナ",detail:"クリソナを精製して作った赤色に輝く宝石。&5種類以下の素材を使った錬成に使用すると&必ず錬成が成功する。"},
+  {name:"ルーブ草",price:16,class:"植物資源",detail:"果物の香りがする水分豊富な植物。どこでもよく育つ。&エルの樹の麓などでたくさん採れる。"},
   {name:"枯れルーブ草",price:20,class:"植物資源",detail:"水気を失い枯れてしまった茶色のルーブ草。&ルーブ草を分解すると手に入る。"},
   {name:"ルーブ繊維",price:60,class:"植物資源",detail:"ルーブ草から繊維を取り出したもの。&寄り合わせて糸や布ができる。"},
   {name:"ルーブ糸",price:80,class:"製造",detail:"ルーブ繊維から作った丈夫な糸。"},
-  {name:"ルーブ布",price:150,class:"製造",detail:"ルーブ繊維から作った布。日用品に幅広く使われている。"},
+  {name:"ルベニアン包帯",price:150,class:"製造",detail:"ルーブ繊維をより合わせて作った包帯。&戦闘中に使うとHPを30回復する。"},
   {name:"清浄水",price:50,class:"その他資源",detail:"様々な用途に使えるきれいな水。&ルーブ草を分解すると手に入る。レシアム外郭で採れる。"},
   {name:"エルの清水",price:120,class:"その他資源",detail:"エル濃度の高い水。"},
   {name:"火炎草",price:130,class:"植物資源",detail:"燃えるような真紅色をした植物。&実はルーブ草の変種らしい。&レイキキ湖で採れる。"},
   {name:"魔力草",price:140,class:"植物資源",detail:"紫色の草で、解毒作用を持つ。実はルーブ草の仲間らしい。&螺旋回廊で採れる。"},
-  {name:"トレーモン木",price:70,class:"植物資源",detail:"短期間で加工に適した大きさに成長する木。&加工すれば良質な木材になる。エルの樹の麓などで採れる。"},
-  {name:"木材",price:35,class:"植物資源",detail:"手ごろな大きさに加工した丈夫な木材。&トレーモン木を分解すると手に入る。"},
-  {name:"ワルド樹脂",price:110,class:"植物資源",detail:"ワルドの木からとれる、ガムのような粘り気が特徴的な樹脂。&レイキキ渓谷でたまに採れる。"},
+  {name:"トレーモン木",price:70,class:"植物資源",detail:"短期間で加工に適した大きさに成長する木。&修行台にされることも多い。加工すれば良質な木材になりそうだ。&エルの樹の麓などで採れる。"},
+  {name:"木材",price:35,class:"植物資源",detail:"手ごろな大きさに加工した丈夫な木材。&トレーモン木を加工すると手に入る。"},
+  {name:"ワルド樹脂",price:110,class:"植物資源",detail:"高地で育つ木からとれる、&ガムのような粘り気が特徴的な樹脂。&天上の岐路でたまに採れる。"},
   {name:"ピンクコーラル",price:90,class:"植物資源",detail:"綺麗な色をした珊瑚。炭酸水に使われることがある。&トロッシュの巣で採れる。"},
   {name:"ラリネスの花",price:95,class:"植物資源",detail:"特定の場所にしか咲かない、青く光る花。&影の鉱脈で採れる。"},
   {name:"アルテラシアの花",price:50,class:"植物資源",detail:"ナソードに寄生し、その機能を停止させる&ために開発された花。&アルテラ平原で採れる。"},
-  {name:"銀秤草",price:50,class:"植物資源",detail:"インクなどに使われるが毒のある花。&効果で取引されるという。&ザヤ山でたまに採れる。"},
-  {name:"フォルギネイの果実",price:260,class:"植物資源",detail:"人を襲う危険な植物からとれる実。強力な精神刺激作用を持つ。&庭での栽培は不可能。ディシオン採掘場の敵から手に入る。"},
-  {name:"エルドラシルの花",price:150,class:"農場",detail:"ハーブとして親しまれる、香りの強い花。&秋になると青紫色の実をつける。&エルの樹の麓でたまに採れる。"},
-  {name:"エルダーベリー",price:210,class:"農場",detail:"エルドラシルが青紫色の実をつけたもの。味方一人のMPが30回復する。&エルの樹の麓でたまに採れる。"},
-  {name:"ウィリアムりんご",price:110,class:"農場",detail:"ポールが育てているりんご。様々な霊薬を錬成する&材料になる。食べるとHPが20回復する。&エルの樹の麓の敵から手に入る。"},
-  {name:"もりもりニンジン",price:85,class:"農場",detail:"苦みが少なく生でも美味しく食べられるニンジン。&HPが35回復する。アルテラ平原で採れる。"},
-  {name:"マンドラタマネギ",price:40,class:"農場",detail:"火を噴きそうになるほど辛いタマネギ。&軽く茹でると甘く食べられる。&春と秋にレイキキ湖で採れる。"},
-  {name:"スノークリスタル",price:65,class:"農場",detail:"断面が雪の結晶のように見える木の実。&たまに実が星形になる品種もあるらしい。&春と冬に螺旋回廊で手に入る。"},
-  {name:"クロライトシード",price:45,class:"農場",detail:"しょっぱい味のする変わった種。&金属の製錬に使われるらしい。&スノークリスタルを分解すると手に入る。"},
-  {name:"キュアトマト",price:60,class:"農場",detail:"森に自生する真っ赤なミニトマト。&戦闘中に使うと中毒を回復する。&エルの樹の麓で採れる。"},
-  {name:"砂漠サツマイモ",price:70,class:"農場",detail:"砂漠でも育つ太くて硬いサツマイモ。&戦闘中に使うと敵に小ダメージを与える。ザヤ山で採れる。"},
-  {name:"エルライム",price:80,class:"農場",detail:"海の近くで育つライムの実。&夏と秋にレシアム外郭で採れる。"},
-  {name:"スターフルーツ",price:90,class:"農場",detail:"輪切りにすると断面が星形に見える果実。&黄色くなったら食べ頃。&春と秋にディシオン採掘場で採れる。"},
-  {name:"エルダー小麦",price:40,class:"農場",detail:"寒さに強い小麦。&種は挽いて粉にして使われる。&エルの樹の麓などで採れる。"},
-  {name:"ファルマン竹",price:70,class:"農場",detail:"武具にも使われる丈夫な竹。庭に植えるとファルマン筍が採れる。&冬にファルマン峠で採れる。"},
-  {name:"霜雪イチゴ",price:90,class:"農場",detail:"寒い地域で育つ野イチゴ。&冬・春にリゴモル海廊で採れる。"},
-  {name:"天桃ライチ",price:145,class:"農場",detail:"甘酸っぱさがたまらない、桃色のフルーツ。&秋に螺旋回廊で採れる。"},
-  {name:"クォークサボテン",price:160,class:"植物資源",detail:"高山で育つサボテン。水分を多く含む。&ザヤ山で採れる。"},
-  {name:"オーガニックコア",price:250,class:"その他資源",detail:"奇妙な物質。ディシオン採掘場でたまに採れる。"},
-  {name:"ハーピィの羽根",price:120,class:"動物資源",detail:"ガルファイに生息する魔物から舞い落ちた羽根。ザヤ山の敵から手に入る。"},
-  {name:"グリッタ―の歯",price:25,class:"動物資源",detail:"螺旋回廊の敵から手に入る鋭い歯。&回復薬の材料になる。&螺旋回廊で採れる。"},
-  {name:"うに",price:61,class:"その他資源",detail:"なぜか山で採れるうに。&戦闘で相手に小ダメージを与える。エルの樹の麓で採れる。"},
-  {name:"リザードバス",price:130,class:"動物資源",detail:"頭部の4本の角が特徴的なバス。&トロッシュの巣で採れる。"},
-  {name:"ロブスターの抜け殻",price:25,class:"動物資源",detail:"金色の輝きを放つという幻のロブスターの抜け殻。&レシアム外郭でたまに採れる。"},
-  {name:"黄金ロブスター",price:331,class:"動物資源",detail:"金色の輝きを放つ、生きた幻のロブスター。&水の聖堂でたまに採れる。"},
-  {name:"獣肉",price:70,class:"動物資源",detail:"動物からとれた獣肉。このままでは食べられない。&エルの樹の麓などの敵から手に入る。"},
-  {name:"生肉",price:100,class:"動物資源",detail:"獣肉を加工したもの。野生の味。&HPが30回復する。&獣肉を分解すると手に入る。"},
-  {name:"獣の皮",price:30,class:"動物資源",detail:"動物の皮。なめして革にする。&獣肉を分解すると手に入る。"},
-  {name:"質のよい皮",price:110,class:"動物資源",detail:"本や防具の加工に適した上質な皮。"},
-  {name:"ベタベタしたエキス",price:103,class:"動物資源",detail:"動物からとれる、鼻を刺すような臭いがするエキス。&好んで集める人もいる。&レイキキ渓谷の敵から手に入る。"},
-  {name:"穀物粉",price:100,class:"その他資源",detail:"エルダー小麦から作られる穀物粉。様々な料理に使われる。&エルダー小麦の種を分解すると手に入る。"},
-  {name:"パピリオ蜜",price:60,class:"動物資源",detail:"蝶々が集めてくる花の蜜。&罪悪感を感じるほどの甘さ。&エルの樹の麓の敵が持っている。"},
-  {name:"炎鷹卵",price:120,class:"動物資源",detail:"炎熱地帯の鷹が大切そうに持っている球。&高熱を発し続けている。&竜の巣で採れる。"},
-  {name:"トロッシュの粉",price:65,class:"動物資源",detail:"トロッシュの羽根から舞い落ちた緑の粉。使い道はあまりなさそうだ。&トロッシュの巣で採れる。"},
+  {name:"銀秤草",price:50,class:"植物資源",detail:"インクなどに使われる花。毒がある。&高価で取引されるという。&ザヤ山でたまに採れる。"},
+  {name:"フォルギネイの果実",price:260,class:"植物資源",detail:"魔界の植物からとれる実。&強力な精神刺激作用を持つ。&影の鉱脈でたまに手に入る。"},
+  {name:"エルドラシルの花",price:150,class:"植物資源",detail:"ハーブとして親しまれる、香りの強い花。&エルの樹の麓でたまに採れる。"},
+  {name:"エルダーベリー",price:210,class:"植物資源",detail:"エルドラシルが青紫色の実をつけたもの。食べるとHPが約7回復する。&エルの樹の麓でたまに採れる。"},
+  {name:"ウィリアムりんご",price:110,class:"植物資源",detail:"ポールが育てているりんご。様々な霊薬を錬成する&材料になる。食べるとHPが約10回復する。&エルの樹の麓の敵から手に入る。"},
+  {name:"もりもりニンジン",price:85,class:"植物資源",detail:"苦みが少なく生でも美味しく食べられるニンジン。&食べるとHPが約20回復する。&アルテラ平原で採れる。"},
+  {name:"マンドラタマネギ",price:40,class:"植物資源",detail:"火を噴きそうになるほど辛いタマネギ。&食べると少し攻撃力が上昇する。&春と秋にレイキキ湖で採れる。"},
+  {name:"スノークリスタル",price:65,class:"植物資源",detail:"断面が雪の結晶のように見える木の実。&たまに実が星形になる品種もあるらしい。&天上の岐路で手に入る。"},
+  {name:"クロライトシード",price:45,class:"製造",detail:"しょっぱい味のする変わった種。&金属の製錬に使われる。"},
+  {name:"キュアトマト",price:60,class:"植物資源",detail:"森に自生する真っ赤なミニトマト。&戦闘中に使うと中毒を回復する。&エルの樹の麓で採れる。"},
+  {name:"砂漠サツマイモ",price:70,class:"植物資源",detail:"砂漠でも育つ太くて硬いサツマイモ。&戦闘中に使うと敵に小ダメージを与える。ザヤ山で採れる。"},
+  {name:"エルライム",price:80,class:"植物資源",detail:"海の近くで育つライムの実。&夏と秋にレシアム外郭で採れる。"},
+  {name:"スターフルーツ",price:90,class:"植物資源",detail:"輪切りにすると断面が星形に見える果実。&黄色くなったら食べ頃。&天上の岐路で採れる。"},
+  {name:"エルダー小麦",price:40,class:"植物資源",detail:"寒さに強い小麦。&種は挽いて粉にして使われる。&エルの樹の麓などで採れる。"},
+  {name:"ファルマン竹",price:70,class:"植物資源",detail:"武具にも使われる丈夫な竹。&冬にファルマン峠で採れる。"},
+  {name:"霜雪イチゴ",price:90,class:"植物資源",detail:"寒い地域で育つ野イチゴ。&食べるとHPが15回復する。&冬・春にリゴモル海廊で採れる。"},
+  {name:"天桃ライチ",price:145,class:"植物資源",detail:"甘酸っぱさがたまらない桃色のフルーツ。&食べるとHPが15回復する。&天上の岐路で採れる。"},
+  {name:"クォークサボテン",price:160,class:"植物資源",detail:"高山で育つサボテン。刺激に反応して冷気を発する。&天上の岐路でたまに採れる。"},
+  {name:"オーガニックコア",price:250,class:"その他資源",detail:"黒い金属質の殻の中に赤い核を持つ、&まるで何かの部品のような奇妙な物質。&天上の岐路の敵から手に入る。"},
+  {name:"ハーピィの羽根",price:120,class:"その他資源",detail:"ガルファイに生息する魔物から舞い落ちた羽根。ザヤ山の敵から手に入る。"},
+  {name:"グリッターの歯",price:25,class:"その他資源",detail:"螺旋回廊の敵から手に入る鋭い歯。&回復薬の材料になる。&螺旋回廊で採れる。"},
+  {name:"うに",price:61,class:"その他資源",detail:"なぜか山で採れるうに。&戦闘で相手に小ダメージを与える。&エルの樹の麓で採れる。"},
+  {name:"リザードバス",price:130,class:"その他資源",detail:"頭部の4本の角が特徴的なバス。&トロッシュの巣で採れる。"},
+  {name:"ロブスターの抜け殻",price:25,class:"その他資源",detail:"金色の輝きを放つという&幻のロブスターの抜け殻。&トロッシュの巣でたまに採れる。"},
+  {name:"黄金ロブスター",price:331,class:"その他資源",detail:"金色の輝きを放つ、&生きた幻のロブスター。&トロッシュの巣でたまに採れる。"},
+  {name:"獣肉",price:70,class:"その他資源",detail:"動物からとれた獣肉。このままでは食べられない。&エルの樹の麓などの敵から手に入る。"},
+  {name:"生肉",price:100,class:"その他資源",detail:"獣肉を加工したもの。野生の味。&HPを回復するがたまに中毒状態になってしまう。&獣肉を分解すると手に入る。"},
+  {name:"獣の皮",price:30,class:"その他資源",detail:"動物の皮。なめして革にする。&獣肉を分解すると手に入る。"},
+  {name:"質のよい皮",price:110,class:"製造",detail:"本や防具の加工に適した上質な皮。"},
+  {name:"ベタベタしたエキス",price:103,class:"その他資源",detail:"動物からとれる、鼻を刺すような臭いがするエキス。&好んで集める人もいる。&レイキキ渓谷の敵から手に入る。"},
+  {name:"穀物粉",price:100,class:"その他資源",detail:"エルダー小麦から作られる穀物粉。&様々な料理に使われる。&エルダー小麦を分解すると手に入る。"},
+  {name:"パピリオ蜜",price:60,class:"その他資源",detail:"蝶々が集めてくる花の蜜。&罪悪感を感じるほどの甘さ。&エルの樹の麓の敵から手に入る。"},
+  {name:"炎鷹卵",price:120,class:"その他資源",detail:"炎熱地帯の鷹が大切そうに持っている球。&高熱を発し続けている。&ザヤ山の敵が持っている。"},
+  {name:"トロッシュの粉",price:65,class:"その他資源",detail:"トロッシュの羽根から舞い落ちた緑の粉。&使い道はあまりなさそうだ。&トロッシュの巣で採れる。"},
   {name:"星屑",price:25,class:"鉱物資源",detail:"キラキラ光る乾燥した砂。ガラス細工に用いられる。&エルの樹の麓などで採れる。"},
-  {name:"ナソードメモリー",price:60,class:"鉱物資源",detail:"ナソードに組み込まれていたメモリーチップ。&アルテラ平原で採れる。"},
-  {name:"エルティア鉱石",price:155,class:"鉱物資源",detail:"エルの涙と呼ばれる、鉱石にエルの力が宿ってできた美しい石。&分解すると3色のエルの欠片を入手できる。"},
+  {name:"ナソードメモリー",price:60,class:"鉱物資源",detail:"ナソードに組み込まれていた&メモリーチップの部品。&アルテラ平原で採れる。"},
+  {name:"エルティアの欠片",price:155,class:"鉱物資源",detail:"エルの涙と呼ばれる、鉱石にエルの力が宿ってできた美しい石。&天上の岐路で採れる。"},
+  {name:"エルティアの粉",price:155,class:"鉱物資源",detail:"エルティアの欠片を砕いたもの。&エルティアの欠片を分解すると手に入る。"},
   {name:"ベスマ鉱石",price:110,class:"鉱物資源",detail:"渓谷で産出される鉱石。特殊な加工によって成分を抽出できる。&レイキキ渓谷でたまに採れる。"},
   {name:"ベスバイト",price:210,class:"鉱物資源",detail:"製錬によってクリソナの純度を高めることができる特殊な金属。&ベスマ鉱石から錬成される。"},
   {name:"ムーンストーン",price:60,class:"鉱物資源",detail:"暗所で紫色に光る壊れやすい石。&砂が固まってできたもの。&螺旋回廊で採れる。"},
-  {name:"結界の欠片",price:199,class:"その他資源",detail:"結界の欠片。&天上の岐路で採れる。"},
+  {name:"結界の欠片",price:199,class:"その他資源",detail:"何かを守っていた結界の欠片。&天上の岐路で採れる。"},
   {name:"虹霓球",price:-1,class:"その他資源",detail:"虹色に光る不思議な球体。"},
   {name:"ディシオン鉱石",price:117,class:"鉱物資源",detail:"アトラス地域で採れる青い鉱石。&ディシティウムという特殊な金属を含んでいる。&ディシオン採掘場でたまに採れる。"},
   {name:"ディシティウム",price:240,class:"鉱物資源",detail:"ディシオン鉱石の青色のもととなる金属。&軽くて丈夫なため、業種を問わず重宝される。"},
-  {name:"輝霜錬石",price:115,class:"鉱物資源",detail:"極北で採れる白い鉱石。分解するとグラキエースとディシティウムが手に入る。&北の霊廟でたまに採れる。"},
-  {name:"グラキエース",price:99,class:"鉱物資源",detail:"古代の言語で氷という意味を持つ、波模様が特徴的なひんやり冷たい鉱石。&ザヤ山でたまに採れる。"},
-  {name:"アイスレート",price:290,class:"鉱物資源",detail:"グラキエースから精製される、氷の板のような物質。燃料になる。&空気中の水分に反応して有毒ガスが発生するため素人が扱うのはとても危険。"},
-  {name:"ヒートストーン",price:320,class:"鉱物資源",detail:"高温地帯でたまに見られる石。実はワルド樹脂が年月を経て化石化したもの。&竜の巣でたまに採れる。"},
+  {name:"輝霜錬石",price:115,class:"鉱物資源",detail:"極北で採れる白い鉱石。&分解するとグラキエースとディシティウムが手に入る。&北の霊廟でたまに採れる。"},
+  {name:"グラキエース",price:99,class:"鉱物資源",detail:"古代の言語で氷という意味を持つ、&波模様が特徴的なひんやり冷たい鉱石。&ザヤ山でたまに採れる。"},
+  {name:"アイスレート",price:290,class:"鉱物資源",detail:"グラキエースから精製される&氷の板のような金属。燃料になる。"},
+  {name:"ヒートストーン",price:320,class:"鉱物資源",detail:"熱を帯びた石。&ワルド樹脂が年月を経て化石化したもの。"},
   {name:"緑柱石",price:75,class:"鉱物資源",detail:"大地の破片とも呼ばれる、翠色に輝く石。&わずかにクリソナ成分を含んでいる。&エルの樹の麓でたまに採れる。"},
   {name:"紫水晶",price:77,class:"鉱物資源",detail:"追憶の邪念とも呼ばれる、紫色に輝く石。&わずかにクリソナ成分を含んでいる。&螺旋回廊でたまに採れる。"},
   {name:"閃雷石",price:76,class:"鉱物資源",detail:"連なりの雷とも呼ばれる、黄色に輝く石。&わずかにクリソナ成分を含んでいる。&ザヤ山でたまに採れる。"},
   {name:"魔力石",price:180,class:"鉱物資源",detail:"三原色の輝きを放つ変わった石。&影の鉱脈で採れる。"},
-  {name:"クリソナの欠片",price:-1,class:"鉱物資源",detail:"クリソナを含んだ小さな欠片。&集めればクリソナを作れそうだ。&鉱石を加工すると手に入る。"},
-  {name:"低純度クリソナ",price:-1,class:"クリソナ",detail:"不純物が混ざったクリソナ。このままでも使い道はある。&クリソナ原石を加工すると手に入る。"},
-  {name:"高純度クリソナ",price:-1,class:"クリソナ",detail:"純度の高いクリソナ。宝石に変えることができる。"},
-  {name:"最高純度クリソナ",price:-1,class:"クリソナ",detail:"純度99.5%以上の非常に純度の高いクリソナ。&宝石に変えることができる。"},
-  {name:"クリソナ原石",price:-1,class:"鉱物資源",detail:"自然の中にわずかに存在する、クリソナの詰まった原石。&加工するとクリソナがたくさん手に入る。"},
+  {name:"クリソナの欠片",price:-1,class:"鉱物資源",detail:"クリソナを含んだ小さな欠片。&集めればクリソナを作れそうだ。"},
+  {name:"低純度クリソナ",price:-1,class:"クリソナ",detail:"不純物が混ざったクリソナ。&錬成に必要。&クリソナ原石を加工すると手に入る。"},
+  {name:"高純度クリソナ",price:-1,class:"クリソナ",detail:"純度の高いクリソナ。錬成に必要。"},
+  {name:"最高純度クリソナ",price:-1,class:"クリソナ",detail:"純度99.5%以上の非常に純度の高いクリソナ。&錬成に必要。"},
+  {name:"クリソナ原石",price:-1,class:"鉱物資源",detail:"自然の中にわずかに存在する、&クリソナの詰まった原石。&加工するとクリソナが手に入る。"},
   {name:"ミスリル結晶",price:200,class:"鉱物資源",detail:"銀色に輝く金属の結晶。特殊な組成のためか自然界では滅多に産出されず、幻の金属と呼ばれる。"},
   {name:"古代銀貨",price:300,class:"鉱物資源",detail:"古代エリオン王国で使用されていた銀貨。&トロッシュの巣で採れる。"},
   {name:"古代金貨",price:500,class:"鉱物資源",detail:"古代エリオン王国で使用されていた金貨。&トロッシュの巣で採れる。"},
-  {name:"空っぽの水晶玉",price:220,class:"家具",detail:"ガラスでできた水晶玉。入れ物や瓶として使える。&各エルの欠片を持てる数が増える。"},
-  {name:"たる",price:230,class:"家具",detail:"木材と木の板をうまく組み合わせて作ったたる。&インベントリが増える。"},
-  {name:"竹かご",price:235,class:"家具",detail:"ファルマン竹を編み込んで作ったかご。&インベントリが増える。"},
-  {name:"疾風のスムージー",price:150,class:"霊薬",detail:"飲むとたちまち体が軽くなる野菜スムージーの霊薬。&使って出かけると、戦闘から必ず逃げられる。"},
-  {name:"超人のスムージー",price:150,class:"霊薬",detail:"飲むと無性に戦いたくなる野菜スムージーの霊薬。&使って出かけると、採取地でのエンカウント率が増加する。"},
-  {name:"石のスムージー",price:150,class:"霊薬",detail:"飲むとたちまち気配が消えてしまうスムージーの霊薬。&使って出かけると、採取地でしばらく弱い敵に会わなくなる。"},
-  {name:"デニフの氷球",price:160,class:"霊薬",detail:"水のマスターの名を冠する霊薬。&使って出かけると、味方の防御力と氷抵抗が上昇する。"},
-  {name:"ロッソの火炎輪",price:160,class:"霊薬",detail:"火のマスターの名を冠する霊薬。&使って出かけると、味方の攻撃力と火傷抵抗が上昇する。"},
-  {name:"炎の水晶玉",price:270,class:"戦闘",detail:"炎の力が込められた水晶玉。投げると破裂して辺りを火の海にする。&戦闘で使うと敵にダメージを与え、火傷状態にする。"},
-  {name:"氷の水晶玉",price:270,class:"戦闘",detail:"氷の力が込められた水晶玉。投げると破裂して強烈な冷気が発生する。&戦闘で使うと敵を氷結状態にする。"},
-  {name:"自然の水晶玉",price:270,class:"戦闘",detail:"自然の力が込められた水晶玉。投げると破裂して毒霧を散布する。&戦闘で使うと敵を中毒状態にする。"},
-  {name:"光の水晶玉",price:270,class:"戦闘",detail:"光の力が込められた水晶玉。投げると持続的な回復エリアを作り出す。&戦闘で使うと、しばらくの間味方は行動後にHPが少し回復する。"},
-  {name:"闇の水晶玉",price:270,class:"戦闘",detail:"闇の力が込められた水晶玉。投げると持続的に力を奪う結界を作り出す。&戦闘で使うと、しばらくの間敵の攻撃力を下げる。"},
-  {name:"風の水晶玉",price:270,class:"戦闘",detail:"風の力が込められた水晶玉。投げると弾けて辺り一帯に風塵をばら撒く。&戦闘で使うと、しばらくの間敵の防御力を下げる。"},
-  {name:"木の槍",price:50,class:"戦闘",detail:"木でできた槍。&戦闘中に使うと敵単体に中ダメージを与える。"},
-  {name:"光の槍",price:75,class:"戦闘",detail:"光のエルの力を宿した槍。&戦闘中に使うと敵単体に中ダメージを与える。&グリッター系に特攻ダメージを与える。"},
-  {name:"沈黙の槍",price:125,class:"戦闘",detail:"神聖なエルの力を宿した沈黙の槍。戦闘中に使うと敵単体に中ダメージを与える。&シャドウ系に特攻ダメージを与える。"},
-  {name:"チャージドボルト",price:180,class:"戦闘",detail:"強力に帯電したうに。&戦闘中に使うと敵全体に中ダメージを与える。"},
-  {name:"イラスティックボム",price:170,class:"戦闘",detail:"投擲用の小型爆弾。&戦闘中に使うと敵単体に中ダメージを与える。"},
-  {name:"ホーネットスティング",price:185,class:"戦闘",detail:"護身用の爆竹。戦闘中に使うと敵全体に中ダメージを与える。"},
-  {name:"浮遊石",price:210,class:"戦闘",detail:"魔法に反応して浮力を発生させる石。&飛行船の動力源に使われる。"},
+  {name:"空っぽの水晶玉",price:220,class:"製造",detail:"ガラスでできた水晶玉。&入れ物や瓶として使える。"},
+  {name:"たる",price:230,class:"製造",detail:"木材をうまく組み合わせて作ったた～る。&アイテムの最大所持数が増える。"},
+  {name:"竹かご",price:235,class:"製造",detail:"ファルマン竹を編み込んで作ったかご。&アイテムの最大所持数が増える。"},
+  {name:"疾風のりんご",price:150,class:"製造",detail:"飲むとたちまち体が軽くなるりんご。&使って出かけると、戦闘で逃走成功率が上がる。"},
+  {name:"超人のりんご",price:150,class:"製造",detail:"飲むと無性に戦いたくなるりんご。&使って出かけると、エンカウント率が増加する。"},
+  {name:"石のりんご",price:150,class:"製造",detail:"飲むとたちまち気配が消えてしまうりんご。&使って出かけると、エンカウント率が低下する。"},
+  {name:"デニフの氷球",price:160,class:"製造",detail:"水のマスターの名を冠する霊薬。&使って出かけると、戦闘中の防御力と氷抵抗が上昇する。"},
+  {name:"ロッソの火炎輪",price:160,class:"製造",detail:"火のマスターの名を冠する霊薬。&使って出かけると、戦闘中の攻撃力と火傷抵抗が上昇する。"},
+  {name:"炎の水晶玉",price:270,class:"製造",detail:"炎の力が込められた水晶玉。投げると破裂して辺りを火の海にする。&戦闘で使うと敵にダメージを与え、火傷状態にする。"},
+  {name:"氷の水晶玉",price:270,class:"製造",detail:"氷の力が込められた水晶玉。投げると破裂して強烈な冷気が発生する。&戦闘で使うと敵を氷結状態にする。"},
+  {name:"自然の水晶玉",price:270,class:"製造",detail:"自然の力が込められた水晶玉。投げると破裂して毒霧を散布する。&戦闘で使うと敵を中毒状態にする。"},
+  {name:"光の水晶玉",price:270,class:"製造",detail:"光の力が込められた水晶玉。投げると持続的な回復エリアを作り出す。&戦闘で使うと、しばらくの間味方は行動後にHPが少し回復する。"},
+  {name:"闇の水晶玉",price:270,class:"製造",detail:"闇の力が込められた水晶玉。投げると持続的に力を奪う結界を作り出す。&戦闘で使うと、しばらくの間敵の攻撃力を下げる。"},
+  {name:"風の水晶玉",price:270,class:"製造",detail:"風の力が込められた水晶玉。投げると弾けて辺り一帯に風塵をばら撒く。&戦闘で使うと、しばらくの間敵の防御力を下げる。"},
+  {name:"木の槍",price:50,class:"製造",detail:"木でできた槍。&敵に小ダメージを与える。"},
+  {name:"光の槍",price:75,class:"製造",detail:"光のエルの力を宿した槍。敵に中ダメージを与える。&グリッター系に特攻ダメージを与える。"},
+  {name:"シュティルレンツェ",price:125,class:"製造",detail:"神聖なエルの力を宿した沈黙の槍。敵に中ダメージを与える。&シャドウ系に特攻ダメージを与える。"},
+  {name:"チャージドボルト",price:180,class:"製造",detail:"強力に帯電したうに。敵に中ダメージを与える。&水棲系に特攻ダメージを与える。"},
+  {name:"イラスティックボム",price:170,class:"製造",detail:"投擲用の小型爆弾。敵に中ダメージを与える。&ナソード系に特攻ダメージを与える。"},
+  {name:"ホーネットスティング",price:185,class:"製造",detail:"護身用の爆竹。戦闘中に使うと大ダメージを与える。"},
+  {name:"浮遊石",price:210,class:"製造",detail:"魔法に反応して浮力を発生させる石。&飛行船の動力源に使われる。"},
   {name:"ネンヤ竹炭",price:270,class:"製造",detail:"ファルマン竹を原料として作られる炭。&燃料だけでなく、消臭剤にもなる。"},
-  {name:"デボラ縫合糸",price:280,class:"製造",detail:"傷を縫うと自然に吸収されるため、抜糸の必要がない特殊な糸。&医療界隈では重宝されるらしい。"},
-  {name:"スポア軟膏",price:140,class:"製造",detail:"アルテラシアの花からとれる成分を使った塗り薬。&味方1人のHPが回復する。"},
-  {name:"闘魂ドリンク",price:330,class:"消費",detail:"短時間だが効力のある精力剤。味はゲロマズ。戦闘中に使うと味方１人の攻撃力が大きく上昇する。"},
-  {name:"ナソードアーマー",price:320,class:"消費",detail:"一時的にナソードアーマーシールドを展開するギア。戦闘中に使うと味方１人の防御力が上昇する。"},
-  {name:"ＱＰＬゼリー",price:310,class:"消費",detail:"機械などの滑りをよくするために使われる、ぬめぬめしたゼリー。&戦闘中に使うと味方１人の素早さが上がる。"},
-  {name:"ガッツポトフ",price:210,class:"消費",detail:"色んな野菜が入った栄養満点のポトフ。&戦闘中に使うと味方1人に食いしばり効果を付与する。"},
-  {name:"ボルケーノトルティーヤ",price:230,class:"消費",detail:"火炎草を生地に混ぜ込んだ、病みつきになるトルティーヤ。&戦闘中に使うと味方１人の攻撃力が上昇する。"},
-  {name:"竜牙爆砕丸",price:170,class:"消費",detail:"ハーン家に伝わる漢方薬。陽の気を高める効果がある丸薬。&しばらく味方1人のHPの最大値を50増やす。"},
-  {name:"回光返照丸",price:180,class:"消費",detail:"ハーン家に伝わる漢方薬。陰の気を高める効果がある丸薬。&しばらく味方1人のMPの最大値を10増やす。"},
-  {name:"デブリアンコーヒー",price:140,class:"消費",detail:"エルダー麦から作られるカフェラテ。&カフェインゼロで子供も飲みやすい。&戦闘で使うと、その戦闘で得られる経験値が少し増える。"},
-  {name:"スッキリ茶",price:120,class:"消費",detail:"一口飲むだけで気分が浄化されるお茶。&味方全体の状態異常を回復する。"},
-  {name:"エルファイテール",price:160,class:"消費",detail:"エルライム香る炭酸ジュース。&味方単体のMPが30回復する。"},
-  {name:"アセラシェイク",price:170,class:"消費",detail:"霜雪イチゴを使った冷たいかき氷。&夏にぴったり。"},
-  {name:"スパイシーサラダ",price:180,class:"消費",detail:"野菜たっぷりのスパイシーサラダ。&味方全体のMPが20回復する。"},
-  {name:"活力のポーション",price:230,class:"消費",detail:"冒険者御用達のポーション。&慣れた冒険者は頭から浴びて使用する。&HPとMPが30％回復する。"},
-  {name:"上級活力ポーション",price:350,class:"消費",detail:"より効力を高めた活力のポーション。使用法は同じ。&味方単体のHPとMPが50％回復する。"},
-  {name:"エルダー麦パン",price:160,class:"消費",detail:"エルダー小麦を使った麦パン。&味方単体のHPが55回復する。"},
-  {name:"ポールクッキー",price:180,class:"消費",detail:"ポールの形をしたかわいいお菓子。&味方全体のHPが30回復する。"},
-  {name:"スターフルーツクッキー",price:190,class:"消費",detail:"スターフルーツの甘酸っぱい味がほんのりと乗ったクッキー。&味方全体のHPが50回復する。"},
-  {name:"ミックスベリーケーキ",price:230,class:"消費",detail:"野イチゴとエルダーベリーを使ったケーキ。&味方全体のHPが100回復する。"},
-  {name:"フライドチキン",price:130,class:"消費",detail:"スノーパウダーで軽く味付けしたフライドチキン。&味方単体のHPが80回復する。"},
-  {name:"ウィンドミルポテト",price:140,class:"消費",detail:"砂漠サツマイモを渦巻き状にスラッシュ＆フライしたポテト。&味方単体のHPが100回復する。"},
-  {name:"塩焼き魚",price:160,class:"消費",detail:"リザードバスを塩焼きにしたもの。&味方単体のHPが120回復する。"},
-  {name:"甘辛スキュアー",price:210,class:"消費",detail:"ピリ辛の串料理。スタミナ抜群。&味方単体のHPが90回復する。"},
-  {name:"竹の葉餃子",price:250,class:"消費",detail:"北部地域でよく食べられる、穀物粉の生地に肉などを包んだ料理。&味方全体のHPが130回復する。"},
-  {name:"特選タコスランチ",price:360,class:"消費",detail:"サラダとスキュアーをトルティーヤに包んだスペシャルタコス。&味方全体の攻撃力が上昇し、HPが200、MPが50回復する。"},
-  {name:"黄金海鮮三昧",price:420,class:"消費",detail:"海の幸を贅沢に詰め込んだ海鮮料理。&戦闘中に使うと、その戦闘で得られる経験値が3倍になる。"},
-  {name:"共存の祝祭パイ",price:30,class:"消費",detail:"共存の祝祭の間食べられるアップルパイ。&味方全体のHPが70回復する。"},
-  {name:"魔法のスクロール",price:320,class:"消費",detail:"破るとランダムな位置にワープするスクロール。&使用するとどこかのエリアにワープする。"},
-  ]
+  {name:"デボラ縫合糸",price:280,class:"製造",detail:"傷を縫うと自然に吸収されるため、&抜糸の必要がない特殊な糸。"},
+  {name:"スポア軟膏",price:140,class:"製造",detail:"アルテラシアの花からとれる成分を使った塗り薬。&HPが60回復する。"},
+  {name:"闘魂ドリンク",price:330,class:"製造",detail:"短時間だが効力のある精力剤。味はゲロマズ。戦闘中に使うと攻撃力が大きく上昇する。"},
+  {name:"ナソードアーマー",price:320,class:"製造",detail:"一時的にナソードアーマーシールドを展開するギア。戦闘中に使うと防御力が上昇する。"},
+  {name:"ＱＰエルゼリー",price:310,class:"製造",detail:"栄養の詰まったペット用のゼリー。&戦闘中に使うとモンスターを仲間にできる。&ただし一部のモンスターには効果がない。"},
+  {name:"ガッツポトフ",price:210,class:"製造",detail:"色んな野菜が入った栄養満点のポトフ。&戦闘中に使うと食いしばり効果を付与する。"},
+  {name:"ボルケーノトルテ",price:230,class:"製造",detail:"火炎草を生地に混ぜ込んだ&トルティーヤ。病みつきになる味。&戦闘中に使うと攻撃力が上昇する。"},
+  {name:"竜牙爆砕丸",price:170,class:"製造",detail:"陽の気を高める効果がある丸薬。&HPの最大値を50増やす。"},
+  {name:"回光返照丸",price:180,class:"製造",detail:"陰の気を高める効果がある丸薬。&MPの最大値を10増やす。"},
+  {name:"デブリアンココア",price:140,class:"製造",detail:"エルダー麦から作られるカフェラテ。&カフェインゼロで子供も飲みやすい。&HPを45回復する。"},
+  {name:"スッキリ茶",price:120,class:"製造",detail:"一口飲むだけで気分が浄化されるお茶。&状態異常を回復する。"},
+  {name:"エルファイテール",price:160,class:"製造",detail:"エルライム香る炭酸ジュース。&MPが30回復する。"},
+  {name:"アセラシェイク",price:170,class:"製造",detail:"霜雪イチゴを使った冷たいかき氷。&夏にぴったり。"},
+  {name:"スパイシーサラダ",price:180,class:"製造",detail:"野菜たっぷりのスパイシーサラダ。&MPが20回復する。"},
+  {name:"活力ポーション",price:230,class:"製造",detail:"冒険者御用達のポーション。&慣れた冒険者は頭から浴びて使用する。&HPとMPが30％回復する。"},
+  {name:"上級活力ポーション",price:350,class:"製造",detail:"より効力を高めた活力のポーション。使用法は同じ。&HPとMPが50％回復する。"},
+  {name:"エルダー麦パン",price:160,class:"製造",detail:"エルダー小麦を使った麦パン。&HPが55回復する。"},
+  {name:"ポールクッキー",price:180,class:"製造",detail:"ポールの形をしたかわいいお菓子。&HPが30回復する。"},
+  {name:"星果クッキー",price:190,class:"製造",detail:"スターフルーツの甘酸っぱい味がほんのりと乗ったクッキー。&HPが50回復する。"},
+  {name:"MIXベリーケーキ",price:230,class:"製造",detail:"野イチゴとエルダーベリーを使ったケーキ。&HPが100回復する。"},
+  {name:"フライドチキン",price:130,class:"製造",detail:"スノーパウダーで軽く味付けしたフライドチキン。&HPが80回復する。"},
+  {name:"ウィンドミルポテト",price:140,class:"製造",detail:"砂漠サツマイモを渦巻き状にスラッシュ＆フライしたポテト。&HPが100回復する。"},
+  {name:"塩焼き魚",price:160,class:"製造",detail:"リザードバスを塩焼きにしたもの。&HPが120回復する。"},
+  {name:"甘辛スキュアー",price:210,class:"製造",detail:"ピリ辛の串料理。スタミナ抜群。&HPが90回復する。"},
+  {name:"竹の葉餃子",price:250,class:"製造",detail:"北部地域でよく食べられる、穀物粉の生地に肉などを包んだ料理。&HPが130回復する。"},
+  {name:"特選タコスランチ",price:360,class:"製造",detail:"サラダとスキュアーをトルティーヤに包んだスペシャルタコス。&攻撃力が上昇し、HPが最大値を超えて300回復する。"},
+  {name:"黄金海鮮三昧",price:420,class:"製造",detail:"海の幸を贅沢に詰め込んだ海鮮料理。&戦闘中に使うと、その戦闘で得られる経験値が3倍になる。"},
+  {name:"共存の祝祭パイ",price:30,class:"製造",detail:"共存の祝祭の間食べられるアップルパイ。&HPが70回復する。"},
+  {name:"魔法のスクロール",price:320,class:"製造",detail:"破るとランダムな位置にワープするスクロール。&使用するとどこかのエリアにワープする。"},
+  {name:"ベリル式精製炉",price:320,class:"製造",detail:"鉱石からクリソナ成分を効率よく取り出せる炉。&クリソナ原石から高純度クリソナが加工できるようになる。"},
+  {name:"ベリル式錬成陣",price:320,class:"製造",detail:"リティアが発明した、&クリソナを介することなく宝石を生み出す魔法陣。&鉱石を直接ジェムストーンに加工できるようになる。"},
+  {name:"がらくた",price:1,class:"製造",detail:"がらくたとしか呼びようがない、&こまごまとした金属。&使い道は無さそうだ。"},
+  {name:"エナジーディスク",price:100,class:"製造",detail:"とてつもない力を秘めた&薄い円盤状の物質。"},
+  {name:"岩花の実",price:100,class:"鉱物資源",detail:"まるで岩のように硬い実。&天上の岐路で採れる。"},
+  {name:"イースの鱗",price:100,class:"その他資源",detail:"水の精霊からこぼれおちた鱗。"},
+  {name:"精霊の涙",price:100,class:"その他資源",detail:"水の精霊からこぼれおちた涙。"},
+  {name:"絡みあう元素欠片",price:100,class:"鉱物資源",detail:"わずかに3元素の魔力が残った欠片。"},
+  {name:"粗い石かけら",price:100,class:"鉱物資源",detail:"古い建造物に用いられていた&石のかけら。"},
+  {name:"ウィンドストーン",price:100,class:"鉱物資源",detail:"風の力を発生させる効果のある軽い石。"},
+  {name:"ルベニアンの精気",price:100,class:"その他資源",detail:"エルの気が目に見えるほど高濃度に結晶化したもの。&エルティアの欠片を加工すると手に入る。"},
+  {name:"ダークネスコア",price:100,class:"その他資源",detail:"魔気が結集したもの。"},
+  {name:"リティア電気石",price:100,class:"鉱物資源",detail:"熱すると電気を帯びる黄緑色の結晶。"},
+  {name:"エルダーミルク",price:100,class:"製造",detail:"麦を原料につくった植物性のミルク。&とっても体にいい。"},
+  {name:"イワトレーモン木",price:70,class:"植物資源",detail:"高所でより硬く育ったトレーモンの木。&木材には適さないが、樹脂を含んでいる。&天上の岐路でたまに採れる。"},
+  {name:"マジックスリング",price:70,class:"製造",detail:"リティアお得意の、伸びるスリング。&戦闘中に使うと、その戦闘から必ず逃げられる。"},
+  {name:"トゥラックランタン",price:70,class:"製造",detail:"竹炭を燃料に明かりをつくり出すランタン。&どんな闇も明るく照らしてくれそうだ。"},
+]
   for(var i=0; i<itemA.length;i++){
     itemA[i].id=i;
   }
   if(debugmode){
-    console.log(itemA.findIndex(value=>value.name=="スノークリスタル"))
-    console.log(itemA.findIndex(value=>value.name=="もりもりニンジン"))
-    console.log(itemA.findIndex(value=>value.name=="清浄水"))
     console.log(itemA.findIndex(value=>value.name=="緑柱石"))
-    console.log(itemA.findIndex(value=>value.name=="エルの清水"))
-    console.log(itemA.findIndex(value=>value.name=="クリソナ原石"))
+    console.log(itemA.findIndex(value=>value.name=="星屑"))
+    console.log(itemA.findIndex(value=>value.name=="クリソナの欠片"))
     console.log(itemA.findIndex(value=>value.name=="たる"))
   }
+var itemClassAry=[1,"素材（全て）","素材（植物資源）","素材（鉱物資源）","素材（その他資源）","クリソナ","製造","戦闘"]
+var battleLog=[];//メッセージ格納
+var UserStatus=[100,100,100]
 var StatusP=[100,100,100];//HP,ATK,DEF
-var StatusE=[30,30,30];
+var StatusE=[30,30,30,0];//3->type
+var EscapeRate=[0,50];//0->逃走試行回数 1->逃走確率
+var Pbuff=[];
+var Ebuff=[];
+var Bturn=1;//経過ターン
+var OPname;
+var Enemylist=[
+  {name:"ポール",St:[50,50,50,0],Dropitem:[24],HPtrigger:[]},
+  {name:"グリピグ",St:[75,120,50,0],Dropitem:[45],HPtrigger:[]},
+  {name:"ソソ",St:[60,60,60,0],Dropitem:[20],HPtrigger:[]},
+  {name:"火山の炎鷹",St:[150,60,60,0],Dropitem:[52],HPtrigger:[]},
+  {name:"プリンチュ",St:[120,60,60,0],Dropitem:[36],HPtrigger:[]},
+  {name:"パピリオ",St:[100,150,80,0],Dropitem:[51],HPtrigger:[]},
+  {name:"ガルファイハーピィ",St:[100,150,80,0],Dropitem:[39],HPtrigger:[]},
+  {name:"ヘルナオーブ",St:[170,90,100,4],Dropitem:[55],HPtrigger:[]},
+  {name:"ナソードドリラー",St:[120,60,60,4],Dropitem:[55],HPtrigger:[]},
+  {name:"コマンドオーガニックコア",St:[140,110,70,4],Dropitem:[38],HPtrigger:[]},
+  {name:"グリッター突撃兵",St:[300,200,60,1],Dropitem:[40],HPtrigger:[]},
+  {name:"グリッターコマンダー",St:[360,200,60,1],Dropitem:[40],HPtrigger:[]},
+  {name:"マーマン",St:[360,200,60,3],Dropitem:[42],HPtrigger:[]},
+  {name:"ラグズ",St:[245,120,160],Dropitem:[42],HPtrigger:[]},
+  {name:"イース",St:[260,180,60],Dropitem:[42],HPtrigger:[]},
+  {name:"ストーンゴーレム",St:[460,120,130],Dropitem:[42],HPtrigger:[]},
+  {name:"シャドウウォーカー",St:[360,200,60,2],Dropitem:[13],HPtrigger:[]},
+  {name:"シャドウランサー",St:[360,200,60,2],Dropitem:[94],HPtrigger:[]},
+  {name:"トロッシュ",St:[500,180,150,3],Dropitem:[53],HPtrigger:[]},
+  {name:"オベザール",St:[990,250,150,0],Dropitem:[],HPtrigger:[]},
+  {name:"アルロン",St:[75,120,80,0],Dropitem:[49],HPtrigger:[]},
+]
+var Skilllist=[
+  {sp:0,name:"通常攻撃（弱）",detail:"　",power:30,PP:0,hitrate:100},
+  {sp:0,name:"通常攻撃（中）",detail:"　",power:40,PP:0,hitrate:100},
+  {sp:0,name:"通常攻撃（強）",detail:"　",power:60,PP:0,hitrate:100},
+  {sp:0,name:"通常攻撃（クリティカル）",detail:"　",power:80,PP:0,hitrate:100},
+  {sp:0,name:"うに",detail:"　",power:40,PP:0,hitrate:100},
+  {sp:0,name:"砂漠サツマイモ",detail:"　",power:50,PP:0,hitrate:70},
+  {sp:0,name:"がらくた",detail:"　",power:20,PP:0,hitrate:70},
+  {sp:0,name:"がらくた爆発",detail:"　",power:200,PP:0,hitrate:90},
+  {sp:0,name:"木の槍",detail:"　",power:35,PP:0,hitrate:90},
+  {sp:1,name:"光の槍",detail:"　",power:55,PP:0,hitrate:100},
+  {sp:2,name:"シュティルレンツェ",detail:"　",power:95,PP:0,hitrate:100},
+  {sp:3,name:"チャージドボルト",detail:"　",power:80,PP:0,hitrate:100},
+  {sp:4,name:"イラスティックボム",detail:"　",power:90,PP:0,hitrate:100},
+  {sp:0,name:"ホーネットスティング",detail:"　",power:120,PP:0,hitrate:100},
+]
+var Bufflist=[
+  {name:"闘魂ドリンク",detail:"攻撃↑↑",t:0},
+  {name:"やけど",detail:"持続ダメージ",t:1},
+  {name:"どく",detail:"持続ダメージ",t:1},
+  {name:"マンドラタマネギ",detail:"攻撃↑",t:0},
+  {name:"ジョイフルライト",detail:"全能力↑↑　食いしばり付与",t:0},
+]
+//sp 1->グリッター 2->シャドゥ 3->水棲 4->ナソード
+var HPtrigger=[];
 //レシピから作る
 //素材を選んでつくる
 //分解、錬成フィルター用
-const disassemble=new Array(5,14,17,33,56,57,59,65,68,69,70,71,72)
-const assembleE=new Array(0,1,2,3,4)
-const assembleA=new Array(0,10,11,12,14,15,16,33,58,61,63,65,72,74,78,85,89,90,91,92,93,94,95,96,97,98,99,100,101,102,103,104,105,107,108,110,111,112,114,115,116,117,118,119,120,121,122,123,124,125,126,127,128,129,130,131,133,134,135,136,137,138,139,140,142,143,144,145,146)
-//思いついた・覚えたレシピ
-var recipe=new Array();
+const disassemble=new Array(5,14,15,17,33,38,45,56,58,60,63,65,68,69,70,71,72,73,77,146)
+const assembleA=new Array(0,1,2,3,4,7,8,9,11,12,13,14,16,28,33,48,58,61,63,65,72,74,78,82,83,85,89,90,91,92,93,94,95,96,97,98,99,100,101,102,103,104,105,107,108,109,110,111,112,114,115,116,117,118,119,120,121,122,123,124,125,126,127,128,129,130,131,132,133,135,136,137,138,139,140,142,143,144,145)
+//戦闘
+const consumptionA=new Array(9,23,24,25,26,29,30,31,35,36,41,46,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,119,120,121,122,123,124,125,126,127,128,129,130,131,134,145);
+const recipe=new Array(1,11,82) 
+var vpronum=0;
+var vmatnameA=[]
+var vmatnumA=[]
+//思いついた・覚えたレシピを随時追加
+var userRecipe=[1,11,82];
+//錬成補助
+var AsmAry=[];
+var AsmAry2=[];
+var crisonaA=[];
+var successRate=0;
 //item[0]伐採 [1]採掘 cleared -1->未判明 0->メニューに？？？と表示
 var henirarea=[
-  {name:"エルの樹の麓",Nitem:[[5,5,33],[54]],Ritem:[[14,41],[25]],SRitem:[[22,27],[68]]},
-  {name:"天上の岐路",Nitem:[[32,35],[54]],Ritem:[[16,29],[55]],SRitem:[[38],[60]]},
-  {name:"アルテラ平原",Nitem:[[24,31],[26,55]],Ritem:[[16,29],[66,27]],SRitem:[[40],[57]]},
-  {name:"ディシオン採掘場",Nitem:[[7,31],[12,53]],Ritem:[[32],[62]],SRitem:[[40],[70]]},
-  {name:"ザヤ山",Nitem:[[34],[12,53]],Ritem:[[16,29],[66,27]],SRitem:[[40],[70]]},
-  {name:"トロッシュの巣",Nitem:[[7,31],[12,53]],Ritem:[[16,29],[66,27]],SRitem:[[40],[70]]},
-  {name:"影の鉱脈",Nitem:[[7,31],[12,53]],Ritem:[[16,29],[66,27]],SRitem:[[40],[70]]},
+  {name:"エルの樹の麓",Nitem:[[5,5,29],[54]],Ritem:[[14,23],[73]],SRitem:[[22],[69]],Monster:["パピリオ","ポール","グリピグ"]},
+  {name:"天上の岐路",Nitem:[[27,36],[60]],Ritem:[[37,32],[56]],SRitem:[[146],[61]],Monster:["ヘルナオーブ","コマンドオーガニックコア"]},
+  {name:"アルテラ平原",Nitem:[[5,33],[26]],Ritem:[[12],[25,141]],SRitem:[[19],[71]],Monster:["グリッター突撃兵","アルロン","ポール","グリッターコマンダー"]},
+  {name:"ディシオン採掘場",Nitem:[[32],[58,55]],Ritem:[[13],[63]],SRitem:[[142],[70]],Monster:["アルロン","プリンチュ","ナソードドリラー"]},
+  {name:"ザヤ山",Nitem:[[5,34,34],[26,30]],Ritem:[[41],[66]],SRitem:[[20],[77]],Monster:["ガルファイハーピィ","ソソ","火山の炎鷹"]},
+  {name:"トロッシュの巣",Nitem:[[31,42],[17,53]],Ritem:[[43,35],[66,79]],SRitem:[[44],[80]],Monster:["ラグズ","マーマン","トロッシュ"]},
+  {name:"影の鉱脈",Nitem:[[13,36],[60]],Ritem:[[18,27],[139]],SRitem:[[21],[72]],Monster:["ストーンゴーレム","シャドウウォーカー","シャドウランサー"]},
   {name:"エリオス行きポータル",Nitem:[[],[]],Ritem:[[],[]],SRitem:[[],[]]},
 ];
 for(var i=0; i<henirarea.length;i++){
@@ -642,8 +740,10 @@ for(var i=0; i<henirarea.length;i++){
 henirarea[0].cleared=0;
 var UserItem=new Array(160);
 UserItem.fill(0);//採取インベントリ
+var Crisona=[];//クリソナは固有インベ
 var UserLibrary=new Array(160);
 UserLibrary.fill(0);//採取インベントリ
+var itemMax=[1,30,50,99];//インベ所持Max
 var itemAry=[0];//インベントリ
 var equipeditem=-1;
 var playtime=0;
@@ -658,8 +758,11 @@ var UserData_SoL = {
   "Achieve":achieve,
   "Inventory":inventory,
   "UserItem":UserItem,
+  "Crisona":Crisona,
   "UserLibrary":UserLibrary,
+  "Recipe":userRecipe,
   "Area":henirarea,
+  "Status":UserStatus,
   "Playtime":playtime,
   "Monster":defeatedmonster,
   "Melon":melonList,
@@ -688,8 +791,11 @@ UserData_SoL = {
   "Achieve":achieve,
   "Inventory":inventory,
   "UserItem":UserItem,
+  "Crisona":Crisona,
   "UserLibrary":UserLibrary,
+  "Recipe":userRecipe,
   "Area":henirarea,
+  "Status":UserStatus,
   "Playtime":playtime,
   "Totalcardmove":totalcardmove,
   "Monster":defeatedmonster,
@@ -716,7 +822,10 @@ totalcardmove=getdata.Totalcardmove;
 melonList=getdata.Melon.concat()
 achieve_SS=getdata.SS.concat();
 UserItem=getdata.UserItem.concat();
+Crisona=getdata.Crisona.concat();
+userRecipe=getdata.Recipe.concat();
 UserLibrary=getdata.UserLibrary.concat();
+UserStatus=getdata.Status.concat();
 defeatedmonster=getdata.Monster;
 //追加データ部分　undefinedなら初期値にしておく
 for(var i=0; i<getdata.Achieve.length; i++){
@@ -772,10 +881,13 @@ UserItem=new Array(160);
 UserItem.fill(0);
 UserLibrary=new Array(160);
 UserLibrary.fill(0);
+Crisona=[];
+userRecipe=[1,11,82];
 GamestartT=0;
 defeatedmonster=0;
 melonList=[0,0];
 achieve_SS=[0,0,0];
+UserStatus=[100,100,100];
 //shut down
 Bgm.stop();
 musicnum=0;
@@ -801,7 +913,7 @@ gamestate=10;
         console.log('ねこ')
     }
 }
-function saveDL(){//*
+function saveDL(){
     var json_obj = {
       "Title": "this is save data from SoLithia",
       "Volume":vBar,
@@ -814,7 +926,9 @@ function saveDL(){//*
       "Achieve":achieve,
       "Inventory":inventory,
       "UserItem":UserItem,
+      "Crisona":Crisona,
       "UserLibrary":UserLibrary,
+      "Status":UserStatus,
       "Area":henirarea,
       "Playtime":playtime,
       "Totalcardmove":totalcardmove,
@@ -873,7 +987,10 @@ function saveUP(){
   melonList=getdata.Melon.concat()
   achieve_SS=getdata.SS.concat();
   UserItem=getdata.UserItem.concat();
+  Crisona=getdata.Crisona.concat();
   UserLibrary=getdata.UserLibrary.concat();
+  UserStatus=getdata.Status.concat();
+  userRecipe=getdata.Recipe.concat();
   defeatedmonster=getdata.Monster;
   //追加データ部分　undefinedなら初期値にしておく
   for(var i=0; i<getdata.Achieve.length; i++){
@@ -896,7 +1013,7 @@ function saveUP(){
   }
   highscore=getdata.Highscore.concat();
   SEbuffer();
-  PopAnm("✅セーブデータを読み込みました",1200,500,35,30,55);
+  PopAnm("✅セーブデータを読み込みました",1200,300,35,30,95);
   saveLocal();
   }  
   else{
@@ -926,6 +1043,12 @@ if(p!==0){
   se18.volume(0);
   se19.volume(0);
   se20.volume(0);
+  se21.volume(0);
+  se22.volume(0);
+  se23.volume(0);
+  se24.volume(0);
+  se25.volume(0);
+  se26.volume(0);
 }else{
   se1.volume(0.2*sBar);
   se2.volume(0.4*sBar);
@@ -947,6 +1070,12 @@ if(p!==0){
   se18.volume(0.3*sBar);
   se19.volume(0.2*sBar);
   se20.volume(0.5*sBar);
+  se21.volume(0.4*sBar);
+  se22.volume(0.4*sBar);
+  se23.volume(0.4*sBar);
+  se24.volume(0.2*sBar);
+  se25.volume(0.2*sBar);
+  se26.volume(0.3*sBar);
   }
 }
 var se1 = new Howl({
@@ -1029,11 +1158,35 @@ var se20 = new Howl({
   src:"kaiju_foot.mp3",
   volume: 0.5,
   });
+var se21 = new Howl({
+  src:"throw_knife.mp3",
+  volume: 0.4,
+  });
+var se22 = new Howl({
+  src:"hitSE6.mp3",
+  volume: 0.4,
+  });
+var se23 = new Howl({
+  src:"maou_se_battle18.mp3",
+  volume: 0.4,
+  });
+var se24 = new Howl({
+  src:"maou_se_battle19.mp3",
+  volume: 0.2,
+  });
+var se25 = new Howl({
+  src:"Negative02.mp3",
+  volume: 0.2,
+  });
+var se26 = new Howl({
+  src:"recovery2.mp3",
+  volume: 0.3,
+  });
 const bgm1data ={
     src: "PerituneMaterial_EpicBattle_Deity_loop.mp3",
     loopStart: 0,
     loopEnd: 117660,
-    volume: 0.1,
+    volume: 0.08,
   };
   const bgm2data ={
     src: "PerituneMaterial_Lost_place5_loop.mp3",
@@ -1067,10 +1220,59 @@ const bgm1data ={
   };
   const bgm7data ={
     src: "Stage_Noahs.mp3",
-    loopStart: 1540,
-    loopEnd: 51910,
-    volume: 0.5,
+    loopStart: 340,
+    loopEnd: 50710,
+    volume: 0.6,
   };
+  const bgm8data ={
+    src: "soL_milestone_inst.mp3",
+    loopStart: 22290,
+    loopEnd: 148500,
+    volume: 0.6,
+  };
+  const bgm9data ={
+    src: "soL_elision.mp3",
+    loopStart: 100,
+    loopEnd: 112100,
+    volume: 0.4,
+  };
+  const bgm10data ={
+    src: "Lunadom_plain.mp3",
+    loopStart: 100,
+    loopEnd: 88910,
+    volume: 0.6,
+  };
+  const bgm11data ={
+    src: "Stage_Trosh.mp3",
+    loopStart: 10040,
+    loopEnd: 96410,
+    volume: 0.6,
+  };
+  const bgm12data ={
+    src: "Stage_feiterA_li.mp3",
+    loopStart: 11090,
+    loopEnd: 97330,
+    volume: 0.6,
+  };
+  //採掘場bgmは暫定
+const bgm13data ={
+  src: "Sortie_Rena.mp3",
+  loopStart: 3750,
+  loopEnd: 71830,
+  volume: 0.6,
+};
+const bgm14data ={
+  src: "Stage_Bethma.mp3",
+  loopStart: 1950,
+  loopEnd: 99410,
+  volume: 0.4,
+};
+const bgm15data ={
+  src: "PerituneMaterial_Irregular_loop.mp3",
+  loopStart: 0,
+  loopEnd: 196370,
+  volume: 0.1,
+};
 var Bgm=new Music(bgm1data);
 var musicnum=0;
 var Barlist=[];//soundconfigで使用
@@ -1088,7 +1290,8 @@ var queue = new createjs.LoadQueue(),
         {src:'Card_images/soL_room.png'},{src:'Card_images/soL_room_path.png'},{src:'Card_images/soL_room_table.png'},{src:'Card_images/soL_room_map2.png'},{src:'Card_images/soL_room_Path9.png'},{src:'Card_images/soL_room_kit4.png'},{src:'Card_images/soL_room_kit1.png'},{src:'Card_images/soL_room_kit2.png'},{src:'Card_images/soL_room_kit3.png'},{src:'Card_images/soL_room_picture2.png'},
         {src:'Card_images/melon1.png'},{src:'Card_images/melon2.png'},{src:'Card_images/melon3.png'},
         {src:'soL_rule1.png'},{src:'soL_rule2.png'},{src:'soL_rule3.png'},{src:'soL_rule3_2.png'},{src:'soL_rule2.png'},{src:'soL_rule3.png'},{src:'soL_rule3_2.png'},
-              ];
+        {src:'soL_bg1.png'},{src:'soL_bg2.png'},{src:'soL_bg3.png'},{src:'soL_bg4.png'},{src:'soL_bg5.png'},{src:'soL_bg6.png'},{src:'soL_bg7.png'},{src:'soL_bg8.png'},
+      ];
 // 同時接続数を設定
 queue.setMaxConnections(6);
 // 読み込みの進行状況が変化した
@@ -1138,6 +1341,7 @@ function UpdateParticles(event){
   if(gamestate==0 && duelLog.length>1 && (playMode[0]==1 || (playMode[0]==2 && playMode[1]==0))){yakumap_undo.alpha=1;}else{yakumap_undo.alpha=0;}
   if(gamestate==0 && duelLog.length && playMode[0]!==4){yakumap_reset.alpha=1;}else{yakumap_reset.alpha=0;}
   if(gamestate==0 && duelLog.length && playMode[0]!==4){yakumap_solve.alpha=1}else{yakumap_solve.alpha=0};
+  if(gamestate==0 && duelLog.length && henirarea[0].cleared>1){yakumap_giveup.alpha=1}else{yakumap_giveup.alpha=0};
 }
 function MouseCircle(event){
   //クリックした場所を教える
@@ -1210,7 +1414,7 @@ function updateParticles() {
 }
 function menu(state=0,area=0){
   //メイン画面
-  console.log('menu',state,area);
+  console.log('menu',state,area,opLock,gamestate);
   if(area>0){
     //ヘニルエントランス
     opLock=0;
@@ -1295,7 +1499,7 @@ function menu(state=0,area=0){
       if(InvID(0)==6){
         MsgAry.push(["　","――ヘニルの時空",-1,-2,3,1])
         MsgAry.push(["リティア","……どうなってるわけ。",0,-2]);
-        MsgAry.push(["リティア","せっかく扉が開いたから外に出たと思ったのに、&また変な空間だよ。",0,-2]);
+        MsgAry.push(["リティア","せっかく扉が開いたから外に出られたと思ったのに、&また変な空間だよ。",0,-2]);
         MsgAry.push(["男の声","驚いたな。&まさかパスワードを解読して入ってくるとは。",2]);
         MsgAry.push(["リティア","誰よ。",0,-2]);
         MsgAry.push(["　","気味の悪い笑い声が響く。",2]);
@@ -1306,8 +1510,10 @@ function menu(state=0,area=0){
         MsgAry.push(["男の声","クックック。&せいぜいあがいてみろ。",2]);
         MsgAry.push(["　","再び、空間に男の笑い声が響きわたった。&これ以上、呼びかけても返事はないようだ。",-1,-2]);
         MsgAry.push(["henirmenu"]);
+        cLock=true;
         MsgNext(-1);
         InvID(0,7);
+        return true;
       }
         break;
     }
@@ -1317,7 +1523,7 @@ function menu(state=0,area=0){
     function HenirPath(){
       switch(this.card){
         case -1:
-          if(equipeditem==6 && InvID(6)==1){
+          if((equipeditem==6 && InvID(6)==1) || debugmode){
             equipeditem=-1;
             InvID(6,-1);
             InvConfig(0);
@@ -1340,9 +1546,27 @@ function menu(state=0,area=0){
           var BG = new createjs.Bitmap("Don_bg5.png");
           BG.alpha=0;
           field.addChild(BG);
-          var BG1 = new createjs.Bitmap("soL_bg1.png");
+          var BG1 = new createjs.Bitmap(SoLbg_src[0]);
           BG1.alpha=0;
           field.addChild(BG1);
+          var BG2 = new createjs.Bitmap(SoLbg_src[1]);
+          BG2.alpha=0;
+          field.addChild(BG2);
+          var BG3 = new createjs.Bitmap(SoLbg_src[2]);
+          BG3.alpha=0;
+          field.addChild(BG3);
+          var BG4 = new createjs.Bitmap(SoLbg_src[3]);
+          BG4.alpha=0;
+          field.addChild(BG4);
+          var BG5 = new createjs.Bitmap(SoLbg_src[4]);
+          BG5.alpha=0;
+          field.addChild(BG5);
+          var BG6 = new createjs.Bitmap(SoLbg_src[5]);
+          BG6.alpha=0;
+          field.addChild(BG6);
+          var BG7 = new createjs.Bitmap(SoLbg_src[6]);
+          BG7.alpha=0;
+          field.addChild(BG7);
           var Car1 = new createjs.Bitmap("Card_images/BackColor_Black.png");
           Car1.x=-200;
           Car1.y=150;
@@ -1375,7 +1599,7 @@ function menu(state=0,area=0){
           field.addChild(Car3);
           var Car4 = new createjs.Bitmap("Card_images/BackColor_Black.png");
           Car4.x=-200;
-          Car4.y=280;
+          Car4.y=50;
           Car4.scale=1.8;
           if(henirarea[3].cleared>=0){
             Car4.alpha=0.8;
@@ -1385,7 +1609,7 @@ function menu(state=0,area=0){
           field.addChild(Car4);
           var Car5 = new createjs.Bitmap("Card_images/BackColor_Black.png");
           Car5.x=-200;
-          Car5.y=50;
+          Car5.y=280;
           Car5.scale=1.8;
           if(henirarea[4].cleared>=0){
             Car5.alpha=0.8;
@@ -1403,6 +1627,16 @@ function menu(state=0,area=0){
             Car6.alpha=0;
             }
           field.addChild(Car6);
+          var Car7 = new createjs.Bitmap("Card_images/BackColor_Black.png");
+          Car7.x=-200;
+          Car7.y=150;
+          Car7.scale=1.8;
+          if(henirarea[6].cleared>=0){
+            Car7.alpha=0.8;
+            }else{
+            Car7.alpha=0;
+            }
+          field.addChild(Car4);
           var shape = new createjs.Shape();
           shape.graphics.beginFill("#bae0c3");
           shape.graphics.beginStroke("#617d68");
@@ -1414,25 +1648,42 @@ function menu(state=0,area=0){
           T.y=483;
           field.addChild(T);
           createjs.Tween.get(Car1)
-          .to({x:-10},400, createjs.Ease.backOut);
+          .to({x:-10},400, createjs.Ease.backOut)
+          .call(SoLkey);
           createjs.Tween.get(Car2)
           .to({x:160},600, createjs.Ease.backOut);
           createjs.Tween.get(Car3)
           .to({x:330},800, createjs.Ease.backOut)
           createjs.Tween.get(Car4)
-          .to({x:330},800, createjs.Ease.backOut)
-          createjs.Tween.get(Car5)
           .to({x:500},800, createjs.Ease.backOut)
+          createjs.Tween.get(Car5)
+          .to({x:330},600, createjs.Ease.backOut);
           createjs.Tween.get(Car6)
           .to({x:500},800, createjs.Ease.backOut)
-          .call(SoLkey);
+          createjs.Tween.get(Car7)
+          .to({x:870},900, createjs.Ease.backOut)
           function SoLkey(){
           Car1.addEventListener("mouseover", {card:1,handleEvent:MouseOver});
           Car1.addEventListener("mouseout", {card:0,handleEvent:MouseOver});
           Car2.addEventListener("mouseover", {card:2,handleEvent:MouseOver});
           Car2.addEventListener("mouseout", {card:0,handleEvent:MouseOver});
+          Car3.addEventListener("mouseover", {card:3,handleEvent:MouseOver});
+          Car3.addEventListener("mouseout", {card:0,handleEvent:MouseOver});
+          Car4.addEventListener("mouseover", {card:4,handleEvent:MouseOver});
+          Car4.addEventListener("mouseout", {card:0,handleEvent:MouseOver});
+          Car5.addEventListener("mouseover", {card:5,handleEvent:MouseOver});
+          Car5.addEventListener("mouseout", {card:0,handleEvent:MouseOver});
+          Car6.addEventListener("mouseover", {card:6,handleEvent:MouseOver});
+          Car6.addEventListener("mouseout", {card:0,handleEvent:MouseOver});
+          Car7.addEventListener("mouseover", {card:7,handleEvent:MouseOver});
+          Car7.addEventListener("mouseout", {card:0,handleEvent:MouseOver});
           Car1.addEventListener("click", {card:1,handleEvent:HenirPath});
           Car2.addEventListener("click", {card:2,handleEvent:HenirPath});
+          Car3.addEventListener("click", {card:3,handleEvent:HenirPath});
+          Car4.addEventListener("click", {card:4,handleEvent:HenirPath});
+          Car5.addEventListener("click", {card:5,handleEvent:HenirPath});
+          Car6.addEventListener("click", {card:6,handleEvent:HenirPath});
+          Car7.addEventListener("click", {card:6,handleEvent:HenirPath});
           var option_bt5 = new createjs.Bitmap('soL_batu.png');
             option_bt5.x=700;
             option_bt5.y=60;
@@ -1451,22 +1702,37 @@ function menu(state=0,area=0){
             switch(this.card){
               case 0:
                 BG1.alpha=0;
-                createjs.Tween.get(BG).to({alpha:0.8},200);
+                BG2.alpha=0;
+                BG3.alpha=0;
+                BG4.alpha=0;
+                BG5.alpha=0;
+                BG6.alpha=0;
+                BG7.alpha=0;
+                createjs.Tween.get(BG).to({alpha:0.8},80);
                 break;
               case 1:
-                createjs.Tween.get(BG).to({alpha:0},100);
-                createjs.Tween.get(BG1).to({alpha:0.8},200);
+                createjs.Tween.get(BG1).to({alpha:0.8},80);
                 T.text=henirarea[this.card-1].name;
                 break;
               case 2:
+                createjs.Tween.get(BG2).to({alpha:0.8},80);
+                T.text=henirarea[this.card-1].name;
                 break;
               case 3:
+                createjs.Tween.get(BG3).to({alpha:0.8},80);
+                T.text=henirarea[this.card-1].name;
                 break;
               case 4:
+                createjs.Tween.get(BG4).to({alpha:0.8},80);
+                T.text=henirarea[this.card-1].name;
                 break;
               case 5:
+                createjs.Tween.get(BG5).to({alpha:0.8},80);
+                T.text=henirarea[this.card-1].name;
                 break;
               case 6:
+                createjs.Tween.get(BG6).to({alpha:0.8},80);
+                T.text=henirarea[this.card-1].name;
                 break;
             }
           };
@@ -1474,6 +1740,7 @@ function menu(state=0,area=0){
           break;
           default:
           //各地域へ入場
+          opLock=0;
           field.removeAllChildren();
           playMode[1]=this.card-1;
           createjs.Tween.get(RoomA)
@@ -1500,7 +1767,7 @@ function menu(state=0,area=0){
                 .beginFill("gold")
                 .drawRect(0, 0, 800, 600);
           field.mask = shapeMask3;
-          Henirmap(playMode[1]);
+          Henirmap(playMode[1],henirarea[playMode[1]].cleared);
           };
           break;
       }
@@ -1795,6 +2062,9 @@ function menu(state=0,area=0){
         MsgNext(-1);
         };
       gamestate=100;
+      if(playMode[0]==4){
+        PathTalk();
+        };
       function Tablecross(){
         //家具のオンカーソル表示
         if(opLock==0){
@@ -1906,7 +2176,6 @@ function menu(state=0,area=0){
           }
             break;
           case 5:
-            var ID=inventory.findIndex(value=>value.id==1);
             if(equipeditem==1 || InvID(1)==-1){
             equipeditem=-1;
             InvID(1,-1)
@@ -2648,6 +2917,11 @@ function menu(state=0,area=0){
         totalcardmove=0;
         }
         //実績解放
+        var A=userRecipe.findIndex(value=>value<0);
+        if(A!==-1){
+          userRecipe[A]=-userRecipe[A];
+          PopAnm("新しいレシピを記録しました！",800,280,35,30,130)
+        }
         var A=cleared[1].findIndex(value=>value>0);
         if(A!==-1){
           AK("ファインダー");
@@ -2681,15 +2955,80 @@ function menu(state=0,area=0){
           var P = PathAry[i];
           if(totalcardmove>=(100+25*i)*i){P.alpha=1}else{P.alpha=0};
         };
+        if(playMode[0]==4){
+        PathTalk(1);
+        }else{
         PathTalk();
+        }
         break;
   }
 };
-function Henirmap(p){
-  //各地域の描画
-  console.log('henirmap',p);
+function Henirmap(p,map=0){
+  //各地域の描画 map:最初に訪れた際はイベント終了後に描画
+  console.log('henirmap',p,map);
+  HenirPathT=[];
+  playMode[0]=4;
+  gamestate=5;
+  var BG1 = new createjs.Bitmap(SoLbg_src[p]);
+  BG1.alpha=0.8;
+  field.addChild(BG1);
+  var Header1 = new createjs.Bitmap("soL_header1.png");
+  Header1.x=480;
+  Header1.scale=0.7;
+  field.addChild(Header1);
+  var Header2 = new createjs.Bitmap("soL_header2.png");
+  Header2.y=-8;
+  field.addChild(Header2);
+  var Opicon2 = new createjs.Bitmap("soL_opicon2.png");
+  Opicon2.x=670;
+  Opicon2.y=540;
+  field.addChild(Opicon2);
+  var obj = new createjs.Shape();
+  obj.graphics.beginFill("#bae0c3");
+  obj.graphics.beginStroke("#617d68");
+  obj.graphics.setStrokeStyle(2);
+  obj.graphics.drawRect(15, 135, 262, 35);
+  field.addChild(obj);
+  if(playMode[1]==7){
+  var T=new createjs.Text("進む","24px serif","#46574a");
+  }else if(playMode[1]==6 && UserItem[148]==0){
+  var T=new createjs.Text("暗くて採取できない！","24px serif","#46574a");
+  }else{
+  var T=new createjs.Text("採取スタート","24px serif","#46574a");
+  }
+  T.x=20;
+  T.y=138;
+  field.addChild(T);
+  var obj2 = new createjs.Shape();
+  obj2.graphics.beginFill("#bae0c3");
+  obj2.graphics.beginStroke("#617d68");
+  obj2.graphics.setStrokeStyle(2);
+  obj2.graphics.drawRect(15, 170, 262, 35);
+  if(henirarea[0].cleared>1){
+  field.addChild(obj2);
+  }
+  var T=new createjs.Text("入口に戻る","24px serif","#46574a");
+  T.x=20;
+  T.y=173;
+  if(henirarea[0].cleared>1){
+  field.addChild(T);
+  }
+  Opicon2.addEventListener("click", {handleEvent:InvConfig_Item});
+  if(playMode[1]==7){
+    //ラストバトル
+    obj.addEventListener("click", {card:4,handleEvent:Lastbattle});
+  }else{
+  if(playMode[1]==6 && UserItem[148]>0){
+    obj.addEventListener("click", {card:4,handleEvent:GameReady});
+    }else if(playMode[1]<=5){
+    obj.addEventListener("click", {card:4,handleEvent:GameReady});
+    }
+  }
+  obj2.addEventListener("click", {rule:playMode[0],handleEvent:Gameend});
+  HenirPathS=[];
   switch(p){
     case 0:
+      //エルの樹
       if(musicnum!==7){
         Bgm.stop();
         musicnum=7;
@@ -2697,62 +3036,37 @@ function Henirmap(p){
         Bgm=new Music(bgm7data);
         Bgm.playMusic();
         }}
-      var BG1 = new createjs.Bitmap("soL_bg1.png");
-      BG1.alpha=0.8;
-      field.addChild(BG1);
+      if(map>0){
       var Room = new createjs.Bitmap("Card_images/soL_henir.png");
       Room.scale=0.5;
       Room.x=100;
       Room.y=200;
       Room.alpha=0.6;
       field.addChild(Room);
-      var Header1 = new createjs.Bitmap("soL_header1.png");
-      Header1.x=480;
-      Header1.scale=0.7;
-      field.addChild(Header1);
-      var Header2 = new createjs.Bitmap("soL_header2.png");
-      Header2.y=-8;
-      field.addChild(Header2);
-      var Opicon2 = new createjs.Bitmap("soL_opicon2.png");
-      Opicon2.x=670;
-      Opicon2.y=540;
-      field.addChild(Opicon2);
-      var obj = new createjs.Shape();
-      obj.graphics.beginFill("#bae0c3");
-      obj.graphics.beginStroke("#617d68");
-      obj.graphics.setStrokeStyle(2);
-      obj.graphics.drawRect(15, 125, 262, 35);
-      field.addChild(obj);
-      var T=new createjs.Text("採取スタート","24px serif","#46574a");
-      T.x=20;
-      T.y=128;
-      field.addChild(T);
-      var obj2 = new createjs.Shape();
-      obj2.graphics.beginFill("#bae0c3");
-      obj2.graphics.beginStroke("#617d68");
-      obj2.graphics.setStrokeStyle(2);
-      obj2.graphics.drawRect(15, 160, 262, 35);
-      field.addChild(obj2);
-      var T=new createjs.Text("入口に戻る","24px serif","#46574a");
-      T.x=20;
-      T.y=163;
-      field.addChild(T);
-      var hp = new createjs.Shape();
-      //hp.graphics.beginFill("black");
-      hp.graphics.beginFill("rgba(242,40,10)");
-      hp.graphics.moveTo(106, 44);
-      hp.graphics.lineTo(109, 56);
-      hp.graphics.lineTo(354, 47);
-      hp.graphics.lineTo(364, 30);
-      field.addChild(hp);
-      Opicon2.addEventListener("click", {handleEvent:InvConfig});
-      obj.addEventListener("click", {card:4,handleEvent:GameReady});
-      obj2.addEventListener("click", {rule:playMode[0],handleEvent:Gameend});
-      Room.addEventListener("click", {card:110,num:1,handleEvent:HenirKey});
-      if(henirarea[p].cleared==0){
+      createjs.Tween.get(Room,{loop:true})
+      .to({y:195},2100)
+      .to({y:200},2100);
+      HenirPathT.push(Room);
+      Room.addEventListener("click", {card:1,num:1,tp:0,handleEvent:HenirKey});
+      var RoomA = new createjs.Bitmap("Card_images/soL_henirA.png");
+      RoomA.scale=0.5;
+      RoomA.x=100;
+      RoomA.y=200;
+      if(henirarea[1].cleared==-1){
+      RoomA.alpha=0;
+      }else{
+      Room.alpha=0;
+      RoomA.alpha=1;
+      }
+      field.addChild(RoomA);
+      createjs.Tween.get(RoomA,{loop:true})
+      .to({y:195},2100)
+      .to({y:200},2100);
+      RoomA.addEventListener("click", {card:2,tp:0,handleEvent:HenirPathTo});
+      HenirPathS.push(RoomA);
+      }
+      if(map==0){
         //初入場時のイベント
-        switch(p){
-          case 0:
             cLock=false;
             var Ary=[];
             var shape = new createjs.Shape();
@@ -2762,8 +3076,9 @@ function Henirmap(p){
             Ary.push(shape);
             createjs.Tween.get(shape).to({alpha:0.4},600).wait(1000).to({alpha:0},800);
             var t=new createjs.Text(henirarea[p].name,"64px serif","white");
-            t.x=150;
+            t.x=400;
             t.y=250;
+            t.textAlign="center"
             t.alpha=0;
             field.addChild(t);
             Ary.push(t);
@@ -2773,45 +3088,571 @@ function Henirmap(p){
             shape.alpha=0;
             Ary.push(shape);
             createjs.Tween.get(t).to({alpha:1},600).wait(2000).call(firstEv);
-            MsgAry.push(["リティア","まさかフルーツポンチで扉が開くなんてね……。",0,-2,3,1])
+            MsgAry.push(["リティア","ここは……森？&でもこの感覚、まだ狭間の中にいるみたい。",0,-2,3,1])
+            MsgAry.push(["リティア","まさかフルーツポンチで扉が開くなんてね……。",0,-2]);
             MsgAry.push(["リティア","クリソナには狭間を開く力がある……。&もしかしたら、氷のクリソナを使ったことが関係したのかな。",0,-2])
-            MsgAry.push(["リティア","で、ここは……森？",0,-2]);
             MsgAry.push(["リティア","さっきのおじさんは、&ここから出たければもっとエリオス側に来いって&言ってたけど……。",0,-2]);
-            MsgAry.push(["リティア","助ける気があるなら、&もっと具体的に教えてくれればいいのに。&いちいち上から目線の言い方してくるし。",0,-2]);
+            MsgAry.push(["リティア","助ける気があるなら、&もっと具体的に教えてくれればいいのに。",0,-2]);
             MsgAry.push(["リティア","あーもう、考えてても始まらない！&このあたりをいろいろ調べてみよう！",0,-2]);
             MsgAry.push(["リティア","もしかしたら、&思いがけない宝物があるかもしれないし！",0,-2]);
             MsgAry.push(["collection"]);
-        break;
         }
+      break;
+    case 1:
+      //天空
+      if(musicnum!==9){
+        Bgm.stop();
+        musicnum=9;
+        if(mute=="ON"){
+        Bgm=new Music(bgm9data);
+        Bgm.playMusic();
+        }}
+      if(map>0){
+      var Room = new createjs.Bitmap("Card_images/soL_henir.png");
+      Room.scale=0.4;
+      Room.x=100;
+      Room.y=200;
+      Room.alpha=0.6;
+      field.addChild(Room);
+      createjs.Tween.get(Room,{loop:true})
+      .to({y:195},2100)
+      .to({y:200},2100);
+      HenirPathT.push(Room);
+      Room.addEventListener("click", {card:2,num:1,tp:0,handleEvent:HenirKey});
+      var RoomA = new createjs.Bitmap("Card_images/soL_henirA.png");
+      RoomA.scale=0.4;
+      RoomA.x=100;
+      RoomA.y=200;
+      if(henirarea[2].cleared==-1){
+      RoomA.alpha=0;
+      }else{
+      Room.alpha=0;
+      RoomA.alpha=1;
       }
-      function firstEv(){
-        for(var i=0;i<Ary.length;i++){
-          field.removeChild(Ary[i]);
-        }
-        cLock=true;
-        MsgNext(-1);
-        henirarea[p].cleared=1;
+      field.addChild(RoomA);
+      createjs.Tween.get(RoomA,{loop:true})
+      .to({y:195},2100)
+      .to({y:200},2100);
+      RoomA.addEventListener("click", {card:3,tp:0,handleEvent:HenirPathTo});
+      HenirPathS.push(RoomA);
+      var Room = new createjs.Bitmap("Card_images/soL_henir.png");
+      Room.scale=0.4;
+      Room.x=400;
+      Room.y=200;
+      Room.alpha=0.6;
+      field.addChild(Room);
+      createjs.Tween.get(Room,{loop:true})
+      .to({y:195},2100)
+      .to({y:200},2100);
+      HenirPathT.push(Room);
+      Room.addEventListener("click", {card:67,num:1,tp:1,handleEvent:HenirKey});
+      var RoomA = new createjs.Bitmap("Card_images/soL_henirA.png");
+      RoomA.scale=0.4;
+      RoomA.x=400;
+      RoomA.y=200;
+      if(henirarea[5].cleared==-1){
+      RoomA.alpha=0;
+      }else{
+      Room.alpha=0;
+      RoomA.alpha=1;
+      }
+      field.addChild(RoomA);
+      createjs.Tween.get(RoomA,{loop:true})
+      .to({y:195},2100)
+      .to({y:200},2100);
+      RoomA.addEventListener("click", {card:6,tp:0,handleEvent:HenirPathTo});
+      HenirPathS.push(RoomA);
+      }
+      if(map==0){
+        //初入場時のイベント
+            cLock=false;
+            var Ary=[];
+            var shape = new createjs.Shape();
+            shape.graphics.beginFill("#808080").drawRect(0, 0, 800, 600);
+            field.addChild(shape);
+            shape.alpha=0;
+            Ary.push(shape);
+            createjs.Tween.get(shape).to({alpha:0.4},600).wait(1000).to({alpha:0},800);
+            var t=new createjs.Text(henirarea[p].name,"64px serif","white");
+            t.x=400;
+            t.y=250;
+            t.textAlign="center"
+            t.alpha=0;
+            field.addChild(t);
+            Ary.push(t);
+            createjs.Tween.get(t).to({alpha:1},600).wait(1000).to({alpha:0},800);
+            shape.graphics.beginFill("white").moveTo(140,320).lineTo(450,320);
+            field.addChild(shape);
+            shape.alpha=0;
+            Ary.push(shape);
+            createjs.Tween.get(t).to({alpha:1},600).wait(2000).call(firstEv);
+            MsgAry.push(["リティア","……ふー、すごい風。&ここは……。",0,-2,3,1])
+            MsgAry.push(["リティア","うわ！　空の上だ！&……それに人工物とナソードの姿も見える……。",0,-2]);
+            MsgAry.push(["リティア","「……ナソードの父は、エリオスを離れ、&別次元の天空にナソードのための理想郷&『エリシオン』を築き上げた……」だっけ。",0,-2]);
+            MsgAry.push(["リティア","マティが見たら、&伝説は本当だったんだ！　とか言って&大喜びしそうな風景ね。",0,-2]);
+            MsgAry.push(["リティア","……とにかく、立ち止まっちゃいられないよね！",0,-2]);
+            MsgAry.push(["リティア","あの人の話ぶりからは、&まだまだ次のエリアに進まないと&いけない気がする。",0,-2])
+            MsgAry.push(["リティア","このピッケルで素材を採取して、&魔法も使って！&道を開いて行こう！",0,-2]);
+            MsgAry.push(["collect_nonev"]);
       }
       break;
-  }
-}
-function HenirKey(){
-    switch(this.card){
-      default:
-        if(equipeditem==this.card && InvID(6)==1){
-          equipeditem=-1;
-          InvID(6,-1);
-          InvConfig(0);
-          se19.play();
-          Roomyard.removeChild(Room);
-          RoomA.alpha=1;
-          createjs.Tween.get(RoomA)
-        .to({x:800,rotation:180},200)
-        .to({x:0,rotation:360},100);
-        }else{
-        Dialogue("Required Item",itemA[this.card].detail+"×"+this.num,-1,-1,"OK",350,330,80,40);
+    case 2:
+      //平原
+      if(musicnum!==10){
+        Bgm.stop();
+        musicnum=10;
+        if(mute=="ON"){
+        Bgm=new Music(bgm10data);
+        Bgm.playMusic();
+        }}
+      if(map>0){
+      var Room = new createjs.Bitmap("Card_images/soL_henir.png");
+      Room.scale=0.4;
+      Room.x=70;
+      Room.y=200;
+      Room.alpha=0.6;
+      field.addChild(Room);
+      createjs.Tween.get(Room,{loop:true})
+      .to({y:195},2100)
+      .to({y:200},2100);
+      HenirPathT.push(Room);
+      Room.addEventListener("click", {card:112,num:1,tp:0,handleEvent:HenirKey});
+      var RoomA = new createjs.Bitmap("Card_images/soL_henirA.png");
+      RoomA.scale=0.4;
+      RoomA.x=70;
+      RoomA.y=200;
+      if(henirarea[3].cleared==-1){
+      RoomA.alpha=0;
+      }else{
+      Room.alpha=0;
+      RoomA.alpha=1;
+      }
+      field.addChild(RoomA);
+      createjs.Tween.get(RoomA,{loop:true})
+      .to({y:195},2100)
+      .to({y:200},2100);
+      RoomA.addEventListener("click", {card:4,tp:0,handleEvent:HenirPathTo});
+      HenirPathS.push(RoomA);
+      var Room = new createjs.Bitmap("Card_images/soL_henir.png");
+      Room.scale=0.4;
+      Room.x=400;
+      Room.y=160;
+      Room.alpha=0.6;
+      field.addChild(Room);
+      createjs.Tween.get(Room,{loop:true})
+      .to({y:155},2100)
+      .to({y:160},2100);
+      HenirPathT.push(Room);
+      Room.addEventListener("click", {card:3,num:1,tp:1,handleEvent:HenirKey});
+      var RoomA = new createjs.Bitmap("Card_images/soL_henirA.png");
+      RoomA.scale=0.4;
+      RoomA.x=400;
+      RoomA.y=160;
+      if(henirarea[4].cleared==-1){
+      RoomA.alpha=0;
+      }else{
+      Room.alpha=0;
+      RoomA.alpha=1;
+      }
+      field.addChild(RoomA);
+      createjs.Tween.get(RoomA,{loop:true})
+      .to({y:155},2100)
+      .to({y:160},2100);
+      RoomA.addEventListener("click", {card:5,tp:0,handleEvent:HenirPathTo});
+      HenirPathS.push(RoomA);
+      }
+      if(map==0){
+        //初入場時のイベント
+            cLock=false;
+            var Ary=[];
+            var shape = new createjs.Shape();
+            shape.graphics.beginFill("#808080").drawRect(0, 0, 800, 600);
+            field.addChild(shape);
+            shape.alpha=0;
+            Ary.push(shape);
+            createjs.Tween.get(shape).to({alpha:0.4},600).wait(1000).to({alpha:0},800);
+            var t=new createjs.Text(henirarea[p].name,"64px serif","white");
+            t.x=400;
+            t.y=250;
+            t.textAlign="center"
+            t.alpha=0;
+            field.addChild(t);
+            Ary.push(t);
+            createjs.Tween.get(t).to({alpha:1},600).wait(1000).to({alpha:0},800);
+            shape.graphics.beginFill("white").moveTo(140,320).lineTo(450,320);
+            field.addChild(shape);
+            shape.alpha=0;
+            Ary.push(shape);
+            createjs.Tween.get(t).to({alpha:1},600).wait(2000).call(firstEv);
+            MsgAry.push(["リティア","ぅわあああ！",0,-2,3,1])
+            MsgAry.push(["リティア","いたた……。&雲の中に飛び込んだと思ったら、今度は草原？",0,-2]);
+            MsgAry.push(["リティア","すー……。はー……。",0,-2]);
+            MsgAry.push(["リティア","青い空、広がる草原、麦の匂い。&何もなければ、ずっと寝そべっていたいなぁ。&けど、ここも作られた空間なんだよね。",0,-2]);
+            MsgAry.push(["リティア","このエリアもかなり広そう。",0,-2]);
+            MsgAry.push(["リティア","レシピに詰まったら、&ソリティアを遊びに戻るのも&気分転換にいいかもしれない。",0,-2]);
+            MsgAry.push(["リティア","さてと！　いつまでも寝てられないよね。",0,-2]);
+            MsgAry.push(["collect_nonev"]);
+      }
+      break;
+    case 3:
+        //採掘場
+        if(musicnum!==13){
+          Bgm.stop();
+          musicnum=13;
+          if(mute=="ON"){
+          Bgm=new Music(bgm13data);
+          Bgm.playMusic();
+          }}
+        if(map==0){
+          //初入場時のイベント
+              cLock=false;
+              var Ary=[];
+              var shape = new createjs.Shape();
+              shape.graphics.beginFill("#808080").drawRect(0, 0, 800, 600);
+              field.addChild(shape);
+              shape.alpha=0;
+              Ary.push(shape);
+              createjs.Tween.get(shape).to({alpha:0.4},600).wait(1000).to({alpha:0},800);
+              var t=new createjs.Text(henirarea[p].name,"64px serif","white");
+              t.x=400;
+              t.y=250;
+              t.textAlign="center"
+              t.alpha=0;
+              field.addChild(t);
+              Ary.push(t);
+              createjs.Tween.get(t).to({alpha:1},600).wait(1000).to({alpha:0},800);
+              shape.graphics.beginFill("white").moveTo(140,320).lineTo(450,320);
+              field.addChild(shape);
+              shape.alpha=0;
+              Ary.push(shape);
+              createjs.Tween.get(t).to({alpha:1},600).wait(2000).call(firstEv);
+              MsgAry.push(["リティア","ここは行き止まりみたい。",0,-2,3,1])
+              MsgAry.push(["リティア","熱帯植物に、青く光る鉱石。",0,-2]);
+              MsgAry.push(["リティア","ここは……面白そうだ！&変わった素材が手に入るかもしれない！",0,-2]);
+              MsgAry.push(["collect_nonev"]);
         }
         break;
+    case 4:
+          //ザヤ山
+          if(musicnum!==14){
+            Bgm.stop();
+            musicnum=14;
+            if(mute=="ON"){
+            Bgm=new Music(bgm14data);
+            Bgm.playMusic();
+            }}
+            if(map>0){
+              var Room = new createjs.Bitmap("Card_images/soL_henir.png");
+              Room.scale=0.5;
+              Room.x=100;
+              Room.y=200;
+              Room.alpha=0.6;
+              field.addChild(Room);
+              createjs.Tween.get(Room,{loop:true})
+              .to({y:195},2100)
+              .to({y:200},2100);
+              HenirPathT.push(Room);
+              Room.addEventListener("click", {card:4,num:1,tp:0,handleEvent:HenirKey});
+              var RoomA = new createjs.Bitmap("Card_images/soL_henirA.png");
+              RoomA.scale=0.5;
+              RoomA.x=100;
+              RoomA.y=200;
+              if(henirarea[6].cleared==-1){
+              RoomA.alpha=0;
+              }else{
+              Room.alpha=0;
+              RoomA.alpha=1;
+              }
+              field.addChild(RoomA);
+              createjs.Tween.get(RoomA,{loop:true})
+              .to({y:195},2100)
+              .to({y:200},2100);
+              RoomA.addEventListener("click", {card:7,tp:0,handleEvent:HenirPathTo});
+              HenirPathS.push(RoomA);
+              }
+          if(map==0){
+            //初入場時のイベント
+                cLock=false;
+                var Ary=[];
+                var shape = new createjs.Shape();
+                shape.graphics.beginFill("#808080").drawRect(0, 0, 800, 600);
+                field.addChild(shape);
+                shape.alpha=0;
+                Ary.push(shape);
+                createjs.Tween.get(shape).to({alpha:0.4},600).wait(1000).to({alpha:0},800);
+                var t=new createjs.Text(henirarea[p].name,"64px serif","white");
+                t.x=400;
+                t.y=250;
+                t.textAlign="center"
+                t.alpha=0;
+                field.addChild(t);
+                Ary.push(t);
+                createjs.Tween.get(t).to({alpha:1},600).wait(1000).to({alpha:0},800);
+                shape.graphics.beginFill("white").moveTo(140,320).lineTo(450,320);
+                field.addChild(shape);
+                shape.alpha=0;
+                Ary.push(shape);
+                createjs.Tween.get(t).to({alpha:1},600).wait(2000).call(firstEv);
+                MsgAry.push(["リティア","見慣れた山道に出たな……。",0,-2,3,1])
+                MsgAry.push(["リティア","そうだ……ザヤ山だ！&ついにあたしが行ったことある場所だよ！",0,-2]);
+                MsgAry.push(["リティア","銀秤草もあるといいな。",0,-2]);
+                MsgAry.push(["collect_nonev"]);
+          }
+          break;
+    case 5:
+          //トロッシュ
+          if(musicnum!==11){
+            Bgm.stop();
+            musicnum=11;
+            if(mute=="ON"){
+            Bgm=new Music(bgm11data);
+            Bgm.playMusic();
+            }}
+            if(map>0){
+              var Room = new createjs.Bitmap("Card_images/soL_henir.png");
+              Room.scale=0.5;
+              Room.x=100;
+              Room.y=200;
+              Room.alpha=0.6;
+              field.addChild(Room);
+              createjs.Tween.get(Room,{loop:true})
+              .to({y:195},2100)
+              .to({y:200},2100);
+              HenirPathT.push(Room);
+              Room.addEventListener("click", {card:4,num:1,tp:0,handleEvent:HenirKey});
+              var RoomA = new createjs.Bitmap("Card_images/soL_henirA.png");
+              RoomA.scale=0.5;
+              RoomA.x=100;
+              RoomA.y=200;
+              if(henirarea[6].cleared==-1){
+              RoomA.alpha=0;
+              }else{
+              Room.alpha=0;
+              RoomA.alpha=1;
+              }
+              field.addChild(RoomA);
+              createjs.Tween.get(RoomA,{loop:true})
+              .to({y:195},2100)
+              .to({y:200},2100);
+              RoomA.addEventListener("click", {card:7,tp:0,handleEvent:HenirPathTo});
+              HenirPathS.push(RoomA);
+              }
+          if(map==0){
+            //初入場時のイベント
+                cLock=false;
+                var Ary=[];
+                var shape = new createjs.Shape();
+                shape.graphics.beginFill("#808080").drawRect(0, 0, 800, 600);
+                field.addChild(shape);
+                shape.alpha=0;
+                Ary.push(shape);
+                createjs.Tween.get(shape).to({alpha:0.4},600).wait(1000).to({alpha:0},800);
+                var t=new createjs.Text(henirarea[p].name,"64px serif","white");
+                t.x=400;
+                t.y=250;
+                t.textAlign="center"
+                t.alpha=0;
+                field.addChild(t);
+                Ary.push(t);
+                createjs.Tween.get(t).to({alpha:1},600).wait(1000).to({alpha:0},800);
+                shape.graphics.beginFill("white").moveTo(140,320).lineTo(450,320);
+                field.addChild(shape);
+                shape.alpha=0;
+                Ary.push(shape);
+                createjs.Tween.get(t).to({alpha:1},600).wait(2000).call(firstEv);
+                MsgAry.push(["リティア","ごぼぼぼぼ！",0,-2,3,1])
+                MsgAry.push(["リティア","あれ……。&息が……できる！",0,-2]);
+                MsgAry.push(["リティア","なるほど、海底に空気の層ができてるってわけね。&全く……空の上から水の中に突っ込むなんて。&ひどい目にあったよ。",0,-2]);
+                MsgAry.push(["リティア","見たことないものがいっぱいある。&どれも気になる！&もちろん、気をつけて進まなきゃね。",0,-2]);
+                MsgAry.push(["collect_nonev"]);
+          }
+          break;
+    case 6:
+            //鉱脈
+            if(musicnum!==12){
+              Bgm.stop();
+              musicnum=12;
+              if(mute=="ON"){
+              Bgm=new Music(bgm12data);
+              Bgm.playMusic();
+              }}
+              if(map>0){
+                var Room = new createjs.Bitmap("Card_images/soL_henir.png");
+                Room.scale=0.5;
+                Room.x=100;
+                Room.y=200;
+                Room.alpha=0.6;
+                field.addChild(Room);
+                createjs.Tween.get(Room,{loop:true})
+                .to({y:195},2100)
+                .to({y:200},2100);
+                HenirPathT.push(Room);
+                Room.addEventListener("click", {card:135,num:1,tp:0,handleEvent:HenirKey});
+                var RoomA = new createjs.Bitmap("Card_images/soL_henirA.png");
+                RoomA.scale=0.5;
+                RoomA.x=100;
+                RoomA.y=200;
+                if(henirarea[7].cleared==-1){
+                RoomA.alpha=0;
+                }else{
+                Room.alpha=0;
+                RoomA.alpha=1;
+                }
+                field.addChild(RoomA);
+                createjs.Tween.get(RoomA,{loop:true})
+                .to({y:195},2100)
+                .to({y:200},2100);
+                RoomA.addEventListener("click", {card:8,tp:0,handleEvent:HenirPathTo});
+                HenirPathS.push(RoomA);
+                }
+            if(map==0){
+              //初入場時のイベント
+              //ランタン
+                  cLock=false;
+                  var Ary=[];
+                  var shape = new createjs.Shape();
+                  shape.graphics.beginFill("#808080").drawRect(0, 0, 800, 600);
+                  field.addChild(shape);
+                  shape.alpha=0;
+                  Ary.push(shape);
+                  createjs.Tween.get(shape).to({alpha:0.4},600).wait(1000).to({alpha:0},800);
+                  var t=new createjs.Text(henirarea[p].name,"64px serif","white");
+                  t.x=400;
+                  t.y=250;
+                  t.textAlign="center"
+                  t.alpha=0;
+                  field.addChild(t);
+                  Ary.push(t);
+                  createjs.Tween.get(t).to({alpha:1},600).wait(1000).to({alpha:0},800);
+                  shape.graphics.beginFill("white").moveTo(140,320).lineTo(450,320);
+                  field.addChild(shape);
+                  shape.alpha=0;
+                  Ary.push(shape);
+                  createjs.Tween.get(t).to({alpha:1},600).wait(2000).call(firstEv);
+                  MsgAry.push(["リティア","寒っ！&今度は何……鍾乳洞みたいな地形だけど……。",0,-2,3,1])
+                  MsgAry.push(["リティア","ここで採取をするには、&何か明かりになるものが&あった方がよさそうだね。",0,-2]);
+                  MsgAry.push(["collect_nonev"]);
+            }
+            break;
+    case 7:
+    //オベザール
+    if(musicnum!==6){
+      Bgm.stop();
+      musicnum=6;
+      if(mute=="ON"){
+      Bgm=new Music(bgm6data);
+      Bgm.playMusic();
+      }}
+    if(map==0){
+      //初入場時のイベント
+          cLock=false;
+          var Ary=[];
+          var shape = new createjs.Shape();
+          shape.graphics.beginFill("#808080").drawRect(0, 0, 800, 600);
+          field.addChild(shape);
+          shape.alpha=0;
+          Ary.push(shape);
+          createjs.Tween.get(shape).to({alpha:0.4},600).wait(1000).to({alpha:0},800);
+          var t=new createjs.Text(henirarea[p].name,"64px serif","white");
+          t.x=400;
+          t.y=250;
+          t.textAlign="center"
+          t.alpha=0;
+          field.addChild(t);
+          Ary.push(t);
+          createjs.Tween.get(t).to({alpha:1},600).wait(1000).to({alpha:0},800);
+          shape.graphics.beginFill("white").moveTo(140,320).lineTo(450,320);
+          field.addChild(shape);
+          shape.alpha=0;
+          Ary.push(shape);
+          createjs.Tween.get(t).to({alpha:1},600).wait(2000).call(firstEv);
+          MsgAry.push(["リティア","ここは……最初の狭間みたいな場所だ。",0,-2,3,1])
+          MsgAry.push(["リティア","遠くに見える星は……ああっ！",0,-2]);
+          MsgAry.push(["リティア","「こちら側からもエリオスが見える場所」……。&もしかして……出口なんじゃ！",0,-2]);
+          MsgAry.push(["リティア","けど、なんか、やばい雰囲気を感じるよ。",0,-2]);
+          MsgAry.push(["リティア","進むか引き返すか。&判断した方が良さそうね。",0,-2]);
+          MsgAry.push(["collect_nonev"]);
+    }
+        break;
+    }
+  function firstEv(){
+    for(var i=0;i<Ary.length;i++){
+      field.removeChild(Ary[i]);
+    }
+    cLock=true;
+    MsgNext(-1);
+    henirarea[p].cleared=1;
+  }
+  function HenirPathTo(){
+        //各地域へ入場部分だけコピペ
+        field.removeAllChildren();
+        playMode[1]=this.card-1;
+        createjs.Tween.get(HenirPathS[this.tp])
+        .to({x:-1700,y:-1300,scale:4,alpha:0.1},500, createjs.Ease.backIn);
+        var shape = new createjs.Shape();
+        shape.graphics.beginFill("white");
+        shape.graphics.drawRect(0, 0, 800, 600);
+        shape.alpha=0;
+        Roomyard.alpha=1;
+        Roomyard.addChild(shape);
+        createjs.Tween.get(shape)
+        .to({alpha:1},500)
+        .wait(80)
+        .call(ToHenir);
+        function ToHenir(){
+        Roomyard.alpha=0;
+        Roomyard.removeChild(shape);
+        var shapeMask3 = new createjs.Shape();
+        shapeMask3.graphics
+          .beginFill("gold")
+          .drawRect(0, 0, 800, 600);
+        field.mask = shapeMask3;
+        Henirmap(playMode[1],henirarea[playMode[1]].cleared);
+        }
+      };
+}
+function HenirKey(){
+  //this.card:id this.num:num
+    if(equipeditem==this.card && InvID(6)==1){
+      equipeditem=-1;
+      InvID(6,-1);
+      InvConfig(0);
+      se19.play();
+      Roomyard.removeChild(Room);
+      RoomA.alpha=1;
+      createjs.Tween.get(RoomA)
+    .to({x:800,rotation:180},200)
+    .to({x:0,rotation:360},100);
+    }else{
+      if(UserLibrary[this.card]==0){
+        Dialogue("Required Item","？？？ ×"+this.num+"&"+itemA[this.card].detail,-1,-1,"OK",350,330,80,40);
+      }else{
+        if(UserItem[this.card]>=this.num){
+          //無言で解放
+          PopAnm(itemA[this.card].name+"を"+this.num+"個使用しました！",900,350);
+          UserItem[this.card]-=this.num;
+          se19.play();
+          field.removeChild(HenirPathT[this.tp]);
+          HenirPathS[this.tp].alpha=1;
+          createjs.Tween.get(HenirPathS[this.tp])
+          .to({x:HenirPathS[this.tp].x+800,rotation:180},200)
+          .to({x:HenirPathS[this.tp].x,rotation:360},100);
+          //TK 
+          switch(playMode[1]){
+            case 0:
+            henirarea[1].cleared=0;
+            break;
+            case 1:
+              if(this.tp==0){
+                henirarea[2].cleared=0;
+              }else if(this.tp==1){
+                henirarea[5].cleared=0;
+              }
+            break;
+          }
+        }else{
+        Dialogue("Required Item",itemA[this.card].name+"×"+this.num+"&"+itemA[this.card].detail,-1,-1,"OK",350,330,80,40);
+      }}
 }};
 function SoLmap(){
   if(opLock==0){
@@ -3565,20 +4406,30 @@ drawbuttom(10,50,decks.length,1,50,40);
 }};
 
 function resetButton(event){
-  //解決する
   if(opLock==0){
     opLock=2;
     se11.play();
     Dialogue("RETRY？","同じ盤面を最初からやり直します",3,-1);
   }
 }
-function solveButton(event){
+function solveButton(event=-1){
   if(cLock){
-  //new game;
   if(opLock==0){
     opLock=2;
     se11.play();
-    Dialogue("NEW GAME？","この盤面を放棄して新しいゲームを始めます",1,-1);
+    Dialogue("NEW GAME？","この盤面を放棄して新しいゲームを始めます",2,-1);
+  }
+}}
+function giveupButton(event=-1){
+  if(cLock){
+  if(opLock==0){
+    opLock=2;
+    se11.play();
+    if(playMode[0]==4){
+      Dialogue("QUIT GAME？","採取を途中で終了します",0,-1);      
+    }else{
+    Dialogue("QUIT GAME？","この盤面を途中で終了します",1,-1);
+    }
   }
 }}
 function DeckReset(p=0,point=0,X=0){
@@ -3674,6 +4525,7 @@ function DeckReset(p=0,point=0,X=0){
   };
 function DeckReset_H(p=0,point=0,X=0){
   //ヘニル
+  if(Extras[0]<0){return false};
   if(p!==0 && X==0){
     p=this.point;
     decksNow2=0;
@@ -3719,7 +4571,12 @@ function DeckReset_H(p=0,point=0,X=0){
       Exlists[0].text="系統：カッター"
     }
     var T=Decklists.pop();
+    if(TT==-100){
+    var S = new createjs.Bitmap('Card_images/Card_Monster.png');
+    Extras[0]=-1;
+    }else{
     var S=new createjs.Bitmap(Card_src[TT]);
+    }
     S.x=275;
     S.y=280;
     S.alpha=0;
@@ -3747,8 +4604,15 @@ function DeckReset_H(p=0,point=0,X=0){
           pickMsg("面白いもの落ちてないかな？&　");
           break;
         }
-      }
       Extras[0]=0;
+      }else if(Extras[0]<0){
+        se8.play();
+        pickMsg("モンスターだ！&　");
+        Battle();
+        createjs.Tween.get(S)
+        .wait(200)
+        .to({x:340,y:170,scale:2},120)
+      }
       point+=1;
       decksNow+=1;
       decksNow2+=1;
@@ -3786,11 +4650,670 @@ function DeckReset_H(p=0,point=0,X=0){
     break;
   }
   };
-function pickMsg(word){
+function pickMsg(word,t=0){
+  console.log(word);
+  if(t==0){
   for( var lines=word.split( "&" ), i=0, l=lines.length; l>i; i++ ){
     Exlists[4][i].text=lines[i];
   };
+  return true;
   }
+  MessageText[2][1].alpha=0;
+  cLock=false;
+  for(var lines=word.split( "&" ), i=0, l=lines.length; 3>i; i++){
+    Exlists[4][i].text="";
+  };
+  var texti=0;
+  var line=lines[0]
+  var Tx=Exlists[4][0];
+  window.requestAnimationFrame((ts)=>MsgSplit(ts,1));
+  function MsgSplit(ts,tflame=1,A=0,delay=0){
+    //1文字ずつ描画 A->文字送りの速さ
+    A+=1;
+    if(A>delay){
+    delay=0;
+    if(line == ''){
+    texti+=1;
+    if(texti >= lines.length){
+    MessageText[2][1].alpha=1;
+      cLock=true;
+      return false;
+    }
+    line=lines[texti]
+    Tx=Exlists[4][texti];
+    delay=18;
+    }
+    if(line.slice(0,1)=="/"){
+    line = line.slice(1);
+    delay=15;
+    }
+    if(A>tflame){
+      var c = line.slice(0,1);
+      line = line.slice(1);
+      Tx.text+=c;
+      A=0;
+    }}
+      window.requestAnimationFrame((ts)=>MsgSplit(ts,tflame,A,delay));
+  }
+  }
+function Battle(){
+  //バトル各種ボタン初期化
+  if(gamestate==0){
+  //モンスターとステータスコピー
+  gamestate=2;
+  Bturn=1;
+  battleLog=[];
+  MessageText[1]=[];
+  MessageText[2]=[];
+  var R=Math.floor(Math.random()*henirarea[playMode[1]].Monster.length);
+  var M=Enemylist.findIndex(value=>value.name==henirarea[playMode[1]].Monster[R]);
+  console.log(M);
+  StatusP=UserStatus.concat();
+  StatusE=Enemylist[M].St.concat();
+  OPname=Enemylist[M].name;
+  EscapeRate=[0,50];//ボス戦では-1にする
+  Pbuff=[];
+  Ebuff=[];
+  var obj = new createjs.Shape();
+  obj.graphics.beginFill("rgba(20,20,20,0.7)");
+  obj.graphics.moveTo(220, 230);
+  obj.graphics.lineTo(250, 220);
+  obj.graphics.lineTo(350, 218);
+  obj.graphics.lineTo(370, 220);
+  obj.graphics.lineTo(368, 250);
+  obj.graphics.lineTo(350, 275);
+  obj.graphics.lineTo(260, 285);
+  obj.graphics.lineTo(220, 270);
+  obj.graphics.lineTo(220, 260);
+  obj.graphics.lineTo(200, 270);
+  obj.graphics.lineTo(220, 240);
+  obj.graphics.lineTo(220, 230);
+  obj.x-=5;
+  battlefield.addChild(obj);
+  var hp = new createjs.Shape();
+  hp.graphics.beginFill("black");
+  hp.graphics.moveTo(226, 234);
+  hp.graphics.lineTo(229, 245);
+  hp.graphics.lineTo(352, 234);
+  hp.graphics.lineTo(358, 222);
+  battlefield.addChild(hp);
+  var hp = new createjs.Shape();
+  hp.graphics.beginFill("rgba(242,40,10)");
+  hp.graphics.moveTo(226, 234);
+  hp.graphics.lineTo(229, 245);
+  hp.graphics.lineTo(352, 234);
+  hp.graphics.lineTo(358, 222);
+  battlefield.addChild(hp);
+  MessageText[1][0]=hp;
+  var t = new createjs.Text("HP "+StatusP[0]+"/"+UserStatus[0], "20px serif", "white");
+  t.x=230;
+  t.y=250;
+  battlefield.addChild(t);
+  MessageText[1][1]=t;
+  stage.addChild(battlefield);
+  var shape = new createjs.Shape();
+  shape.graphics.beginFill("rgba(200,200,200,0.5)");
+  shape.graphics.drawRect(0, 0, 800, 600);
+  shape.alpha=0;
+  battlefield.addChild(shape);
+  createjs.Tween.get(shape).to({alpha:1},150);
+  createjs.Tween.get(shape).to({alpha:0.2},150);
+  shape.addEventListener("click", {card:-1,handleEvent:Battle});
+  battlefield.x=800;
+  var shape = new createjs.Shape();
+  shape.graphics.beginFill("#fc4e42");
+  shape.graphics.beginStroke("#e3e3e3");
+  shape.graphics.setStrokeStyle(3);
+  shape.graphics.drawRect(30, 50, 214, 110);
+  battlefield.addChild(shape);
+  shape.addEventListener("click", {card:1,handleEvent:Battle});
+  var shape = new createjs.Shape();
+  shape.graphics.beginFill("#60a2f7");
+  shape.graphics.beginStroke("#e3e3e3");
+  shape.graphics.setStrokeStyle(3);
+  shape.graphics.drawRect(244, 50, 214, 110);
+  battlefield.addChild(shape);
+  shape.addEventListener("click", {card:2,handleEvent:Battle});
+  var shape = new createjs.Shape();
+  shape.graphics.beginFill("#3cb564");
+  shape.graphics.beginStroke("#e3e3e3");
+  shape.graphics.setStrokeStyle(3);
+  shape.graphics.drawRect(458, 50, 214, 110);
+  battlefield.addChild(shape);
+  shape.addEventListener("click", {card:3,handleEvent:Battle});
+  var t = new createjs.Text("たたかう", "36px serif", "white");
+  t.x=40;
+  t.y=60;
+  battlefield.addChild(t);
+  var t = new createjs.Text("ATTACK", "32px serif", "white");
+  t.x=40;
+  t.y=110;
+  battlefield.addChild(t);
+  var t = new createjs.Text("アイテム", "36px serif", "white");
+  t.x=254;
+  t.y=60;
+  battlefield.addChild(t);
+  var t = new createjs.Text("ITEM", "32px serif", "white");
+  t.x=254;
+  t.y=110;
+  battlefield.addChild(t);
+  var t = new createjs.Text("にげる", "36px serif", "white");
+  t.x=468;
+  t.y=60;
+  battlefield.addChild(t);
+  var t = new createjs.Text("ESCAPE", "32px serif", "white");
+  t.x=468;
+  t.y=110;
+  battlefield.addChild(t);
+  var shape = new createjs.Shape();
+  shape.graphics.beginFill("rgba(10,10,10,0.8)");
+  shape.graphics.drawRect(0, 0, 700, 162);
+  shape.x=-30;
+  battlefield.addChild(shape);
+  MessageText[2][0]=shape;
+  createjs.Tween.get(shape)
+  .to({x:0,y:-130},150);
+  createjs.Tween.get(battlefield)
+  .to({x:0},150);
+  var t=new createjs.Text("▼","bold 18px 'メイリオ'","white");
+  t.x=620;
+  t.y=555;
+  t.alpha=0;
+  battlefield.addChild(t);
+  MessageText[2][1]=t;
+  createjs.Tween.get(t, {loop: true})
+  .to({y:550},30)
+  .wait(270)
+  .to({y:555},30)
+  .wait(270);
+  var shape = new createjs.Shape();
+  shape.graphics.beginFill("#1e7861");
+  shape.graphics.beginStroke("#e3e3e3");
+  shape.graphics.setStrokeStyle(2);
+  shape.graphics.drawRect(0, 0, 140, 40);
+  battlefield.addChild(shape);
+  var t = new createjs.Text("TURN "+Bturn, "26px serif", "white");
+  t.x=5;
+  t.y=5;
+  battlefield.addChild(t);
+  MessageText[1][2]=t;
+  pickMsg("モンスターだ！&"+OPname+"が出現！");
+  // アイテム欄を更新する
+  stage.addChild(Ct);
+  battleItem();
+};
+  if(gamestate==2 || gamestate==3){
+    switch(this.card){
+      case -1:
+        //メッセージ
+        if(cLock){
+        console.log("battle!")
+        if(battleLog.length){
+          battleLogNext();
+        }
+      };
+        break;
+      case 1:
+        //たたかう
+        Ct.alpha=0;
+        Ct.y=-100;
+        if(gamestate==3 && cLock){
+          if(battleLog.length){
+            battleLogNext();
+          }
+        };
+        if(gamestate==2){
+          gamestate=3;
+        createjs.Tween.get(MessageText[2][0])
+        .to({y:0},50);
+        var Ary=["これでもくらえ！","ババババーン！","ドカーン！","爆発しろー！"]
+        var R=Math.floor(Math.random()*Ary.length);
+        battleLog.push("attack");
+        battleLog.push("リティア様の攻撃！&"+Ary[R]);
+        var D=Damage(0,R);
+        StatusE[0]-=D;
+        battleLog.push("damage");
+        battleLog.push(OPname+"に&"+D+"のダメージ！");
+        if(StatusE[0]<0){
+        var M=Enemylist.findIndex(value=>value.name==OPname);
+        Exlists[3]=Exlists[3].concat(Enemylist[M].Dropitem[0]);
+        battleLog.push("defeat")
+        battleLog.push(OPname+"を倒したよ！&何か落ちてる…。");
+        battleLog.push("result")
+        battleLog.push(itemA[Enemylist[M].Dropitem[0]].name+"をゲットしたよ！&　");
+        battleLog.push("end of battle"); 
+        }else{
+          Enemyturn();
+        }
+        battleLogNext();
+        }
+        break;
+      case 2:
+        if(gamestate==3 && cLock){
+          if(battleLog.length){
+            battleLogNext();
+          }
+        };
+        //戦闘で使用できるアイテムを表示する
+        if(gamestate==2){
+        if(equipeditem==-2){
+          equipeditem=-1;
+        createjs.Tween.get(Ct)
+        .to({y:0,alpha:1},50);
+        }else{
+          equipeditem=-2;
+        createjs.Tween.get(Ct)
+        .to({y:-100,alpha:0},50);
+        }
+        //アイテム使用は他部のボタンで
+        };
+        break;
+      case 3:
+        if(gamestate==3 && cLock){
+          if(battleLog.length){
+            battleLogNext();
+          }
+        };
+        if(gamestate==2){
+        gamestate=3;
+        Ct.alpha=0;
+        se24.play();
+        var E=UserLibrary.filter(value=>value>0);
+        EscapeRate[1]=15*EscapeRate[0]+50*(StatusP[0]/StatusE[0])+(E.length/2);
+        var R=100*Math.random();
+        if(R>EscapeRate[1]){
+        EscapeRate[0]+=1;
+        battleLog.push("あーもう！&にげられないよ！");
+        Enemyturn();
+        battleLogNext();
+        }else{
+        pickMsg("にげたよー！&　");
+        stage.removeChild(battlefield);
+        stage.removeChild(Ct);
+        battlefield.removeAllChildren();
+        Ct.removeAllChildren();
+        deckmap.removeChild(DeckFacelists[DeckFacelists.length-1]); 
+        deckfaces.pop();
+        gamestate=0;
+        Extras[0]=0;
+        }
+        }
+        break;
+    };
+  }
+  function battleLogNext(){
+    var B=battleLog.shift();
+    switch(B){
+      case "attack":
+        se21.play();
+        battleLogNext();
+        break;
+      case "defeat":
+        se5.play();
+        var T=DeckFacelists[DeckFacelists.length-1]; 
+        createjs.Tween.get(T)
+        .to({alpha:0},100)
+        Sprite1.scale=2;
+        Sprite1.x=470;
+        Sprite1.y=300;
+        Sprite1.gotoAndPlay('walk');
+        //.to({x:340,y:170,scale:2},120)
+        battleLogNext();
+        break;
+      case "result":
+        se12.play();
+        battleLogNext();
+        break;
+      case "turnend":
+        battleItem();
+        MessageText[2][1].alpha=0;
+        Bturn+=1;
+        createjs.Tween.get(MessageText[2][0])
+        .to({y:-130},50);
+        pickMsg("どうする？&　");
+        MessageText[1][2].text="TURN "+Bturn;
+        gamestate=2;
+        break;
+      case "damage":
+        se22.play();
+        var T=DeckFacelists[DeckFacelists.length-1]; 
+        createjs.Tween.get(T)
+        .to({alpha:0},100)
+        .to({alpha:1},100)
+        .to({alpha:0},100)
+        .to({alpha:1},100)
+        battleLogNext();
+        break;
+      case "shake":
+        se23.play();
+        createjs.Tween.get(field)
+        .to({x:-5,y:-15},12)
+        .to({x:5,y:12},12)
+        .to({x:-1.5,y:-4.2},6)
+        .to({x:1.2,y:3.1},6)
+        .to({x:0,y:0},6);
+        Hpdraw(-1);
+        battleLogNext();
+        break;
+      case "end of battle":
+        equipeditem=-1;
+        pickMsg("採取にもどろ！&　");
+        stage.removeChild(battlefield);
+        battlefield.removeAllChildren();
+        stage.removeChild(Ct);
+        Ct.removeAllChildren();
+        deckmap.removeChild(DeckFacelists[DeckFacelists.length-1]); 
+        deckfaces.pop();
+        gamestate=0;
+        Extras[0]=0;
+        break;
+      case "gameover":
+        equipeditem=-1;
+        stage.removeChild(battlefield);
+        battlefield.removeAllChildren();
+        stage.removeChild(Ct);
+        Ct.removeAllChildren();
+        deckmap.removeChild(DeckFacelists[DeckFacelists.length-1]); 
+        deckfaces.pop();
+        gamestate=0;
+        Extras[0]=0;
+        Extras[3]=[];
+        Gameover(1);
+        break;
+      case "HPrec":
+        se26.play();
+        var Rp=battleLog.shift();
+        Hpdraw(Rp);
+        battleLogNext();
+      default:
+        pickMsg(B,1);
+        //MessageText[2][1].alpha=1;
+        break;
+    }};
+    function Enemyturn(){
+      battleLog.push(OPname+"の攻撃だ！&　");
+      battleLog.push("shake");
+      var D=Damage(1,0);
+      StatusP[0]-=D;
+      if(StatusP[0]<=0){
+        battleLog.push("むちゃくちゃいたい！&"+D+"のダメージ！"); 
+        battleLog.push("やられちゃった…。&　");
+        battleLog.push("gameover");            
+      }else{
+      if(StatusP[0]<UserStatus[0]/10){
+        battleLog.push("むちゃくちゃいたい！&"+D+"のダメージ！");             
+        }else{
+        battleLog.push("いたっ！&"+D+"のダメージ！"); 
+        }
+        battleLog.push("turnend"); 
+      }};
+    function Hpdraw(h=-1){
+      if(h==-1){h=StatusP[0]};
+    var Hprate=h/UserStatus[0]
+    var hp = new createjs.Shape();
+    hp.graphics.beginFill("rgba(242,40,10)");
+    hp.graphics.moveTo(226, 234);
+    hp.graphics.lineTo(229, 245);
+    hp.graphics.lineTo(229+(352-229)*Hprate, 245+(234-245)*Hprate);
+    hp.graphics.lineTo(226+(358-226)*Hprate, 234+(222-234)*Hprate);
+    battlefield.addChild(hp);
+    battlefield.removeChild(MessageText[1][0]);
+    MessageText[1][0]=hp;
+    MessageText[1][1].text="HP "+h+"/"+UserStatus[0]
+    }
+    function battleItem(){
+      Ct.removeAllChildren();
+      var Materialmap = new createjs.Container();
+      Ct.alpha=0;
+      Ct.y=-100;
+      equipeditem=-2;
+      var Matbar = new createjs.Shape();
+      Matbar.graphics.beginFill("black");
+      Matbar.graphics.drawRect(244, 160, 262, 286);
+      Matbar.alpha=0.5;
+      Ct.addChild(Matbar);
+      Ct.addChild(Materialmap);
+      var shapeMask3 = new createjs.Shape();
+              shapeMask3.graphics
+                    .beginFill("gold")
+                    .drawRect(244, 160, 262, 286);
+      Materialmap.mask = shapeMask3;
+      var H=[];
+      var H2=[];
+      var itemS=[];
+      var cursorT=[];
+      for(var i=0;i<consumptionA.length;i++){
+        itemS.push(itemA[consumptionA[i]]);
+        H.push(UserItem[consumptionA[i]])
+      }
+      H2=H.filter(value=>value>0);
+      var Hash=H2.length*26;
+      var I=0;
+      Matbar.addEventListener("mousedown", {hash:Hash,handleEvent:MatDown});
+      Matbar.addEventListener("pressmove", {hash:Hash,handleEvent:MatMove}); 
+      var t = new createjs.Shape();
+      t.graphics.beginStroke("#60a2f7");
+      t.graphics.beginFill("#d4f8ff");
+      t.graphics.setStrokeStyle(3);
+      t.graphics.drawRect(246, 0, 260, 26);
+      t.alpha=0;
+      Materialmap.addChild(t);
+      cursorT.push(t);
+      var t = new createjs.Shape();
+      t.graphics.beginStroke("#60a2f7");
+      t.graphics.beginFill("#d4f8ff");
+      t.graphics.setStrokeStyle(3);
+      t.graphics.drawRect(246+260, 0, 110, 40);
+      t.alpha=0;
+      Ct.addChild(t);
+      cursorT.push(t);
+      t.addEventListener("click", {handleEvent:useBattleItem});
+      var T=new createjs.Text("使う","36px serif","#60a2f7");
+      T.x=246+280;
+      T.alpha=0;
+      Ct.addChild(T);
+      cursorT.push(T);
+    for(var i=0;i<H.length;i++){
+      if(i<itemA.length){
+      var L=itemA.findIndex(value=>value.name==itemS[i].name);
+      if(H[i]>0){
+        var t = new createjs.Shape();
+        t.graphics.beginFill("black");
+        t.graphics.drawRect(246, 160+26*I, 260, 26);
+        t.alpha=0.6;
+        Materialmap.addChild(t);
+        var T=new createjs.Text(itemS[i].name,"24px serif","white");
+        T.x=246;
+        T.y=160+26*I;
+        Materialmap.addChild(T);
+        var T=new createjs.Text(" ×"+H[i],"24px serif","white");
+        T.x=246+200;
+        T.y=160+26*I;
+        Materialmap.addChild(T);
+        t.addEventListener("click", {height:I,card:L,handleEvent:Equipitem});
+        t.addEventListener("mousedown", {hash:Hash,handleEvent:MatDown});
+        t.addEventListener("pressmove", {hash:Hash,handleEvent:MatMove}); 
+        t.addEventListener("mouseover", {card:L,handleEvent:MatDetail_1});
+        t.addEventListener("mouseout", {card:-1,handleEvent:MatDetail_1});
+        I+=1;
+      }};
+    }
+    function MatDown(){
+      dragPointX = stage.mouseX - Materialmap.x;
+      dragPointY = stage.mouseY - Materialmap.y;
+    }
+    function MatMove(){
+      Materialmap.y = stage.mouseY-dragPointY;
+      if(Materialmap.y>0){Materialmap.y=0};
+      if(this.hash<260 && Materialmap.y<0){Materialmap.y=0};
+      if(this.hash>=260 && Materialmap.y<-(this.hash-260)){Materialmap.y=-(this.hash-260)};
+    }
+    function Equipitem(){
+      se11.play();
+      if(equipeditem==this.card){
+        equipeditem=-1;
+        for(var i=0;i<cursorT.length;i++){
+        cursorT[i].alpha=0;
+        }
+      }else{
+        equipeditem=this.card;
+        for(var i=0;i<cursorT.length;i++){
+          cursorT[i].alpha=1;
+          cursorT[i].y=160+26*this.height;
+          }
+      };
+    }
+    function useBattleItem(){
+      if(gamestate==2 && equipeditem>=0){
+        //アイテム別の効果
+        switch(equipeditem){
+          //回復アイテム
+          case 9:
+            HPrec(30);
+          break;
+          case 23:
+            HPrec(8,5);
+          break;
+          case 24:
+            HPrec(10,6);
+          break;
+          case 25:
+            HPrec(17,7);
+          break;
+          case 35:
+            HPrec(15,6);
+          break;
+          case 36:
+            HPrec(13,6);
+          break;
+          case 46:
+            HPrec(25,5);
+          break;
+          case 117:
+            var Rate=10*Math.floor(UserStatus[0]/30)
+            HPrec(Rate);
+          break;
+          case 118:
+            var Rate=10*Math.floor(UserStatus[0]/50)
+            HPrec(Rate);
+          break;
+          case 119:
+            HPrec(55);
+          break;
+          case 120:
+            HPrec(40);
+          break;
+          case 121:
+            HPrec(50);
+          break;
+          case 122:
+            HPrec(100);
+          break;
+          case 123:
+            HPrec(70);
+          break;
+          case 124:
+            HPrec(90);
+          break;
+          case 125:
+            HPrec(80);
+          break;
+          case 126:
+            HPrec(85);
+          break;
+          case 127:
+            HPrec(120);
+          break;
+          case 128:
+            HPrec(300,0,1);
+          break;
+          case 130:
+            HPrec(70,5);
+          break;
+          //投擲
+          case 30:
+          case 41:
+          case 95:
+          case 96:
+          case 97:
+          case 98:
+          case 99:
+          case 100:
+          case 134:
+            Shoot();
+            break;
+        }
+        function Shoot(){
+          //相手にダメージを与えるアイテム
+          gamestate=3;
+          createjs.Tween.get(Ct)
+          .to({y:-100,alpha:0},50);
+          UserItem[equipeditem]-=1;
+          battleLog.push("attack");
+          battleLog.push(itemA[equipeditem].name+"を使うよ！&　");
+          var R=Skilllist.findIndex(value=>value.name==itemA[equipeditem].name);
+          if(R==-1){console.log('item error!');R=0};
+          if(equipeditem==134){
+            //1割で爆発
+            var Rx=100*Math.random();
+            if(Rx<10){
+            battleLog.push("うわ！&がらくたが爆発した！　");
+            R+=1;
+            }
+          }
+          var D=Damage(0,R);
+          StatusE[0]-=D;
+          battleLog.push("damage");
+          battleLog.push(OPname+"に&"+D+"のダメージ！");
+          if(StatusE[0]<0){
+          var M=Enemylist.findIndex(value=>value.name==OPname);
+          Exlists[3]=Exlists[3].concat(Enemylist[M].Dropitem[0]);
+          battleLog.push("defeat")
+          battleLog.push(OPname+"を倒したよ！&何か落ちてる…。");
+          battleLog.push("result")
+          battleLog.push(itemA[Enemylist[M].Dropitem[0]].name+"をゲットしたよ！&　");
+          battleLog.push("end of battle"); 
+          }else{
+            Enemyturn();
+          }
+          battleLogNext();
+        }
+        function HPrec(num,Mod=0,overrun=0){
+          //HPマンタンの時は使用できない Mod->回復のブレ over->最大値を超えて回復
+        if(StatusP[0]>=UserStatus[0]){
+          pickMsg("今は使っても意味がなさそう。&　");
+          return false;
+        }
+        gamestate=3;
+        createjs.Tween.get(Ct)
+        .to({y:-100,alpha:0},50);
+        UserItem[equipeditem]-=1;
+        battleLog.push("attack");
+        battleLog.push(itemA[equipeditem].name+"を使うよ！&　");
+        var plus=Math.floor(Mod*Math.random());
+        num+=plus;
+        StatusP[0]+=num;
+        if(StatusP[0]>UserStatus[0] && overrun==0){StatusP[0]=UserStatus[0]};
+        var Temp=StatusP[0]
+        battleLog.push("HPrec",Temp);
+        battleLog.push("HPが　"+num+"回復したよ！");
+        Enemyturn();
+        battleLogNext();
+        }
+    }
+  };
+    function MatDetail_1(){
+    switch(this.card){
+      case -1:
+      pickMsg("　&　&　");
+        break;
+      default:
+      pickMsg(itemA[this.card].detail);
+        break;
+    }
+    }
+  };
+};
 function CardTurn(p=0){
   //カードめくり@スパイダー
       for(var i=0;i<Cardlists.length;i++){
@@ -3991,6 +5514,7 @@ function monsterMove(){
     //Bgm.stop();
   }
   cLock=true;
+  if(opLock==-1){opLock=0};
 };
 function Efuda(p=0){
   //10,11,12,13ならtrueを返す
@@ -5169,6 +6693,8 @@ function handleUp(event) {
     }
 }};
 function handleClick(event){
+  //モンスター出現中
+  if(Extras[0]<0){return false}
   //ヘニル　山札の数とプラスマイナス1なら移動する
   //1は11としても扱える
   if(cLock && mLock && opLock==0){
@@ -5184,7 +6710,7 @@ function handleClick(event){
       //1-10,11-20...
       var E=Math.abs(B-A);
       if(E==1 || E==9){
-        if(Extras[0]>=5){se10.play();}else{se12.play();}        
+        if(Extras[0]>=7){se10.play();}else{se12.play();}        
         var T=Cardlists[I][J];
         var newCard = new createjs.Bitmap(Card_src[hands[I][J]]);
         newCard.x=T.x;
@@ -5208,25 +6734,45 @@ function handleClick(event){
     switch(Extras[0]){
     case 1:
     case 2:
-      var R=Math.floor(Math.random()*henirarea[0].Nitem[Extras[1]].length);
-      A=henirarea[0].Nitem[Extras[1]][R];
-      B=1+Math.floor(Math.random()*2)
+      var R=Math.floor(Math.random()*henirarea[playMode[1]].Nitem[Extras[1]].length);
+      A=henirarea[playMode[1]].Nitem[Extras[1]][R];
+      B=1+Math.floor(Math.random()*1.5)
       break;
     case 3:
-      var R=Math.floor(Math.random()*henirarea[0].Nitem[Extras[1]].length);
-      A=henirarea[0].Nitem[Extras[1]][R];
-      B=3+Math.floor(Math.random()*2)
+      var Rate=Math.random()*3
+      if(Rate<=2){
+      var R=Math.floor(Math.random()*henirarea[playMode[1]].Nitem[Extras[1]].length);
+      A=henirarea[playMode[1]].Nitem[Extras[1]][R];
+      B=1+Math.floor(Math.random()*2.5)
+      }else{
+        var R=Math.floor(Math.random()*henirarea[playMode[1]].Ritem[Extras[1]].length);
+        A=henirarea[playMode[1]].Ritem[Extras[1]][R];
+        B=1+Math.floor(Math.random()*1.1)
+      }
       break;
     case 4:
     case 5:
-      var R=Math.floor(Math.random()*henirarea[0].Ritem[Extras[1]].length);
-      A=henirarea[0].Ritem[Extras[1]][R];
-      B=1+Math.floor(Math.random()*3)
+      var R=Math.floor(Math.random()*henirarea[playMode[1]].Ritem[Extras[1]].length);
+      A=henirarea[playMode[1]].Ritem[Extras[1]][R];
+      B=1+Math.floor(Math.random()*1.2)
+      break;
+    case 6:
+    case 7:
+      var Rate=Math.random()*3
+      if(Rate<=2){
+      var R=Math.floor(Math.random()*henirarea[playMode[1]].Ritem[Extras[1]].length);
+      A=henirarea[playMode[1]].Ritem[Extras[1]][R];
+      B=1+Math.floor(Math.random()*1.8)
+      }else{
+      var R=Math.floor(Math.random()*henirarea[playMode[1]].SRitem[Extras[1]].length);
+      A=henirarea[playMode[1]].SRitem[Extras[1]][R];
+      B=1+Math.floor(Math.random()*1.1)
+      }
       break;
     default:
-      var R=Math.floor(Math.random()*henirarea[0].SRitem[Extras[1]].length);
-      A=henirarea[0].SRitem[Extras[1]][R];
-      B=1+Math.floor(Math.random()*3)
+      var R=Math.floor(Math.random()*henirarea[playMode[1]].SRitem[Extras[1]].length);
+      A=henirarea[playMode[1]].SRitem[Extras[1]][R];
+      B=1+Math.floor(Math.random()*Extras[0]/8)
       break;
     }
     itemA.findIndex(value=>value.id==A);
@@ -5240,9 +6786,9 @@ function handleClick(event){
     }else if(Extras[0]>=5){
     pickMsg(itemA[A].name+"を"+B+"個ゲットしたよ！&これ、珍しそう！");
     }else if(Extras[0]>=3){
-    pickMsg("続けて"+itemA[A].name+"を"+B+"個ゲットしたよ！&あれもこれも、ぜーんぶあたしのもの！");
+    pickMsg(itemA[A].name+"を"+B+"個ゲットしたよ！&あれもこれも、ぜーんぶあたしのもの！");
     }else if(Extras[0]>=2){
-    pickMsg("続けて"+itemA[A].name+"を"+B+"個ゲットしたよ！");
+    pickMsg("これももーらいっ！&"+itemA[A].name+"を"+B+"個ゲットしたよ！");
     }else{
     pickMsg(itemA[A].name+"を"+B+"個ゲットしたよ！&　");
     }
@@ -5330,6 +6876,18 @@ function SoundConfig(event,p=0){
         break;
       case 7:
         Bgm =new Music(bgm7data);
+        Bgm.playMusic();
+        break;
+      case 8:
+        Bgm =new Music(bgm8data);
+        Bgm.playMusic();
+        break;
+      case 9:
+        Bgm =new Music(bgm9data);
+        Bgm.playMusic();
+        break;
+      case 10:
+        Bgm =new Music(bgm10data);
         Bgm.playMusic();
         break;
       default:
@@ -5584,10 +7142,16 @@ function OptionConfig(){
     }
   }
 }
-function InvConfig(p=-1){
+function InvConfig_Item(){
+  InvConfig(0,1);
+  InvConfig(-1,1)
+};
+function InvConfig(p=-1,layer=0){
+  //layer 1->インベのみfieldに 2->消費インベのみかつbattlefieldへ
 if(p==0){
   //入手時には描画する
   Itemyard.removeAllChildren();
+  if(layer==0){
   var Invbar = new createjs.Shape();
   Invbar.graphics.beginFill("black");
   Invbar.graphics.drawRect(690, 55, 110, 460);
@@ -5617,68 +7181,73 @@ if(p==0){
   var Hash=inventory.filter(value=>value.cleared!==0);
   Invbar.addEventListener("mousedown", {hash:Hash.length,handleEvent:itemDown});
   Invbar.addEventListener("pressmove", {hash:Hash.length,handleEvent:itemMove});
-  var Itemmap = new createjs.Container();//インベントリ
-  var Materialmap = new createjs.Container();
+  var Itemmap = new createjs.Container();
   Itemyard.addChild(Itemmap);
   var shapeMask3 = new createjs.Shape();
           shapeMask3.graphics
                 .beginFill("gold")
                 .drawRect(700, 90, 100, 425);
   Itemmap.mask = shapeMask3;
-    itemAry=[];
-    function itemDown(){
-      dragPointX = stage.mouseX - Itemmap.x;
-      dragPointY = stage.mouseY - Itemmap.y;
-    }
-    function itemMove(){
-      Itemmap.y = stage.mouseY-dragPointY;
-      if(Itemmap.y>0){Itemmap.y=0};
-      if(this.hash<7 && Itemmap.y<0){Itemmap.y=0};
-      if(this.hash>=7 && Itemmap.y<-(this.hash*66-415)){Itemmap.y=-(this.hash*66-415)};
-    }
-  for(var i=0;i<6;i++){
-      var shape = new createjs.Shape();
-      shape.graphics.beginFill("white");
-      shape.graphics.drawRect(710, 95+(66*i), 64, 64);
-      shape.alpha=0.7;
-      Itemmap.addChild(shape);
-    }
-  for(var i=0;i<inventory.length;i++){
-    if(inventory[i].cleared !==0){
-    var shape = new createjs.Shape();
-    shape.graphics.beginFill("#bae0c3");
-    shape.graphics.beginStroke("#617d68");
-    shape.graphics.setStrokeStyle(2);
-    shape.graphics.drawRect(710, 95+(66*itemAry.length), 64, 64);
-    Itemmap.addChild(shape);
-    shape.addEventListener("click", {card:i,handleEvent:Equipitem});
-    shape.addEventListener("mouseover", {card:i,handleEvent:ItemDetail});
-    shape.addEventListener("mouseout", {card:-1,handleEvent:ItemDetail});
-    shape.addEventListener("mousedown", {hash:Hash.length,handleEvent:itemDown});
-    shape.addEventListener("pressmove", {hash:Hash.length,handleEvent:itemMove});
-    var T =new createjs.Bitmap(Item_src[i]);
-    T.x=710;
-    T.y=95+(66*itemAry.length);
-    T.scale=0.5;
-    Itemmap.addChild(T);
-    if(inventory[i].cleared <=-1){
-    var shape = new createjs.Shape();
-      shape.graphics.beginFill("black");
-      shape.graphics.drawRect(710, 95+(66*itemAry.length), 64, 64);
-      shape.alpha=0.7;
-      Itemmap.addChild(shape);
-    }
-    itemAry.push(i);
-    }}
-    Itemmap.addChild(Invcursor);
-  if(equipeditem>=0){
-    var E=itemAry.indexOf(equipeditem)
-    Invcursor.x=710;
-    Invcursor.y=90+(66*E);
-    Invcursor.alpha=1;
-  }else{
-    Invcursor.alpha=0; 
+  function itemDown(){
+    dragPointX = stage.mouseX - Itemmap.x;
+    dragPointY = stage.mouseY - Itemmap.y;
   }
+  function itemMove(){
+    Itemmap.y = stage.mouseY-dragPointY;
+    if(Itemmap.y>0){Itemmap.y=0};
+    if(this.hash<7 && Itemmap.y<0){Itemmap.y=0};
+    if(this.hash>=7 && Itemmap.y<-(this.hash*66-415)){Itemmap.y=-(this.hash*66-415)};
+  }
+for(var i=0;i<6;i++){
+    var shape = new createjs.Shape();
+    shape.graphics.beginFill("white");
+    shape.graphics.drawRect(710, 95+(66*i), 64, 64);
+    shape.alpha=0.7;
+    Itemmap.addChild(shape);
+  }
+itemAry=[];
+for(var i=0;i<inventory.length;i++){
+  if(inventory[i].cleared !==0){
+  var shape = new createjs.Shape();
+  shape.graphics.beginFill("#bae0c3");
+  shape.graphics.beginStroke("#617d68");
+  shape.graphics.setStrokeStyle(2);
+  shape.graphics.drawRect(710, 95+(66*itemAry.length), 64, 64);
+  Itemmap.addChild(shape);
+  shape.addEventListener("click", {card:i,handleEvent:Equipitem});
+  shape.addEventListener("mouseover", {card:i,handleEvent:ItemDetail});
+  shape.addEventListener("mouseout", {card:-1,handleEvent:ItemDetail});
+  shape.addEventListener("mousedown", {hash:Hash.length,handleEvent:itemDown});
+  shape.addEventListener("pressmove", {hash:Hash.length,handleEvent:itemMove});
+  var T =new createjs.Bitmap(Item_src[i]);
+  T.x=710;
+  T.y=95+(66*itemAry.length);
+  T.scale=0.5;
+  Itemmap.addChild(T);
+  if(inventory[i].cleared <=-1){
+  var shape = new createjs.Shape();
+    shape.graphics.beginFill("black");
+    shape.graphics.drawRect(710, 95+(66*itemAry.length), 64, 64);
+    shape.alpha=0.7;
+    Itemmap.addChild(shape);
+  }
+  itemAry.push(i);
+  }}
+  Itemmap.addChild(Invcursor);
+if(equipeditem>=0){
+  var E=itemAry.indexOf(equipeditem)
+  Invcursor.x=710;
+  Invcursor.y=90+(66*E);
+  Invcursor.alpha=1;
+}else{
+  Invcursor.alpha=0; 
+}
+  };//アイテムここまで
+  //インベントリ
+  var Materialmap = new createjs.Container();
+    itemMax[0]=1;
+    if(UserItem[82]>0){itemMax[0]+=1;}
+    if(UserItem[83]>0){itemMax[0]+=1;}
   var IDtextbg = new createjs.Shape();
   IDtextbg.graphics.beginFill("black");
   IDtextbg.graphics.drawRect(20, 520, 600, 70);
@@ -5710,42 +7279,132 @@ if(p==0){
     shape.graphics.beginStroke("#617d68");
     shape.graphics.setStrokeStyle(2);
     shape.graphics.drawRect(805, 55, 262, 35);
+    //絞り込み機能を追加したい
+    shape.addEventListener("click", {handleEvent:itemClassF});
+    function itemClassF(){
+      se11.play();
+      itemClassAry[0]+=1;
+      if(itemClassAry[0]==itemClassAry.length){itemClassAry[0]=1};
+      InvConfig(0,layer)
+    };
     Itemyard.addChild(shape);
-    var T=new createjs.Text("素材","24px serif","#46574a");
-    T.x=910;
+    var T=new createjs.Text(itemClassAry[itemClassAry[0]],"24px serif","#46574a");
+    T.x=940;
     T.y=58;
+    T.textAlign="center";
     Itemyard.addChild(T);
     var shapeMask3 = new createjs.Shape();
             shapeMask3.graphics
                   .beginFill("gold")
                   .drawRect(800, 55, 280, 460);
     Materialmap.mask = shapeMask3;
-    var H=UserItem.filter(value=>value>0);
-    var Hash=H.length*25;
+    var itemS=[];
+    var H=[];
+    var H2=[];
+    switch(itemClassAry[0]){
+      case 1:
+      itemS=itemA.concat();
+      H=UserItem.concat();
+      H2=H.filter(value=>value>0);
+      break;
+      case 2:
+        var itemS=itemA.filter(value=>value.class=="植物資源")
+        for(var i=0;i<itemS.length;i++){
+          H.push(UserItem[itemS[i].id]);
+        }
+        break;
+      case 3:
+        var itemS=itemA.filter(value=>value.class=="鉱物資源")
+        for(var i=0;i<itemS.length;i++){
+          H.push(UserItem[itemS[i].id]);
+        }
+        break;
+      case 4:
+        var itemS=itemA.filter(value=>value.class=="その他資源")
+        for(var i=0;i<itemS.length;i++){
+          H.push(UserItem[itemS[i].id]);
+        }
+        break;
+      case 5:
+        var itemS=itemA.filter(value=>value.class=="クリソナ")
+        for(var i=0;i<itemS.length;i++){
+          H.push(UserItem[itemS[i].id]);
+        }
+        break;
+      case 6:
+        var itemS=itemA.filter(value=>value.class=="製造")
+        for(var i=0;i<itemS.length;i++){
+          H.push(UserItem[itemS[i].id]);
+        }
+        break;
+      case 7:
+        var itemS=[];
+        for(var i=0;i<consumptionA.length;i++){
+          itemS.push(itemA[consumptionA[i]]);
+          H.push(UserItem[consumptionA[i]])
+        }
+        break;
+    }
+    H2=H.filter(value=>value>0);
+    var Hash=H2.length*25;
+    var I=0;
+    if(itemClassAry[0]==1 || itemClassAry[0]==5){
+    Hash+=Crisona.length*25;
+  for(var i=0;i<Crisona.length;i++){
+    var C;
+    if(Crisona[i]>=70 && Crisona[i]<80){
+      C=74;
+    }else if(Crisona[i]<90){
+      C=75;
+    }else{
+      C=76;
+    }
+    var t = new createjs.Shape();
+    t.graphics.beginFill("black");
+    t.graphics.drawRect(815, 100+25*I, 245, 25);
+    t.alpha=0.6;
+    Materialmap.addChild(t);
+    var T=new createjs.Text(itemA[C].name,"20px serif","white");
+    T.x=815;
+    T.y=100+25*I;
+    Materialmap.addChild(T);
+    var T=new createjs.Text(" ×1","20px serif","white");
+    T.x=1000;
+    T.y=100+25*I;
+    Materialmap.addChild(T);
+    t.addEventListener("mousedown", {hash:Hash,handleEvent:MatDown});
+    t.addEventListener("pressmove", {hash:Hash,handleEvent:MatMove}); 
+    t.addEventListener("mouseover", {card:C,jundo:Crisona[i],handleEvent:MatDetail_1});
+    t.addEventListener("mouseout", {card:-1,handleEvent:MatDetail_1});
+    I+=1;
+  }
+    }
     Matbar.addEventListener("mousedown", {hash:Hash,handleEvent:MatDown});
     Matbar.addEventListener("pressmove", {hash:Hash,handleEvent:MatMove}); 
-    var I=0;
-  for(var i=0;i<UserItem.length;i++){
-    if(UserItem[i]>0){
+  for(var i=0;i<H.length;i++){
+    if(i<itemA.length){
+    var L=itemA.findIndex(value=>value.name==itemS[i].name);
+    if(L<74 || L>76){
+    if(H[i]>0){
       var t = new createjs.Shape();
       t.graphics.beginFill("black");
       t.graphics.drawRect(815, 100+25*I, 245, 25);
       t.alpha=0.6;
       Materialmap.addChild(t);
-      var T=new createjs.Text(itemA[i].name,"20px serif","white");
+      var T=new createjs.Text(itemS[i].name,"20px serif","white");
       T.x=815;
       T.y=100+25*I;
       Materialmap.addChild(T);
-      var T=new createjs.Text(" ×"+UserItem[i],"20px serif","white");
+      var T=new createjs.Text(" ×"+H[i],"20px serif","white");
       T.x=1000;
       T.y=100+25*I;
       Materialmap.addChild(T);
       t.addEventListener("mousedown", {hash:Hash,handleEvent:MatDown});
       t.addEventListener("pressmove", {hash:Hash,handleEvent:MatMove}); 
-      t.addEventListener("mouseover", {card:i,handleEvent:MatDetail_1});
+      t.addEventListener("mouseover", {card:L,handleEvent:MatDetail_1});
       t.addEventListener("mouseout", {card:-1,handleEvent:MatDetail_1});
       I+=1;
-    }}
+    }}}};
   function MatDown(){
     dragPointX = stage.mouseX - Materialmap.x;
     dragPointY = stage.mouseY - Materialmap.y;
@@ -5806,7 +7465,11 @@ function MatDetail_1(){
       break;
     default:
       IDtextbg.alpha=0.5;
+      if(this.card==74 || this.card==75 || this.card==76){
+        var detail=itemA[this.card].name+"（純度"+this.jundo+"%）："+itemA[this.card].detail
+      }else{
       var detail=itemA[this.card].name+"："+itemA[this.card].detail
+      }
       for( var lines=detail.split( "&" ), i=0, l=lines.length; l>i; i++ ) {
         if(i>=3){break};
         var line = lines[i];
@@ -5833,19 +7496,16 @@ function Equipitem(){
     }
 }
 };
-var AsmAry=[]
 function AsmConfig(){
-  //錬成を行う
-  //加工→1つの材料を選んで分解や精製を行います。
-  //製錬→クリソナを生み出します。
-  //錬成⇒クリソナを使って、新たな物質を生み出します。
-  //レシピから作る　自分で作る
 if(AsmAry.length){
   for(var i=0;i<AsmAry.length;i++){
     field.removeChild(AsmAry[i])
   }
 };
 AsmAry=[];
+AsmAry2=[];
+crisonaA=[]
+successRate=0;
 if(opLock==0){
 field.removeAllChildren();
 opLock=12;
@@ -5874,17 +7534,17 @@ shape.graphics.setStrokeStyle(2);
 shape.graphics.drawRect(490, 280, 200, 35);
 field.addChild(shape);
 AsmAry.push(shape);
-var T=new createjs.Text("加工","24px serif","#46574a");
+var T=new createjs.Text("分解・加工","24px serif","#46574a");
 T.x=55;
 T.y=283;
 field.addChild(T);
 AsmAry.push(T);
-var T=new createjs.Text("製錬","24px serif","#46574a");
+var T=new createjs.Text("レシピから錬成","24px serif","#46574a");
 T.x=275;
 T.y=283;
 field.addChild(T);
 AsmAry.push(T);
-var T=new createjs.Text("錬成","24px serif","#46574a");
+var T=new createjs.Text("選んで錬成","24px serif","#46574a");
 T.x=495;
 T.y=283;
 field.addChild(T);
@@ -5914,82 +7574,90 @@ field.mask = shapeMask3;
 createjs.Tween.get(BG)
 .to({alpha:0.8},100);
 AsmAry[0].addEventListener("click", {card:1,handleEvent:Assemble});
-AsmAry[1].addEventListener("click", {card:2,handleEvent:Assemble});
-AsmAry[2].addEventListener("click", {card:3,handleEvent:Assemble});
 AsmAry[0].addEventListener("mouseover", {card:1,handleEvent:Asmdetail});
-AsmAry[1].addEventListener("mouseover", {card:2,handleEvent:Asmdetail});
-AsmAry[2].addEventListener("mouseover", {card:3,handleEvent:Asmdetail});
+if(henirarea[0].cleared>2){
+  AsmAry[1].addEventListener("click", {card:2,handleEvent:Assemble});
+  AsmAry[1].addEventListener("mouseover", {card:2,handleEvent:Asmdetail});
+}else{
+  var shape = new createjs.Shape();
+  shape.graphics.beginFill("#324537");
+  shape.graphics.drawRect(272, 282, 196, 31);
+  field.addChild(shape);
+  AsmAry.push(shape)
+};
+if(henirarea[1].cleared>1){
+  AsmAry[2].addEventListener("click", {card:3,handleEvent:Assemble});
+  AsmAry[2].addEventListener("mouseover", {card:3,handleEvent:Asmdetail});
+}else{
+  var shape = new createjs.Shape();
+  shape.graphics.beginFill("#324537");
+  shape.graphics.drawRect(492, 282, 196, 31);
+  field.addChild(shape);
+  AsmAry.push(shape)
+};
+}else{
+  console.log('go to main menu')
+  se11.play();
+  field.removeAllChildren();
+  opLock=0;
+  Titleyard.alpha=1;
 }
 function Asmdetail(){
   switch(this.card){
     case 1:
-      DetailText.text="加工/1つの材料を選んで分解や精製を行います。"
+      DetailText.text="加工/1つの材料を選んで分解や加工を行います。"
       break;
     case 2:
-      DetailText.text="製錬/クリソナを製錬し、宝石を作り出します。"
+      DetailText.text="レシピから錬成/思いついたレシピをもとに錬成します。"
       break;
     case 3:
-      DetailText.text="錬成/クリソナを使って、新たな物質を生み出します。"
+      DetailText.text="選んで錬成/自分で材料を選んで錬成します。"
       break;
   }
 }
 };
 function Assemble(){
   Ct.removeAllChildren();
+  Ct.x=0;
   se11.play();
   opLock=12;
+  if(AsmAry.length){
+    for(var i=0;i<AsmAry.length;i++){
+      field.removeChild(AsmAry[i])
+    }
+  };
+  AsmAry=[];
+  var Materialmap = new createjs.Container();
+    var Matbar = new createjs.Shape();
+    Matbar.graphics.beginFill("black");
+    Matbar.graphics.drawRect(55, 80, 262, 380);
+    Matbar.alpha=0.5;
+    field.addChild(Matbar);
+    field.addChild(Materialmap);
+    AsmAry.push(Matbar);
+    AsmAry.push(Materialmap);
+    var shape = new createjs.Shape();
+    shape.graphics.beginFill("#bae0c3");
+    shape.graphics.beginStroke("#617d68");
+    shape.graphics.setStrokeStyle(2);
+    shape.graphics.drawRect(55, 60, 262, 35);
+    field.addChild(shape);
+    var shapeMask3 = new createjs.Shape();
+    shapeMask3.graphics
+          .beginFill("gold")
+          .drawRect(55, 80, 262, 380);
+    Materialmap.mask = shapeMask3;
+    var Ary=[0,"加工","レシピから錬成","選んで錬成"]
+    var T=new createjs.Text(Ary[this.card],"24px serif","#46574a");
+    T.x=60;
+    T.y=64;
+    field.addChild(T);
+    AsmAry.push(shape);
+    AsmAry.push(T);
   switch(this.card){
     case 1:
       //加工
-      if(AsmAry.length){
-        for(var i=0;i<AsmAry.length;i++){
-          field.removeChild(AsmAry[i])
-        }
-      };
-      AsmAry=[];
-      var Materialmap = new createjs.Container();
-        var Matbar = new createjs.Shape();
-        Matbar.graphics.beginFill("black");
-        Matbar.graphics.drawRect(55, 80, 262, 380);
-        Matbar.alpha=0.5;
-        field.addChild(Matbar);
-        field.addChild(Materialmap);
-        AsmAry.push(Matbar);
-        AsmAry.push(Materialmap);
-        var shape = new createjs.Shape();
-        shape.graphics.beginFill("#bae0c3");
-        shape.graphics.beginStroke("#617d68");
-        shape.graphics.setStrokeStyle(2);
-        shape.graphics.drawRect(55, 60, 262, 35);
-        field.addChild(shape);
-        var T=new createjs.Text("加工","24px serif","#46574a");
-        T.x=60;
-        T.y=64;
-        field.addChild(T);
-        AsmAry.push(shape);
-        AsmAry.push(T);
-        var shapeMask3 = new createjs.Shape();
-                shapeMask3.graphics
-                      .beginFill("gold")
-                      .drawRect(55, 80, 262, 400);
-        Materialmap.mask = shapeMask3;
-        var shape = new createjs.Shape();
-        shape.graphics.beginFill("black");
-        shape.graphics.drawRect(55, 475, 600, 50);
-        shape.alpha=0.7
-        field.addChild(shape);
-        AsmAry.push(shape);
-        var DetailText=new createjs.Text("　","20px serif","white");
-        DetailText.x=55;
-        DetailText.y=477;
-        field.addChild(DetailText);
-        AsmAry.push(DetailText);
-        var DetailText=new createjs.Text("　","20px serif","white");
-        DetailText.x=55;
-        DetailText.y=502;
-        field.addChild(DetailText);
-        AsmAry.push(DetailText);
-        field.addChild(Ct);
+        var Hash=disassemble.length*25;
         var I=0;
       for(var i=0;i<disassemble.length;i++){
         if(UserItem[disassemble[i]]>0){
@@ -6006,67 +7674,223 @@ function Assemble(){
           T.x=260;
           T.y=102+25*I;
           Materialmap.addChild(T);
+          t.addEventListener("mousedown", {hash:Hash,handleEvent:MatDown});
+          t.addEventListener("pressmove", {hash:Hash,handleEvent:MatMove}); 
           t.addEventListener("mouseover", {card:disassemble[i],handleEvent:Matdetail});
           t.addEventListener("click", {type:0,product:disassemble[i],loop:1,handleEvent:Alchemyset});
           I+=1;
         }}
       break;
+    case 2:
+        //錬成
+          var Hash=25+userRecipe.length*25;
+          //知っているレシピをぜんぶ表示
+          userRecipe.sort(compareFunc);
+          //並べ替え
+        for(var i=0;i<userRecipe.length;i++){
+            var t = new createjs.Shape();
+            t.graphics.beginFill("black");
+            t.graphics.drawRect(55, 100+25*i, 265, 25);
+            t.alpha=0.6;
+            Materialmap.addChild(t);
+            var T=new createjs.Text(itemA[userRecipe[i]].name,"20px serif","white");
+            T.x=65;
+            T.y=102+25*i;
+            Materialmap.addChild(T);
+            t.addEventListener("mousedown", {hash:Hash,handleEvent:MatDown});
+            t.addEventListener("pressmove", {hash:Hash,handleEvent:MatMove}); 
+            t.addEventListener("mouseover", {card:userRecipe[i],handleEvent:Matdetail});
+            t.addEventListener("click", {type:1,product:userRecipe[i],loop:1,handleEvent:Alchemyset});
+            //材料が足りない物は色を変える
+          }
+        break;  
+        case 3:
+          //えらんで錬成
+            var H=UserItem.filter(value=>value>0 && value !==74 && value !==75 && value !==76);
+            var Hash=H.length*25;
+            var I=0;
+          for(var i=0;i<UserItem.length;i++){
+            if(UserItem[i]>0){
+              if(i<74 || i>76){
+              var t = new createjs.Shape();
+              t.graphics.beginFill("black");
+              t.graphics.drawRect(55, 100+25*I, 265, 25);
+              t.alpha=0.6;
+              Materialmap.addChild(t);
+              var T=new createjs.Text(itemA[i].name+"×"+UserItem[i],"20px serif","white");
+              T.x=65;
+              T.y=102+25*I;
+              I+=1;
+              Materialmap.addChild(T);
+              t.addEventListener("mousedown", {hash:Hash,handleEvent:MatDown});
+              t.addEventListener("pressmove", {hash:Hash,handleEvent:MatMove}); 
+              t.addEventListener("mouseover", {card:i,handleEvent:Matdetail});
+              t.addEventListener("click", {type:1,product:i,handleEvent:Formula});
+            }};
+          }
+          Ct.removeAllChildren();
+          vpronum=0
+          vmatnameA=[]
+          vmatnumA=[]
+          break;    
   }
-}
+  Matbar.addEventListener("mousedown", {hash:Hash,handleEvent:MatDown});
+  Matbar.addEventListener("pressmove", {hash:Hash,handleEvent:MatMove}); 
+  function MatDown(){
+    dragPointX = stage.mouseX - Materialmap.x;
+    dragPointY = stage.mouseY - Materialmap.y;
+  }
+  function MatMove(){
+    Materialmap.y = stage.mouseY-dragPointY;
+    if(Materialmap.y>0){Materialmap.y=0};
+    if(this.hash<370 && Materialmap.y<0){Materialmap.y=0};
+    if(this.hash>=370 && Materialmap.y<-(this.hash-370)){Materialmap.y=-(this.hash-370)};
+  }
+  var shape = new createjs.Shape();
+  shape.graphics.beginFill("black");
+  shape.graphics.drawRect(55, 482, 600, 50);
+  shape.alpha=0.7
+  field.addChild(shape);
+  AsmAry.push(shape);
+  var DetailText=new createjs.Text("　","19px serif","white");
+  DetailText.x=55;
+  DetailText.y=484;
+  field.addChild(DetailText);
+  AsmAry.push(DetailText);
+  var DetailText=new createjs.Text("　","19px serif","white");
+  DetailText.x=55;
+  DetailText.y=508;
+  field.addChild(DetailText);
+  AsmAry.push(DetailText);
+  field.addChild(Ct);
+};
 function Matdetail(){
   var detail=itemA[this.card].detail;
   for( var lines=detail.split( "&" ), i=0, l=lines.length; l>i; i++ ) {
     var line = lines[i] ;
     AsmAry[AsmAry.length-2+i].text=line;
     if(i==1){break};
-  };
-}
-var Ct = new createjs.Container();
+  }
+};
 function Alchemyset(e,type,product,loop=1){
   //ALchemyへのつなぎ,type0,1=>プレビュー画面表示 2,3=>実行,loop=>実行回数
   if(opLock==10){return false};
+  if(opLock==13){
+    if(this.type<2){return false};
+    if((this.type==3 || this.type==4 )&& successRate==0){return false};
+  }
   se11.play();
+  Ct.alpha=1;
+  Ct.y=0;
   Ct.removeAllChildren();
   type=this.type;
   product=this.product;
   loop=this.loop;
   var vproname=product
-  var vpronum=0
-  var vmatnameA=[]
-  var vmatnumA=[]
+  vpronum=0
+  vmatnameA=[]
+  vmatnumA=[]
+    //調合レシピ登録関連
+    if(type==4){
+      if(product!==134 && userRecipe.indexOf(product)==-1){
+        userRecipe.push(-product);
+      };
+      if(product<0){
+        var N=-product;
+        product=134;
+        userRecipe.push(-N);
+      }
+    type=3;
+   }
+  if(type==0 || type==2){//分解プレビュー
   if(loop<=0){loop=1}
   if(loop>UserItem[vproname]){loop=UserItem[vproname]};
-  if(type==0 || type==2){//分解プレビュー
   switch (product){
     case 5:
-    if(type==2){
-    Alchemy(0,[5],[1],[10,6],[2,1],loop);
-               }
-    if(type==0){
-    vpronum=1*loop;
     vmatnameA.push(10,6);
     vmatnumA.push(2,1);
-    for(var i=0;i<vmatnumA.length;i++){
-      vmatnumA[i]*=loop;
-      }
-    }
-  break;
+    if(type==2){Alchemy(0,[product],[1],vmatnameA,vmatnumA,loop);return true;};
+    break;
+    case 14:
+      vmatnameA.push(15);
+      vmatnumA.push(2);
+      if(type==2){Alchemy(0,[product],[1],vmatnameA,vmatnumA,loop);return true;};
+      break;
+    case 15:
+      vmatnameA.push(95);
+      vmatnumA.push(2);
+      if(type==2){Alchemy(0,[product],[1],vmatnameA,vmatnumA,loop);return true;};
+      break;
+    case 33:
+      vmatnameA.push(50);
+      vmatnumA.push(3);
+      if(type==2){Alchemy(0,[product],[1],vmatnameA,vmatnumA,loop);return true;};
+      break;
+    case 38:
+      vmatnameA.push(55,73);
+      vmatnumA.push(3,1);
+      if(type==2){Alchemy(0,[product],[1],vmatnameA,vmatnumA,loop);return true;};
+      break;
+    case 45:
+      vmatnameA.push(46,47);
+      vmatnumA.push(2,1);
+      if(type==2){Alchemy(0,[product],[7],vmatnameA,vmatnumA,loop);return true;};
+      break;
+    case 56:
+      vmatnameA.push(57,142,73);
+      vmatnumA.push(3,1,1);
+      if(type==2){Alchemy(0,[product],[1],vmatnameA,vmatnumA,loop);return true;};
+      break;
+    case 63:
+      vmatnameA.push(64,73);
+      vmatnumA.push(2,1);
+      if(type==2){Alchemy(0,[product],[1],vmatnameA,vmatnumA,loop);return true;};
+      break;
+    case 69:
+      vmatnameA.push(54,73);
+      vmatnumA.push(3,1);
+      if(type==2){Alchemy(0,[product],[1],vmatnameA,vmatnumA,loop);return true;};
+      break;
+    case 73:
+      vmatnameA.push(74);
+      vmatnumA.push(1);
+      if(type==2){Alchemy(0,[product],[7],vmatnameA,vmatnumA,loop);return true;};
+      break;
+    case 77:
+      if(UserItem[132]>0){
+        vmatnameA.push(75);
+        vmatnumA.push(3);       
+      }else{
+      vmatnameA.push(74);
+      vmatnumA.push(3);
+      };
+      if(type==2){Alchemy(0,[product],[1],vmatnameA,vmatnumA,loop);return true;}; 
+      break;
+    case 146:
+      vmatnameA.push(136,16);
+      vmatnumA.push(2,1);
+      if(type==2){Alchemy(0,[product],[7],vmatnameA,vmatnumA,loop);return true;};
+      break;
    default:
       //Message(-1,"加工出来ないアイテム",3)
   return false;
   }
   //描画と分解可否判定
-  if(type==0){
+    vpronum=loop;
+    if(product==73){vpronum=7*loop};
+    for(var i=0;i<vmatnumA.length;i++){
+      vmatnumA[i]*=loop;
+      }
     var shape = new createjs.Shape();
     shape.graphics.beginFill("black");
-    shape.graphics.drawRect(350, 80, 300, 380);
+    shape.graphics.drawRect(350, 80, 320, 380);
     shape.alpha=0.7
     Ct.addChild(shape);
     var shape = new createjs.Shape();
     shape.graphics.beginFill("#bae0c3");
     shape.graphics.beginStroke("#617d68");
     shape.graphics.setStrokeStyle(2);
-    shape.graphics.drawRect(350, 60, 300, 40);
+    shape.graphics.drawRect(350, 60, 320, 40);
     Ct.addChild(shape);
     var T=new createjs.Text("いくつ加工する？","24px serif","#46574a");
     T.x=360;
@@ -6076,48 +7900,55 @@ function Alchemyset(e,type,product,loop=1){
     shape.graphics.beginFill("#bae0c3");
     shape.graphics.beginStroke("#617d68");
     shape.graphics.setStrokeStyle(2);
-    shape.graphics.drawRect(350, 370, 150, 50);
+    shape.graphics.drawRect(350, 370, 160, 50);
     Ct.addChild(shape);
     shape.addEventListener("click", {type:type,product:product,loop:loop-1,handleEvent:Alchemyset});
     var shape = new createjs.Shape();
     shape.graphics.beginFill("#bae0c3");
     shape.graphics.beginStroke("#617d68");
     shape.graphics.setStrokeStyle(2);
-    shape.graphics.drawRect(500, 370, 150, 50);
+    shape.graphics.drawRect(510, 370, 160, 50);
     Ct.addChild(shape);
     shape.addEventListener("click", {type:type,product:product,loop:loop+1,handleEvent:Alchemyset});
     var shape = new createjs.Shape();
     shape.graphics.beginFill("#bae0c3");
     shape.graphics.beginStroke("#617d68");
     shape.graphics.setStrokeStyle(2);
-    shape.graphics.drawRect(350, 420, 300, 40);
+    shape.graphics.drawRect(350, 420, 320, 40);
     Ct.addChild(shape);
+    if(vpronum<=UserItem[vproname]){
     shape.addEventListener("click", {type:2,product:product,loop:loop,handleEvent:Alchemyset});
-    var T=new createjs.Text("OK","24px serif","#46574a");
-    T.x=480;
+    }else{
+      shape.graphics.beginFill("black");
+      shape.graphics.drawRect(350, 420, 320, 40);
+      shape.alpha=0.7;
+      Ct.addChild(shape);
+    }
+    var T=new createjs.Text("OK","26px serif","#46574a");
+    T.x=490;
     T.y=422;
     Ct.addChild(T);
     var S = new createjs.Bitmap('Winedom_arrowleft.png');
     S.scale=0.4;
-    S.x=420;
-    S.y=370;
+    S.x=400;
+    S.y=373;
     Ct.addChild(S);
     var S = new createjs.Bitmap('Winedom_arrowright.png');
     S.scale=0.4;
-    S.x=550;
-    S.y=370;
+    S.x=580;
+    S.y=373;
     Ct.addChild(S);
     var T=new createjs.Text(itemA[vproname].name,"24px serif","white");
     T.x=360;
     T.y=120;
     Ct.addChild(T);
     var T=new createjs.Text(" ×"+vpronum+"/"+UserItem[vproname],"24px serif","white");
-    T.x=360+180;
+    T.x=360+220;
     T.y=120;
     Ct.addChild(T);
     var S = new createjs.Bitmap('Winedom_arrowdown.png');
     S.scale=0.3;
-    S.x=480;
+    S.x=490;
     S.y=160;
     Ct.addChild(S);
     for(var i=0;i<vmatnameA.length;i++){
@@ -6132,97 +7963,550 @@ function Alchemyset(e,type,product,loop=1){
       T.text=itemA[vmatnameA[i]].name;
       }
       var T=new createjs.Text("×"+vmatnumA[i],"24px serif","white");
-      T.x=360+180
+      T.x=360+220
       T.y=210+30*i;
       Ct.addChild(T); 
     }
-  }
-  if(type==2){
-  //Message(0,"できたー！",3)
-  }
-  }
-  if(type==1 || type==3){
-  switch (product){
-    case 2:
-    case 3:
-    case 4:
-    case 5:
-    case 6:
-    case 7:
-  for(var i=0; i<loop ; i++){
-  daypass+=0.1;
-  if(type==3){
-    Alchemy(1,product,1,1,1);
-             }
-  }
-  if(type==1){
-  vpronum=1*loop;
-  vmatnameA=1;
-  vmatnumA=1*loop;
-  }
-      break;
-    case 10:
-  for(var i=0; i<loop ; i++){
-  daypass+=0.5
-  if(type==3){
-  Alchemy(1,product,1,9,3,5,1);
-  }
-  }
-  if(type==1){
-  vpronum=1*loop;
-  vmatnameA=9;
-  vmatnumA=3*loop;
-  vmatnameB=5;
-  vmatnumB=1*loop;
-  }
-      break;
-  default:
-  Message(-1,"出来ないよー。",3)
-  }
-  //描画と錬成可否判定
-  if(type==1){
-  cx1.clearRect(x-12,y-52,255,365)
-  cx2.clearRect(x-12,y-52,255,365)
-  cx3.clearRect(x-12,y-52,255,365)
-  Message(-1,"いくつ錬成しようかな？",3)
-  cx2.font = "20px 'Century Gothic'";
-  cx2.fillText("個数/現在所持数",x+40,y-25)
-  cx2.font = "16px 'Century Gothic'";
-  var unk=1;
-  for(var i=0;i<vmatnameA.length;i++){
-    var A=UserLibrary[vmatnameA[i]]
-    if(A==0){//知らないアイテム
-    cx2.fillText("???",x,y);
-    unk=0;
-    }else{
-      if(vmatnumA[i]>UserItem[vmatnumA[i]]){//不足
-    cx2.fillStyle = 'red';
-    }
-    cx2.fillText(itemA[vmatnameA].name,x,y)
-    cx2.fillText("×"+vmatnumA[i]+"/"+UserItem[vmatnumA[i]],x+180,y)
-    cx2.fillStyle = "#f0f0f0";
-    }
-    y+=30;  
-  }
-  cx2.fillText("　　 ↓",x,y)
-  y+=30
-  cx2.fillText(itemA[vproname].name,x,y)
-  cx2.fillText("×"+vpronum,x+180,y)
-  //drawsq(x-10,60,250,y);
-  if(unk==0){return false;}
-  }
-  if(type==3){
-  //日数経過
-  //Message(0,"できたー！",3)
-  }}
   };
+  if(type==1 || type==3){//錬成プレビュー
+    //錬成は選んで錬成の関係で下記
+    AssemCompare(product,type,loop);
+    if(type==3){return true};
+    //描画と錬成可否判定
+    if(loop>0){
+    var loopT;
+    for(var i=0;i<vmatnameA.length;i++){
+      //現在最大限回せるループ数
+        loopT=Math.floor(UserItem[vmatnameA[i]]/vmatnumA[i]);
+        if(loop>loopT){loop=loopT};
+      }
+      };
+    if(loop<=0){loop=1}
+    vpronum=loop;
+      for(var i=0;i<vmatnumA.length;i++){
+        vmatnumA[i]*=loop;
+        }
+      var shape = new createjs.Shape();
+      shape.graphics.beginFill("black");
+      shape.graphics.drawRect(350, 80, 320, 380);
+      shape.alpha=0.7
+      Ct.addChild(shape);
+      var shape = new createjs.Shape();
+      shape.graphics.beginFill("#bae0c3");
+      shape.graphics.beginStroke("#617d68");
+      shape.graphics.setStrokeStyle(2);
+      shape.graphics.drawRect(350, 60, 320, 40);
+      Ct.addChild(shape);
+      var T=new createjs.Text("いくつ錬成する？","24px serif","#46574a");
+      T.x=360;
+      T.y=65;
+      Ct.addChild(T);
+      var shape = new createjs.Shape();
+      shape.graphics.beginFill("#bae0c3");
+      shape.graphics.beginStroke("#617d68");
+      shape.graphics.setStrokeStyle(2);
+      shape.graphics.drawRect(350, 370, 160, 50);
+      Ct.addChild(shape);
+      shape.addEventListener("click", {type:type,product:product,loop:loop-1,handleEvent:Alchemyset});
+      var shape = new createjs.Shape();
+      shape.graphics.beginFill("#bae0c3");
+      shape.graphics.beginStroke("#617d68");
+      shape.graphics.setStrokeStyle(2);
+      shape.graphics.drawRect(510, 370, 160, 50);
+      Ct.addChild(shape);
+      shape.addEventListener("click", {type:type,product:product,loop:loop+1,handleEvent:Alchemyset});
+      var S = new createjs.Bitmap('Winedom_arrowleft.png');
+      S.scale=0.4;
+      S.x=400;
+      S.y=373;
+      Ct.addChild(S);
+      var S = new createjs.Bitmap('Winedom_arrowright.png');
+      S.scale=0.4;
+      S.x=580;
+      S.y=373;
+      Ct.addChild(S);
+      var Y=120;
+      var Can=0;
+      for(var i=0;i<vmatnameA.length;i++){
+        if(UserLibrary[vmatnameA[i]]==0){
+          Can+=1;
+          var T=new createjs.Text("　","24px serif","#ff3f38");
+          T.x=360;
+          T.y=Y;
+          Ct.addChild(T);
+          var TT=new createjs.Text("　","24px serif","#ff3f38");
+          TT.x=360+220;
+          TT.y=Y;
+          Ct.addChild(TT);     
+        }else if(vmatnumA[i]>UserItem[vmatnameA[i]]){
+          Can+=1;
+          var T=new createjs.Text("　","24px serif","#3898ff");
+          T.x=360;
+          T.y=Y;
+          Ct.addChild(T);
+          var TT=new createjs.Text("　","24px serif","#3898ff");
+          TT.x=360+220;
+          TT.y=Y;
+          Ct.addChild(TT);        
+        }else{
+          var T=new createjs.Text("　","24px serif","white");
+          T.x=360;
+          T.y=Y;
+          Ct.addChild(T);
+          var TT=new createjs.Text("　","24px serif","white");
+          TT.x=360+220;
+          TT.y=Y;
+          Ct.addChild(TT);     
+        }
+         T.text=itemA[vmatnameA[i]].name;
+         TT.text="×"+vmatnumA[i]+"/"+UserItem[vmatnameA[i]]
+        Y+=30;
+      };
+      Y+=10;
+      var S = new createjs.Bitmap('Winedom_arrowdown.png');
+      S.scale=0.3;
+      S.x=490;
+      S.y=Y;
+      Ct.addChild(S);
+      Y+=50;
+      var T=new createjs.Text(itemA[vproname].name,"24px serif","white");
+      T.x=360;
+      T.y=Y;
+      Ct.addChild(T);
+      var T=new createjs.Text("×"+vpronum+"/"+UserItem[vproname],"24px serif","white");
+      T.x=360+220;
+      T.y=Y;
+      Ct.addChild(T);
+      var shape = new createjs.Shape();
+      shape.graphics.beginFill("#bae0c3");
+      shape.graphics.beginStroke("#617d68");
+      shape.graphics.setStrokeStyle(2);
+      shape.graphics.drawRect(350, 420, 320, 40);
+      Ct.addChild(shape);
+      if(Can==0){
+      shape.addEventListener("click", {type:3,product:product,loop:loop,handleEvent:Crisonaset});
+      }else{
+        shape.graphics.beginFill("black");
+        shape.graphics.drawRect(350, 420, 320, 40);
+        shape.alpha=0.7;
+        Ct.addChild(shape);
+      }
+      var T=new createjs.Text("OK","26px serif","#46574a");
+      T.x=490;
+      T.y=422;
+      Ct.addChild(T);
+  }
+};
+function AssemCompare(product,type,loop){
+  //type 0の時はその際代入されたvmatnameA,vmatnumAとの比較を行う
+  //type -1の時はuseritem内に所持している要素があるかどうか レシピ閃きに必要
+  var arr1=[];
+  var arr2=[];
+  switch (product){
+    case 1:
+      arr1.push(69,10,51);
+      arr2.push(3,8,2);
+      break;
+    case 2:
+      arr1.push(1,11,27,37);
+      arr2.push(1,3,10,4);
+      break;
+    case 3:
+      arr1.push(1,11,32,144);
+      arr2.push(1,3,10,4);
+      break;
+    case 7:
+      arr1.push(6,37);
+      arr2.push(6,2);
+      break;
+    case 8:
+      arr1.push(7,141);
+      arr2.push(2,1);
+      break;
+    case 9:
+      arr1.push(7,8);
+      arr2.push(3,4);
+      break;
+    case 11:
+      arr1.push(10,57);
+      arr2.push(1,3);
+      break;  
+    case 28:
+      arr1.push(27,17,136);
+      arr2.push(4,5,8);
+      break;
+    case 48:
+      arr1.push(47,16);
+      arr2.push(1,3);
+      break;
+    case 59:
+      arr1.push(58,61);
+      arr2.push(3,1);
+      break;  
+    case 81:
+      arr1.push(15,136);
+      arr2.push(10,1);
+      break;
+    case 82:
+      arr1.push(12,54);
+      arr2.push(1,15);
+      break;
+    case 83:
+      arr1.push(34,8);
+      arr2.push(16,4);
+      break;
+    case 96:
+      arr1.push(95,142);
+      arr2.push(1,3);
+      break;
+    case 97:
+      arr1.push(96,139,37);
+      arr2.push(1,3,2);
+      break;
+    case 98:
+      arr1.push(41,12,71);
+      arr2.push(4,3,1);
+      break;
+    case 99:
+      arr1.push(16,64,8);
+      arr2.push(6,3,2);
+      break;
+    case 101:
+      arr1.push(141,59,64);
+      arr2.push(3,1,2);
+      break;
+    case 102:
+      arr1.push(50,34);
+      arr2.push(3,2);
+      break;
+    case 103:
+      arr1.push(7,43);
+      arr2.push(1,4);
+      break;
+    case 104:
+      arr1.push(19,30);
+      arr2.push(3,1);
+      break;
+    case 107:
+      arr1.push(16,30);
+      arr2.push(2,1);
+      break;
+    case 108:
+      arr1.push(30,25,26);
+      arr2.push(2,2,3);
+      break;
+    case 109:
+      arr1.push(50,36);
+      arr2.push(3,1);
+      break;
+    case 110:
+      //竜牙爆砕
+      return false;
+      break;
+    case 112:
+      arr1.push(145,18);
+      arr2.push(1,2);
+      break;
+    case 113:
+      arr1.push(10,22);
+      arr2.push(1,2);
+      break;
+    case 114:
+      arr1.push(10,31,17);
+      arr2.push(1,2,1);
+      break;
+    case 115:
+      arr1.push(145,35);
+      arr2.push(1,3);
+      break;
+    case 116:
+      arr1.push(32,29,31);
+      arr2.push(2,3,2);
+      break;
+    case 117:
+      arr1.push(40,10,138);
+      arr2.push(5,1,2);
+      break;
+    case 118:
+      arr1.push(117,143,18);
+      arr2.push(1,2,3);
+      break;
+    case 119:
+      arr1.push(10,50,27);
+      arr2.push(2,3,1);
+      break;
+    case 120:
+      arr1.push(145,50,51);
+      arr2.push(1,2,1);
+      break;
+    case 121:
+      arr1.push(145,50,32);
+      arr2.push(1,3,2);
+      break;
+    case 122:
+      arr1.push(145,50,35,23);
+      arr2.push(1,4,2,3);
+      break;
+    case 131:
+      arr1.push(20,39,48);
+      arr2.push(5,3,20);
+      break;
+    case 123:
+      arr1.push(46,13);
+      arr2.push(3,1);
+      break;
+    case 124:
+      arr1.push(30,27,141);
+      arr2.push(1,1,1);
+      break;
+    case 125:
+      arr1.push(42,27,68);
+      arr2.push(1,1);
+      break;
+    case 126:
+      arr1.push(46,26,36);
+      arr2.push(1,3,2);
+      break;
+    case 128:
+      arr1.push(109,116,126);
+      arr2.push(1,1,1);
+      break;
+    case 131:
+      arr1.push(48,39,20);
+      arr2.push(20,1,3);
+      break;
+    case 132:
+      arr1.push(68,64,102,52);
+      arr2.push(5,3,2,2);
+      break;
+    case 133:
+      arr1.push(131,139,144);
+      arr2.push(1,3,2);
+      break;
+    case 135:
+      arr1.push(78,52,144);
+      arr2.push(3,8,4);
+      break;
+    case 144:
+      arr1.push(71,28,55);
+      arr2.push(1,1,4);
+      break;
+    case 145:
+      arr1.push(33,51,10,141);
+      arr2.push(4,2,3,1);
+      break;
+    case 148:
+      arr1.push(60,102);
+      arr2.push(5,3);
+      break;
+    case 134:
+      //がらくた
+      arr1=vmatnameA.concat();
+      arr2=vmatnumA.concat();
+      break;
+   default:
+  return false;
+  }
+  if(type==-1){
+    for(var i=0;i<arr1.length;i++){
+      if(UserItem[arr1[i]]>0){
+        return true;
+      }
+    }
+    return false;
+  }
+  if(type==0){
+    return vmatNumCompare(arr1,vmatnameA,arr2,vmatnumA)
+  }
+    vmatnameA=arr1.concat();
+    vmatnumA=arr2.concat();
+  if(type==3){Alchemy(1,[product],[1],vmatnameA,vmatnumA,loop);};
+}
   function Alchemy(type=0,product,pnum,materialA,mnumA,loop=1){
   //type0=>product to materials, type1=>materials to product
-  //Alchemy(0,[5],[1],[10,6],[2,1],loop);
   //結果画面描画用意
   var KitAry=[];
-  cookready(5+loop);
-  function cookready(length=20,word="加工中・・・"){
+  if(type==0){
+  //ドン
+  opLock=10;
+  cookready(3+loop,"加工中・・・");
+  Ct.removeAllChildren();
+  Ct.alpha=0;
+  var shape = new createjs.Shape();
+  shape.graphics.beginFill("black");
+  shape.graphics.beginStroke("white");
+  shape.graphics.setStrokeStyle(2);
+  shape.graphics.drawRect(200, 60, 400, 400);
+  shape.alpha=0.7;
+  Ct.addChild(shape);
+  Cstar.x=270;
+  Cstar.y=90;
+  Cstar.rotation=-15;
+  Cstar.scale=0.7
+  Ct.addChild(Cstar);
+  var t=new createjs.Text("RESULT","32px serif","orange");
+  t.x=320;
+  t.y=90;
+  Ct.addChild(t);
+  var shape = new createjs.Shape();
+  shape.graphics.beginFill("#f06787");
+  shape.graphics.drawRect(330, 350, 105, 60);
+  Ct.addChild(shape);
+  if(Crisona.length && henirarea[0].cleared==2){
+  shape.addEventListener("click", {card:1,handleEvent:AssembleTurt});
+  function AssembleTurt(){
+    se11.play();
+    field.removeAllChildren();
+    opLock=0;
+    Titleyard.alpha=1;
+    henirarea[0].cleared=3;
+    PathTalk(1);
+  }
+  }else{
+  shape.addEventListener("click", {card:1,handleEvent:Assemble});
+  }
+  var t=new createjs.Text("OK","bold 24px 'メイリオ'","white");
+  t.x=360;
+  t.y=365;
+  Ct.addChild(t); 
+  UserItem[product]-=pnum*loop;
+  var J=0;
+  for(var i=0;i<materialA.length;i++){
+    UserItem[materialA[i]]+=mnumA[i]*loop;
+    if(UserItem[materialA[i]]>itemMax[itemMax[0]]){UserItem[materialA[i]]=itemMax[itemMax[0]]};
+    if(materialA[i]==74 || materialA[i]==75 || materialA[i]==76){
+      //クリソナ特殊裁定
+      for(var j=0;j<mnumA[i]*loop;j++){
+      var A=(70+(materialA[i]-74)*10+(Math.random()*100)/10).toFixed(1);
+      if(A<90){A=Math.floor(A)};
+      Crisona.push(A);
+      var t=new createjs.Text(itemA[materialA[i]].name+"（純度"+A+"%) ×1","24px serif","white");
+      t.x=230;
+      t.y=150+30*i+30*j;
+      Ct.addChild(t);
+      }
+      J+=mnumA;
+    }else{
+    if(UserLibrary[materialA[i]]==0){
+      UserLibrary[materialA[i]]=1;
+      var t=new createjs.Text("new item!!","20px serif","white");
+      t.x=220;
+      t.y=150+30*i+30*J;
+      Ct.addChild(t);
+      }
+    var t=new createjs.Text(itemA[materialA[i]].name+"×"+mnumA[i]*loop,"24px serif","white");
+    t.x=330;
+    t.y=150+30*i+30*J;
+    Ct.addChild(t);
+    }
+    InvConfig(0);
+  }
+  };
+  if(type==1){
+  //カッ
+  opLock=10;
+  //錬成には成功率が関与
+  Ct.x=0;
+  Ct.removeAllChildren();
+  Ct.alpha=0;
+  var shape = new createjs.Shape();
+  shape.graphics.beginFill("black");
+  shape.graphics.beginStroke("white");
+  shape.graphics.setStrokeStyle(2);
+  shape.graphics.drawRect(200, 60, 400, 400);
+  shape.alpha=0.7;
+  Ct.addChild(shape);
+  var R=Math.random()*100;
+  console.log(R,successRate)
+  if(R>successRate){
+    //失敗
+    cookready(5+loop,"錬成中・・・",false);
+    product=73;
+    var t=new createjs.Text("錬成失敗……","24px serif","white");
+    t.x=330;
+    t.y=140;
+    Ct.addChild(t);
+    }else{
+    cookready(5+loop,"錬成中・・・");
+    if(product==134){
+    var t=new createjs.Text("調合失敗！","24px serif","white");
+    }else{
+    var t=new createjs.Text("錬成成功！","24px serif","white");
+    }
+    t.x=330;
+    t.y=140;
+    Ct.addChild(t);
+    }
+    var N=userRecipe.findIndex(value=>value<0);
+    if(N!==-1){
+    userRecipe[N]=-userRecipe[N];
+    var t=new createjs.Text("「"+itemA[userRecipe[N]].name+"」の","24px serif","white");
+    t.x=220;
+    t.y=295;
+    Ct.addChild(t);
+    var t=new createjs.Text("レシピを記録しました！","24px serif","white");
+    t.x=220;
+    t.y=320;
+    Ct.addChild(t);
+  }
+  Cstar.x=270;
+  Cstar.y=90;
+  Cstar.rotation=-15;
+  Cstar.scale=0.7
+  Ct.addChild(Cstar);
+  var t=new createjs.Text("RESULT","32px serif","orange");
+  t.x=320;
+  t.y=90;
+  Ct.addChild(t);
+  var shape = new createjs.Shape();
+  shape.graphics.beginFill("#f06787");
+  shape.graphics.drawRect(330, 350, 105, 60);
+  Ct.addChild(shape);
+  shape.addEventListener("click", {card:2,handleEvent:Assemble});
+  var t=new createjs.Text("OK","bold 24px 'メイリオ'","white");
+  t.x=360;
+  t.y=365;
+  Ct.addChild(t);
+  //クリソナを消費
+  if(crisonaA[0]==2){
+    UserItem[crisonaA[1]]-=1;
+  }else{
+    UserItem[crisonaA[0]]-=1;
+    var A=Crisona.indexOf(crisonaA[1]);
+    Crisona.splice(A,1);
+  }
+  UserItem[product]+=pnum*loop;
+  if(UserItem[product]>itemMax[itemMax[0]]){UserItem[product]=itemMax[itemMax[0]]};
+  if(product==74 || product==75 || product==76){
+    //クリソナ特殊裁定
+    for(var j=0;j<pnum*loop;j++){
+    var A=(70+(product-74)*10+(Math.random()*100)/10).toFixed(1);
+    if(A<90){A=Math.floor(A)};
+    Crisona.push(A);
+    var t=new createjs.Text(itemA[product].name+"（純度"+A+"%) ×1","24px serif","white");
+    t.x=330;
+    t.y=180+30*i+30*j;
+    Ct.addChild(t);
+    }
+  }else{
+  var t=new createjs.Text(itemA[product].name+"×"+pnum*loop,"24px serif","white");
+  t.x=330;
+  t.y=180;
+  Ct.addChild(t);
+  }
+  if(UserLibrary[product]==0){
+    UserLibrary[product]=1;
+    var t=new createjs.Text("new item!!","20px serif","white");
+    t.x=220;
+    t.y=180;
+    Ct.addChild(t);
+    }
+  for(var i=0;i<materialA.length;i++){
+    UserItem[materialA[i]]-=mnumA[i]*loop;
+  }
+  InvConfig(0);
+  }
+  function cookready(length=20,word="加工中・・・",success=true){
     var DL= new createjs.Bitmap("soL_dialogue.png");
     DL.scale=1.7;
     DL.x=200;
@@ -6252,9 +8536,9 @@ function Alchemyset(e,type,product,loop=1){
     .wait(800)
     .to({y:Box2.y},5)
     .wait(800)
-    window.requestAnimationFrame((ts)=>Cook(ts,length));
+    window.requestAnimationFrame((ts)=>Cook(ts,length,0,0,success));
     }
-  function Cook(ts,length=20,tflame=0,sf=0){
+  function Cook(ts,length=20,tflame=0,sf=0,success){
     tflame+=1;
     if(tflame>length){
       var shape = new createjs.Shape();
@@ -6270,132 +8554,383 @@ function Alchemyset(e,type,product,loop=1){
         field.removeChild(KitAry[i]);
       };
       KitAry=[];
-      se10.play();
+      if(success){se10.play()}else{se25.play()};
       Ct.alpha=1;
       cLock=true;
     }else{
-    window.requestAnimationFrame((ts)=>Cook(ts,length,tflame,sf));
+    window.requestAnimationFrame((ts)=>Cook(ts,length,tflame,sf,success));
     }
   }
-  if(type==0){
-  //ドン
-  opLock=10;
-  Ct.removeAllChildren();
-  Ct.alpha=0;
-  var shape = new createjs.Shape();
-  shape.graphics.beginFill("black");
-  shape.graphics.beginStroke("white");
-  shape.graphics.setStrokeStyle(2);
-  shape.graphics.drawRect(200, 60, 400, 400);
-  shape.alpha=0.7;
-  Ct.addChild(shape);
-  Cstar.x=270;
-  Cstar.y=90;
-  Cstar.rotation=-15;
-  Cstar.scale=0.7
-  Ct.addChild(Cstar);
-  var t=new createjs.Text("RESULT","32px serif","orange");
-  t.x=320;
-  t.y=90;
-  Ct.addChild(t);
-  var shape = new createjs.Shape();
-  shape.graphics.beginFill("#f06787");
-  shape.graphics.drawRect(330, 350, 105, 60);
-  Ct.addChild(shape);
-  shape.addEventListener("click", {card:1,handleEvent:Assemble});
-  var t=new createjs.Text("OK","bold 24px 'メイリオ'","white");
-  t.x=360;
-  t.y=365;
-  Ct.addChild(t); 
-  UserItem[product]-=pnum*loop;
-  for(var i=0;i<materialA.length;i++){
-    UserItem[materialA[i]]+=mnumA[i]*loop;
-    if(UserLibrary[materialA[i]]==0){
-    UserLibrary[materialA[i]]=1;
-    var t=new createjs.Text("new item!!","20px serif","white");
-    t.x=220;
-    t.y=150+30*i;
-    Ct.addChild(t);
-    }
-    var t=new createjs.Text(itemA[materialA[i]].name+"×"+mnumA[i]*loop,"24px serif","white");
-    t.x=330;
-    t.y=150+30*i;
-    Ct.addChild(t);
-    InvConfig(0);
-  }
   };
-  if(type==1){
-  Useritem[product]+=pnum;
-  Useritem[materialA]-=mnumA;
-  Useritem[materialB]-=mnumB;
-  Useritem[materialC]-=mnumC;
-  Useritem[materialD]-=mnumD;
-  Useritem[materialE]-=mnumE;
-  Useritem[materialF]-=mnumF;
-  //カッ
-  cx2.font = "20px Arial";
-  if(Userlibrary[product]==0){
-    Userlibrary[product]=product
-    cx2.fillText("new item!!",xx-100,yy)
-    };
-  cx2.fillText(itemA[product].name,xx,yy)
-  cx2.fillText("×"+pnum,xx+250,yy)
-  }
-  };
-  function Formula(){
+function Formula(e,type,product){
   //調合レシピと照合する
-  //霓玉を使って失敗したら霓玉だけは返す
-  console.log(mixlist)
-  cx2.font = "36px Arial";
-  var xx=150
-  var yy=180
-  cx2.fillText("RESULT", 150, yy);
-  cx2.font = "24px Arial";
-  cx2.fillText("OK [Z]", 580, 380);
-  cx2.font = "20px Arial"
-  for(var i=0; i<mixlist.length ; i++){
-    yy+=22
-    cx2.fillText(itemA[mixlist[i]].name, xx, yy);
-  }
-  yy+=40
-  mapstate=7;
-  pagestate=0;
-  var result=mixlist.findIndex(value=>value==76);
-  if(result==-1){result=2+Math.floor(Math.random()*6)}else{result=76}
-  //数の一致
-  var A=formulaA.filter(value=>value.Mat.length==mixlist.length);
-  if(A.length==0){
-    cx2.font = "36px Arial";
-    cx2.fillText("調合失敗！", 320, 180);
-    cx2.font = "20px Arial"
-    cx2.fillText("材料は"+itemA[result].name+"になってしまいました。", xx, yy);
-    Useritem[result]+=1;
-    return result;
-  }
-  //中身の一致
-  mixlist.sort(compareFunc)
-  console.log(mixlist,A);
-  for(var i=0; i<mixlist.length ; i++){
-  var A=A.filter(value=>value.Mat[i]==mixlist[i])
-  if(A.length==0){
-    cx2.font = "36px Arial";
-    cx2.fillText("調合失敗！", 320, 180);
-    cx2.font = "20px Arial"
-    cx2.fillText("材料は"+itemA[result].name+"になってしまいました。", xx, yy);
-    Useritem[result]+=1;
-    return result;
-  }}
-  console.log(A[0].Mix);
-    cx2.font = "36px Arial";
-    cx2.fillText("調合成功！", 320, 180);
-    Userlibrary[A[0].Mix]=A[0].Mix
-      cx2.font = "20px Arial"
-    cx2.fillText(itemA[A[0].Mix].name+"のレシピを覚えました！", xx, yy);
-    for(var i=0; i<mixlist.length ; i++){
-      Useritem[mixlist[i]]+=1
+  //ALchemyへのつなぎ,type0=>プレビュー画面表示 1->+1 -1->-1 2=>実行
+  if(opLock==10 || opLock==13){return false};
+  se11.play();
+  type=this.type;
+  product=this.product;
+  var Dex=134;//錬成産物代入用
+  //グローバル変数を利用
+  //vpronum=0
+  //vmatnameA=[]
+  //vmatnumA=[]
+    vpronum=1;
+    var A=vmatnameA.indexOf(product)
+  if(type==1){
+    if(A==-1){
+      if(vmatnameA.length>=6){return false};
+      vmatnameA.push(product);
+      vmatnumA.push(1);
+    }else{
+      if(UserItem[product]<=vmatnumA[A]){return false};
+      vmatnumA[A]+=1;
+    }
+  }else if(type==-1){
+    if(A==-1){
+      return false;
+    }else{
+      vmatnumA[A]-=1;
+      if(vmatnumA[A]==0){
+        vmatnameA.splice(A,1);
+        vmatnumA.splice(A,1);
       }
-  return A[0].Mix
+    }
+  }
+    Ct.removeAllChildren();
+    var shape = new createjs.Shape();
+    shape.graphics.beginFill("black");
+    shape.graphics.drawRect(350, 80, 320, 380);
+    shape.alpha=0.7
+    Ct.addChild(shape);
+    var shape = new createjs.Shape();
+    shape.graphics.beginFill("#bae0c3");
+    shape.graphics.beginStroke("#617d68");
+    shape.graphics.setStrokeStyle(2);
+    shape.graphics.drawRect(350, 60, 320, 40);
+    Ct.addChild(shape);
+    var T=new createjs.Text("調合アイテム選択","24px serif","#46574a");
+    T.x=360;
+    T.y=65;
+    Ct.addChild(T);
+    var Y=120;
+    for(var i=0;i<vmatnameA.length;i++){
+        var T=new createjs.Text("　","24px serif","white");
+        T.x=360;
+        T.y=Y;
+        Ct.addChild(T);
+        var TT=new createjs.Text("　","24px serif","white");
+        TT.x=360+200;
+        TT.y=Y;
+        Ct.addChild(TT);     
+        T.text=itemA[vmatnameA[i]].name;
+        TT.text="×"+vmatnumA[i];
+        var S = new createjs.Bitmap('icon_plus.png');
+        S.scale=0.4;
+        S.x=360+283;
+        S.y=Y;
+        Ct.addChild(S);
+        S.addEventListener("click", {type:1,product:vmatnameA[i],handleEvent:Formula});
+        var S = new createjs.Bitmap('icon_minus.png');
+        S.scale=0.4;
+        S.x=360+255;
+        S.y=Y;
+        Ct.addChild(S);
+        S.addEventListener("click", {type:-1,product:vmatnameA[i],handleEvent:Formula});
+        Y+=30;
+    }
+    Y+=10;
+    var S = new createjs.Bitmap('Winedom_arrowdown.png');
+    S.scale=0.3;
+    S.x=490;
+    S.y=Y;
+    Ct.addChild(S);
+    Y+=50;
+    //レシピにあうものか判定
+    var T=new createjs.Text("・・・","24px serif","white");
+    T.x=360;
+    T.y=Y;
+    for(var i=0;i<assembleA.length;i++){
+      //console.log(assembleA[i],AssemCompare(assembleA[i],0));
+      if(assembleA[i]!==134){
+      if(AssemCompare(assembleA[i],0)==-1){
+        Dex=assembleA[i];
+        if(userRecipe.indexOf(assembleA[i])!==-1){
+        T.text=itemA[assembleA[i]].name;
+        T.color="#66eda7"
+        }else{
+        T.text="なにかできそう！"
+        T.color="#eddb66"
+        }
+        se14.play();
+        break;
+      }else if(AssemCompare(assembleA[i],0)>0){
+        //1->不足 2->過多 3->数は正しいが割合が合っていない
+        //レシピ開発としては成功とする
+        Dex=-assembleA[i];
+        se14.play();
+        T.text="？？？のレシピ"
+        break;
+      }
+    };
+    }
+    Ct.addChild(T);
+    var shape = new createjs.Shape();
+    shape.graphics.beginFill("#bae0c3");
+    shape.graphics.beginStroke("#617d68");
+    shape.graphics.setStrokeStyle(2);
+    shape.graphics.drawRect(350, 420, 320, 40);
+    Ct.addChild(shape);
+    if(vmatnumA.length>=2){
+    shape.addEventListener("click", {type:4,product:Dex,loop:1,handleEvent:Crisonaset});
+    }else{
+      shape.graphics.beginFill("black");
+      shape.graphics.drawRect(350, 420, 320, 40);
+      shape.alpha=0.7;
+      Ct.addChild(shape);
+    }
+    var T=new createjs.Text("OK","26px serif","#46574a");
+    T.x=490;
+    T.y=422;
+    Ct.addChild(T);
   };
+function Crisonaset(){
+  if(opLock==12){
+  opLock=13;
+  se11.play();
+  //Alchemysetプレビュー->Crisonaset->Alchemyset本番->Alchemy
+  //type4->調合（組み合わせがOKならレシピを追加、組成も正しければ産物獲得）
+  //錬成・選んで錬成→クリソナ選択→錬成実行まで
+  createjs.Tween.get(Ct)
+  .to({x:-260},100);
+  for(var i=0;i<AsmAry.length;i++){
+    AsmAry[i].alpha=0;
+  }
+    var Materialmap = new createjs.Container();
+    var Matbar = new createjs.Shape();
+    Matbar.graphics.beginFill("black");
+    Matbar.graphics.drawRect(680, 80, 262, 380);
+    Matbar.alpha=0.5;
+    Ct.addChild(Matbar);
+    Ct.addChild(Materialmap);
+    AsmAry2.push(Matbar);
+    AsmAry2.push(Materialmap);
+    var H=UserItem.slice(0,4);
+    console.log(H);
+    var HH=H.filter(value=>value>0);
+    var Hash=(HH.length+Crisona.length)*25;
+    function MatDown(){
+      dragPointX = stage.mouseX - Materialmap.x;
+      dragPointY = stage.mouseY - Materialmap.y;
+    }
+    function MatMove(){
+      Materialmap.y = stage.mouseY-dragPointY;
+      if(Materialmap.y>0){Materialmap.y=0};
+      if(this.hash<370 && Materialmap.y<0){Materialmap.y=0};
+      if(this.hash>=370 && Materialmap.y<-(this.hash-370)){Materialmap.y=-(this.hash-370)};
+    }
+    Matbar.addEventListener("mousedown", {hash:Hash,handleEvent:MatDown});
+    Matbar.addEventListener("pressmove", {hash:Hash,handleEvent:MatMove}); 
+    var shape = new createjs.Shape();
+    shape.graphics.beginFill("#bae0c3");
+    shape.graphics.beginStroke("#617d68");
+    shape.graphics.setStrokeStyle(2);
+    shape.graphics.drawRect(680, 60, 262, 35);
+    Ct.addChild(shape);
+    AsmAry2.push(shape);
+    AsmAry2.push(T);
+    var shapeMask3 = new createjs.Shape();
+            shapeMask3.graphics
+                  .beginFill("gold")
+                  .drawRect(680, 80, 262, 400);
+    Materialmap.mask = shapeMask3;
+  var shape = new createjs.Shape();
+  shape.graphics.beginFill("#bae0c3");
+  shape.graphics.beginStroke("#617d68");
+  shape.graphics.setStrokeStyle(2);
+  shape.graphics.drawRect(350, 370, 320, 50);
+  Ct.addChild(shape);
+  AsmAry2.push(shape);
+  AsmAry2.push(T);
+  var shape = new createjs.Shape();
+  shape.graphics.beginFill("#bae0c3");
+  shape.graphics.beginStroke("#617d68");
+  shape.graphics.setStrokeStyle(2);
+  shape.graphics.drawRect(350, 420, 320, 40);
+  Ct.addChild(shape);
+  AsmAry2.push(shape);
+  shape.addEventListener("click", {type:4,product:this.product,loop:this.loop,handleEvent:Alchemyset});
+  var T=new createjs.Text("OK","26px serif","#46574a");
+  T.x=490;
+  T.y=422;
+  Ct.addChild(T);
+  var shape = new createjs.Shape();
+  shape.graphics.beginFill("#bae0c3");
+  shape.graphics.beginStroke("#617d68");
+  shape.graphics.setStrokeStyle(2);
+  shape.graphics.drawRect(680, 370, 262, 35);
+  Ct.addChild(shape);
+  AsmAry2.push(shape);
+  AsmAry2.push(T);
+  var shape = new createjs.Shape();
+  shape.graphics.beginFill("#bae0c3");
+  shape.graphics.beginStroke("#617d68");
+  shape.graphics.setStrokeStyle(2);
+  shape.graphics.drawRect(680, 405, 262, 55);
+  Ct.addChild(shape);
+  AsmAry2.push(shape);
+  AsmAry2.push(T);
+  var T=new createjs.Text("クリソナ選択","24px serif","#46574a");
+    T.x=685;
+    T.y=64;
+    Ct.addChild(T);
+    AsmAry2.push(T);
+  var I=0;
+    for(var i=0;i<Crisona.length;i++){
+        var t = new createjs.Shape();
+        t.graphics.beginFill("black");
+        t.graphics.drawRect(680, 100+25*i, 265, 25);
+        t.alpha=0.6;
+        Materialmap.addChild(t);
+        AsmAry2.push(t);
+        var C;
+        if(Crisona[i]>=70 && Crisona[i]<80){
+          C=74;
+        }else if(Crisona[i]<90){
+          C=75;
+        }else{
+          C=76;
+        }
+        var T=new createjs.Text(itemA[C].name+"（純度"+Crisona[i]+"%）","20px serif","white");
+        T.x=688;
+        T.y=102+25*i;
+        Materialmap.addChild(T);
+        AsmAry2.push(T);
+        t.addEventListener("click", {type:C,product:Crisona[i],handleEvent:Crisonaset_this});
+        t.addEventListener("mousedown", {hash:Hash,handleEvent:MatDown});
+        t.addEventListener("pressmove", {hash:Hash,handleEvent:MatMove}); 
+        I+=1;
+      }
+      for(var i=0;i<4;i++){
+        if(UserItem[i]>0){
+          var t = new createjs.Shape();
+          t.graphics.beginFill("black");
+          t.graphics.drawRect(680, 100+25*I, 265, 25);
+          t.alpha=0.6;
+          Materialmap.addChild(t);
+          AsmAry2.push(t);
+          var T=new createjs.Text(itemA[i].name+"　×"+UserItem[i],"20px serif","white");
+          T.x=688;
+          T.y=102+25*I;
+          Materialmap.addChild(T);
+          AsmAry2.push(T);
+          t.addEventListener("click", {type:2,product:i,handleEvent:Crisonaset_this});
+          t.addEventListener("mousedown", {hash:Hash,handleEvent:MatDown});
+          t.addEventListener("pressmove", {hash:Hash,handleEvent:MatMove}); 
+          I+=1;
+        }
+      }
+      var T=new createjs.Text("選択中のクリソナ：","24px serif","#46574a");
+      T.x=688;
+      T.y=374;
+      Ct.addChild(T);
+      AsmAry2.push(T);
+      var T=new createjs.Text("---","20px serif","#46574a");
+      T.x=688;
+      T.y=418;
+      Ct.addChild(T);
+      AsmAry2.push(T);
+      var T=new createjs.Text("錬成成功率：---%","32px serif","#46574a");
+      T.x=352;
+      T.y=372;
+      Ct.addChild(T);
+      AsmAry2.push(T);
+    function Crisonaset_this(){
+      se11.play();
+      if(this.type==2){
+      AsmAry2[AsmAry2.length-2].text=itemA[this.product].name;
+      //成功率は素材数に応じて100
+      successRate=75-5*vmatnameA.length+(this.product)*5;
+      switch(this.product){
+        case 0:
+          successRate=100;
+          break;
+        case 1:
+          if(vmatnameA.length<=2){successRate=100};
+          break;
+        case 2:
+          if(vmatnameA.length<=3){successRate=100};
+          break;
+        case 3:
+          if(vmatnameA.length<=4){successRate=100};
+          break;
+        case 4:
+          if(vmatnameA.length<=5){successRate=100};
+          break;
+      }
+      }else{
+      AsmAry2[AsmAry2.length-2].text=itemA[this.type].name+"（純度"+this.product+"%）";
+      //成功率は(75-5*素材数)+(純度-70)*2
+      successRate=75-5*vmatnameA.length+(this.product-70)*2
+      }
+      crisonaA=[this.type,this.product];
+      AsmAry2[AsmAry2.length-1].text="錬成成功率："+successRate+"%"
+    }
+  }
+};
+  function Damage(P=0,Sid=0,subpow=0){
+    //P 0->こっちの攻撃　1->あいての攻撃 id->スキルid subpow->入力されている場合は威力欄でこちらを参照する
+    //命中判定
+    //var StatusP=[100,100,100];//HP,ATK,DEF
+    //var StatusE=[30,30,30,0];
+    var ATK=1;
+    var DEF=1;//攻撃・防御補正
+    var X=22;//基本変数
+    var result=0
+  //ダメージ=攻撃側のレベル×2÷5+2→きりすて×威力×攻撃/防御　きりすて /50 +2 きりすて ×0.85-1.0の乱数　きりすて
+  if(P==0){
+      var R=Math.random()*100;
+      var Pow=Skilllist[Sid].power;
+      if(Skilllist[Sid].sp>0 && Skilllist[Sid].sp==StatusE[3]){
+        //特攻判定 必中
+        Pow*=2;
+        R=0;
+      }
+      if(Skilllist[Sid].hitrate<R){
+        result=-1;
+        return result;
+      }
+  var RR=(85+Math.floor(Math.random()*16))/100
+  result=Math.floor(RR*Math.floor(Math.floor(X*Pow*(StatusP[1]*ATK)/(StatusE[2]*DEF))/50+2));
+  console.log('damage',P,Sid,result);
+  //HPトリガー
+  var T=StatusE[0]-result;
+  for (var i=0;i<HPtrigger.length;i++){
+  if(T<HPtrigger[i] && HPtrigger_li[i]==0){
+    if(T>0){
+      //トリガーを飛ばしていない場合はトリガーでストップ
+    result=StatusE[0]-HPtrigger[i];
+    };
+    HPtrigger_li[i]=1;
+    console.log('hptrigger',i,result)
+    return result;
+    //break;
+  }
+  };
+  return result;
+}else{
+    var R=Math.random()*100;
+    if(Skilllist[Sid].hitrate<R){
+      result=-1;
+      return result;
+    }
+  var Pow=Skilllist[Sid].power;
+  var RR=(85+Math.floor(Math.random()*16))/100
+  console.log(ATK,DEF);
+  result=Math.floor(RR*Math.floor(Math.floor(X*Pow*StatusE[1]*ATK/StatusP[2]*DEF)/50+2));
+  console.log('damage',P,Sid,result);
+  return result;  
+}
+ }
 canvas5.onmousedown = mouseDownListener;
 function mouseDownListener(e) {
   createjs.Ticker.addEventListener("tick", MouseCircle);
@@ -6443,7 +8978,21 @@ window.addEventListener("keyup", keyupHandler, false);
         if(opLock==0){
           opLock=2;
           se11.play();
+          if(playMode[0]==4){
+            if(henirarea[0].cleared>1){
+            Dialogue("QUIT GAME？","採取を途中で終了します",0,-1);     
+            }       
+          }else{
           Dialogue("QUIT GAME？","この盤面を途中で終了します",1,-1);
+          }
+        }
+      }
+      if(gamestate==5 && cLock){
+        //メニューに戻る
+        if(opLock==0){
+          opLock=2;
+          se11.play();
+          Dialogue("EXIT？","ヘニルの時空の入り口に戻ります",6,-1);
         }
       }
       if(gamestate==100 && cLock){
@@ -6464,9 +9013,11 @@ window.addEventListener("keyup", keyupHandler, false);
       if(gamestate==0 && cLock){
           //new game;
           if(opLock==0 && duelLog.length){
+            if(playMode[0]!==4){
             opLock=2;
             se11.play();
             Dialogue("NEW GAME？","この盤面を放棄して新しいゲームを始めます",2,-1);
+            }
           }
         }
       if(gamestate==1 && cLock){
@@ -6475,7 +9026,7 @@ window.addEventListener("keyup", keyupHandler, false);
       }
     }
     };
-  function Dialogue(word,detail="　",yes=1,no=-1,ok=-1,okx=345,oky=300,okw=105,okh=60){
+  function Dialogue(word,detail="　",yes=1,no=-1,ok=-1,okx=345,oky=300,okw=105,okh=60,ok2=-1,ok2x=345,ok2y=300,ok2w=105,ok2h=60){
     //ok 0->OKボタンにする
     Loadmap.removeAllChildren();
     Loadmap.alpha=1;
@@ -6533,17 +9084,37 @@ window.addEventListener("keyup", keyupHandler, false);
     t.x=okx+okw/4;
     t.y=oky+okh/4;
     Loadmap.addChild(t); 
+      if(ok2 !==-1){
+      var shape = new createjs.Shape();
+      shape.graphics.beginFill("#ff3838");
+      shape.graphics.drawRect(ok2x, ok2y, ok2w, ok2h);
+      Loadmap.addChild(shape);
+      shape.addEventListener("click", {card:no,handleEvent:DialogueResult});
+      var t=new createjs.Text(ok2,"bold 24px 'メイリオ'","white");
+      t.x=ok2x+ok2w/4;
+      t.y=ok2y+ok2h/4;
+      Loadmap.addChild(t);
+      }
     }
     createjs.Tween.get(Loadmap)
     .to({x:0},150);
     function DialogueResult(e){
       se7.play();
       switch(this.card){
+        case 0:
+          //game over for debug/henir
+          Gameover();
+          break;
         case 1:
           //game over
           Gameover(1);
           break;
         case 2:
+          if(playMode[1]==1 && playMode[0]!==3){
+            cleared[1][playMode[0]+2]+=1;              
+            }else{
+          cleared[1][playMode[0]-1]+=1;
+            }
           Gamestart();
           break;
         case 3:
@@ -6575,6 +9146,9 @@ window.addEventListener("keyup", keyupHandler, false);
         case 5:
           //ローカルストレージのデータを削除
           saveDel();
+          break;
+        case 6:
+          Gameend();
           break;
         default:
           //no
@@ -6682,11 +9256,58 @@ window.addEventListener("keyup", keyupHandler, false);
         Dialogue("ヘニルの時空","特定のアイテムを使いポータルを活性化すると&ヘニルの時空へ飛び込むことができます。",-1,-1,"OK");
         cLock=true;
         return false;
+      case "assem":
+        Loadmap.removeAllChildren();
+        Dialogue("錬金術が解放されました","手に入れた素材を加工したり、錬成して、&新しいアイテムを生み出しましょう。",-1,-1,"OK");
+        var Opicon3 = new createjs.Bitmap("soL_opicon3.png");
+        Opicon3.x=610;
+        Opicon3.y=540;
+        Titleyard.addChild(Opicon3);
+        if(UserLibrary.indexOf(1)!==-1){
+          Opicon3.addEventListener("click", {handleEvent:AsmConfig});
+        }
+        cLock=true;
+        return false;
+      case "recip":
+        Loadmap.removeAllChildren();
+        Dialogue("レシピからの錬成が解放されました","素材とクリソナを使い、レシピに沿って錬成が行えます。&レシピはソリティアをプレイすると&思い出すことがあります。",-1,-1,"OK");
+        var Opicon3 = new createjs.Bitmap("soL_opicon3.png");
+        Opicon3.x=610;
+        Opicon3.y=540;
+        Titleyard.addChild(Opicon3);
+        cLock=true;
+        return false;
+      case "recip2":
+        Loadmap.removeAllChildren();
+        Dialogue("選んで錬成が解放されました","素材と自由に選んで錬成が行えます。&素材の種類と数が一致していれば、&新たなレシピを生み出せるでしょう。",-1,-1,"OK");
+        var Opicon3 = new createjs.Bitmap("soL_opicon3.png");
+        Opicon3.x=610;
+        Opicon3.y=540;
+        Titleyard.addChild(Opicon3);
+        cLock=true;
+        return false;
       case "end":
         Loadmap.removeAllChildren();
         opLock=0;
         cLock=true;
         return false;
+      case "book":
+        word="　";
+        detail="　";
+        var shape = new createjs.Shape();
+          shape.graphics.beginStroke("white");
+          shape.graphics.setStrokeStyle(2);
+          shape.graphics.drawRect(290,90,245,245);
+          Loadmap.addChild(shape);
+        var T=new createjs.Bitmap("Card_images/soL_elbook.png");
+          T.x=300;
+          T.y=100;
+          T.alpha=0;
+          T.scale=2;
+          createjs.Tween.get(T)
+          .to({alpha:1},300);
+          Loadmap.addChild(T);
+        break;
       case "bg5":
         if(detail=="start"){
           word="　";
@@ -6717,6 +9338,12 @@ window.addEventListener("keyup", keyupHandler, false);
       case "collection":
         Loadmap.removeAllChildren();
         Dialogue("採取","ヘニルの時空のエリアでは、&採取をして素材を集めることができます。",-1,-1,"OK");
+        Henirmap(0,1)
+        cLock=true;
+        return false;
+      case "collect_nonev":
+        Loadmap.removeAllChildren();
+        Henirmap(playMode[1],1)
         cLock=true;
         return false;
     }
@@ -6862,6 +9489,55 @@ window.addEventListener("keyup", keyupHandler, false);
         window.requestAnimationFrame((ts)=>MsgSplit(ts,tflame,A,B,delay));
     }
   };
+function ToGameretry(){
+  //gameover画面からのリトライは挑戦回数を-1しておく
+  clearBG.removeAllChildren();
+  field.removeAllChildren();
+  if(playMode[1]==1 && playMode[0]!==3){
+    cleared[1][playMode[0]+2]-=1;              
+    }else{
+  cleared[1][playMode[0]-1]-=1;
+    }
+  gamestate=0;
+  retryswitch+=1;
+  yakumap.removeChild(yakumap_rule);
+  switch(playMode[0]){
+    case 1:
+    //クロンダイク
+    yakumap_rule = new createjs.Bitmap("soL_rule1.png");
+    yakumap_rule.alpha=0;
+    yakumap_rule.x=800;
+    yakumap_rule.y=70;
+    yakumap.addChild(yakumap_rule);
+      break;
+    case 2:
+      //スパイダー
+    yakumap_rule = new createjs.Bitmap("soL_rule2.png");
+    yakumap_rule.alpha=0;
+    yakumap_rule.x=800;
+    yakumap_rule.y=70;
+    yakumap.addChild(yakumap_rule);
+      break;
+    case 3:
+    //エルドリッチ
+    yakumap_rule = new createjs.Bitmap("soL_rule3.png");
+    yakumap_rule.alpha=0;
+    yakumap_rule.x=800;
+    yakumap_rule.y=70;
+    yakumap_rule.addEventListener("click", {point:0,handleEvent:rulepage});
+    yakumap.addChild(yakumap_rule);
+      break;
+    case 4:
+      //ヘニル
+    yakumap_rule = new createjs.Bitmap("soL_rule4.png");
+    yakumap_rule.alpha=0;
+    yakumap_rule.x=800;
+    yakumap_rule.y=70;
+    yakumap.addChild(yakumap_rule);
+    break;
+  }
+  Gameretry();
+}
 function Gameend(){
   //go to title;
   //gamestate=10;
@@ -6874,7 +9550,7 @@ function Gameend(){
   menu(1);
 }
 function Gamestart(){
-  if(equipeditem==7){playMode[1]=1}else{playMode[1]=0};
+  if(playMode[0]!==4){if(equipeditem==7){playMode[1]=1}else{playMode[1]=0}};
     gamestate=0;
     retryswitch=0;
     cLock=false;
@@ -6931,29 +9607,6 @@ function Gamestart(){
         break;
       case 3:
       //エルドリッチ
-      function rulepage(){
-        if(opLock==1){
-        switch(this.point){
-          case 0:
-            se11.play()
-            yakumap.removeChild(yakumap_rule);
-            yakumap_rule = new createjs.Bitmap("soL_rule3_2.png");
-            yakumap_rule.x=60;
-            yakumap_rule.y=70;
-            yakumap_rule.addEventListener("click", {point:1,handleEvent:rulepage});
-            yakumap.addChild(yakumap_rule);
-            break;
-          case 1:
-            se11.play()
-            yakumap.removeChild(yakumap_rule);
-            yakumap_rule = new createjs.Bitmap("soL_rule3.png");
-            yakumap_rule.x=60;
-            yakumap_rule.y=70;
-            yakumap_rule.addEventListener("click", {point:0,handleEvent:rulepage});
-            yakumap.addChild(yakumap_rule);
-            break;
-        }}
-      };
       yakumap_rule = new createjs.Bitmap("soL_rule3.png");
       yakumap_rule.alpha=0;
       yakumap_rule.x=800;
@@ -6979,11 +9632,7 @@ function Gamestart(){
       yakumap_rule.y=70;
       yakumap.addChild(yakumap_rule);
       Backyard.removeAllChildren();
-      switch(playMode[1]){
-        default:
-          BG = new createjs.Bitmap("soL_bg1.png");
-      break;
-      }
+      BG = new createjs.Bitmap(SoLbg_src[playMode[1]]);
       BG.alpha=0.7;
       Backyard.addChild(BG);
       Backyard.alpha=1;
@@ -7001,6 +9650,7 @@ function Gamestart(){
   };
 function Gameretry(t=0){
   cLock=false;
+  opLock=-1;
   field.removeAllChildren();
   undocount=0;
   score=0;
@@ -7120,6 +9770,7 @@ function Gameretry(t=0){
       cards.splice(0, 13),
     ]
     //なるべく初手ゲームオーバーをなくすために最前,2列目に現れるモンスターは4体以下にしておく
+    //ダメなときはダメですが
     var T=0;
     for(var i=0;i<4;i++){
       if(Efuda(hands[i][hands[i].length-1])){
@@ -7163,7 +9814,6 @@ function Gameretry(t=0){
       Card_src=Card_src_H.concat();
       duelLog=[];
       Cardlists=[[],[],[],[],[],[]]
-      //handsLog=cards.concat();
       hands = [
         cards.splice(0, 4),
         cards.splice(0, 4),
@@ -7173,8 +9823,18 @@ function Gameretry(t=0){
         cards.splice(0, 4),
       ]
       decks = cards.concat();
+      //エリアごとにモンスター数は変更予定
+      for(var i=0;i<3;i++){
+        var M=1+Math.floor(Math.random()*(decks.length-2));
+        decks.splice(M,1,-100);
+      }
+      if(playMode[1]==0 && henirarea[0].cleared==1){
+        //チュートリアル
+        hands=[[],[1],[10,8],[9],[],[]];
+        decks=[7];
+      }
       Extras=[0,0,0,0];//0->連鎖数 1->0:カッター1:ドリル 2->獲得素材id 3->個数
-      Exlists=[[],[],[],[],[],[]];//0->extras[1]テキスト 1->extras[2] 2->extras[3] 3->getitem 4->メッセージ格納
+      Exlists=[[],[],[],[],[],[]];//0->extras[1]テキスト 1->extras[2] 2->extras[3] 3->getitem 4->メッセージ格納 5->chara画像
     for(var i=0;i<hands.length;i++){
       for(var j=0;j<hands[i].length;j++){
       var newCard = new createjs.Bitmap(Card_src[hands[i][j]]);
@@ -7191,6 +9851,29 @@ function Gameretry(t=0){
   }
   printView();
   console.log('デュエル開始')  
+};
+function rulepage(){
+  if(opLock==1){
+  switch(this.point){
+    case 0:
+      se11.play()
+      yakumap.removeChild(yakumap_rule);
+      yakumap_rule = new createjs.Bitmap("soL_rule3_2.png");
+      yakumap_rule.x=60;
+      yakumap_rule.y=70;
+      yakumap_rule.addEventListener("click", {point:1,handleEvent:rulepage});
+      yakumap.addChild(yakumap_rule);
+      break;
+    case 1:
+      se11.play()
+      yakumap.removeChild(yakumap_rule);
+      yakumap_rule = new createjs.Bitmap("soL_rule3.png");
+      yakumap_rule.x=60;
+      yakumap_rule.y=70;
+      yakumap_rule.addEventListener("click", {point:0,handleEvent:rulepage});
+      yakumap.addChild(yakumap_rule);
+      break;
+  }}
 };
   function printView(){
     //シャッフルして描画するまで
@@ -7246,6 +9929,9 @@ function Gameretry(t=0){
         field.addChild(newCard);
         DeckReset();
         FirstAnimation();
+        if(cleared[1][0]==0){
+          Dialogue("クロンダイク","カードを交互に重ねて、右上のゾーンに&A-Kまでまとめていくルールです。&？ボタンからルールを確認できます。",-1,-1,"OK",350,330,80,40);
+          }
         break;
         case 2:
           if(musicnum!==4){
@@ -7275,6 +9961,9 @@ function Gameretry(t=0){
           }
           if(melonList[0]!==0){se10.play();};
           FirstAnimation();
+          if(cleared[1][1]==0){
+            Dialogue("マグマンタ","5組のトランプを使って、&A-Kまで順番に揃えていくルールです。&？ボタンからルールを確認できます。",-1,-1,"OK",350,330,80,40);
+            }
           break;  
         case 3:
         if(musicnum!==2){
@@ -7337,15 +10026,40 @@ function Gameretry(t=0){
         }
         drawbuttom(580,450,"Monster "+E+"/4",1,120,40);
         drawbuttom(580,500,"討伐数 "+decks.length+"/16",1,120,40);
+        if(cleared[1][2]==0){
+          Dialogue("エリアノド防衛戦","カードを2枚ずつ使って、&モンスターを倒していきます。&？ボタンからルールを確認できます。",-1,-1,"OK",350,330,80,40);
+          }
         break;
         case 4:
-          if(musicnum!==7){
-            Bgm.stop();
-            musicnum=7;
-            if(mute=="ON"){
-            Bgm=new Music(bgm7data);
-            Bgm.playMusic();
-            }}
+          switch(playMode[1]){
+            case 1:
+              if(musicnum!==9){
+                Bgm.stop();
+                musicnum=9;
+                if(mute=="ON"){
+                Bgm=new Music(bgm9data);
+                Bgm.playMusic();
+                }}
+              break;
+              case 2:
+                if(musicnum!==10){
+                  Bgm.stop();
+                  musicnum=10;
+                  if(mute=="ON"){
+                  Bgm=new Music(bgm10data);
+                  Bgm.playMusic();
+                  }}
+                break;
+            default:
+              if(musicnum!==7){
+                Bgm.stop();
+                musicnum=7;
+                if(mute=="ON"){
+                Bgm=new Music(bgm7data);
+                Bgm.playMusic();
+                }}
+              break;
+          }
           cx.strokeStyle="white";
           for(var i=0;i<6;i++){
             createRoundRect(119+90*i,5,80,128,5,cx);
@@ -7388,14 +10102,16 @@ function Gameretry(t=0){
           DL.x=-30;
           DL.y=150;
           field.addChild(DL);
-          var DL= new createjs.Bitmap("window_ds.png");
-          DL.scale=0.6;
-          DL.x=5;
-          DL.y=130;
-          field.addChild(DL);
+          Exlists[5]=DL;
+          var shape = new createjs.Shape();
+          shape.graphics
+          .beginLinearGradientFill(["white","black"],[0.0,1.0],0,0,0,600)
+          .drawRect(5, 460, 660, 110);
+          shape.alpha=0.6;
+          field.addChild(shape);
           for( var i=0;i<3; i++ ){
           var t=new createjs.Text("　","bold 26px 'メイリオ'","white");
-          t.x=15;
+          t.x=180;
           t.y=470+i*32;
           field.addChild(t);
           Exlists[4].push(t);
@@ -7404,9 +10120,13 @@ function Gameretry(t=0){
           Opicon2.x=670;
           Opicon2.y=540;
           field.addChild(Opicon2);
+          Opicon2.addEventListener("click", {handleEvent:InvConfig_Item});
           //deck
           DeckReset_H();
           FirstAnimation();
+          if(playMode[1]==0 && henirarea[0].cleared==1){
+          Dialogue("採取","採取はトランプを使って行います。&場の札±1のカードを獲得することができます。&Aは11としても扱うことができます。",-1,-1,"OK",350,330,80,40);
+          }
           break;  
       }
   };
@@ -7433,9 +10153,19 @@ function Gameretry(t=0){
         break;
       case 4:
         var T = Cardlists[i][j];
+      if(T){
       createjs.Tween.get(T)
       .to({x:95+i*(cardWidth+cardgapX),y:5+j*cardgapY,alpha:1},80)
       .call(nextcard);
+      }else{
+        i+=1;
+        if(i>5){
+          i=0;
+          j+=1;
+        }
+        if(j<=3){
+        FirstAnimation(i,j);
+      }}
         break;
     }
     function nextcard(){
@@ -7447,6 +10177,7 @@ function Gameretry(t=0){
             j+=1;
             if(j>6){
               cLock=true;
+              opLock=0;
               duelLog.push("start");
               if(playMode[1]==1){CardTurn(-1);}
               return false;
@@ -7467,6 +10198,7 @@ function Gameretry(t=0){
           }
           if(j>3 && i>2){
               cLock=true;
+              opLock=0;
               duelLog.push("start");
               CardTurn(-1);
               return false;
@@ -7504,6 +10236,7 @@ function Gameretry(t=0){
             j+=1;
             if(j>3){
               cLock=true;
+              opLock=0;
               duelLog.push("start");
               return false;
             };
@@ -7778,7 +10511,7 @@ function Gameretry(t=0){
         field.removeChild(T);
         field.removeChild(newCard);
         melonList[1]=1;
-        PopAnm("メロンはポールに盗まれてしまった！",800,300,35,30,95);
+        PopAnm("メロンはポールに盗まれてしまった！",900,300,35,30,95);
       };
   }
   function disp(when=0){
@@ -7801,6 +10534,44 @@ function shuffle(){
   cards[r] = temp
 }};
 function compareFunc(a,b){return a-b;}
+function vmatNumCompare(arr1,arr2,vmat1,vmat2){
+  //投入された素材の合計数でヒントを与える 1は少なすぎ 2は多すぎ 3は割合が異なる
+  //素材・数がどちらも一致していれば-1を返す
+  var result;
+  //要素の一致
+  if (arr1.length !== arr2.length) {
+    return -2;
+}
+const sortedArr1 = arr1.slice().sort();
+const sortedArr2 = arr2.slice().sort();
+for (var i = 0; i < sortedArr1.length; i++) {
+    if (sortedArr1[i] !== sortedArr2[i]) {
+        return false;
+    }
+}
+result=3;
+var Total_1=0;
+var Total_2=0;
+for(var i=0;i<vmat1.length;i++){
+  Total_1+=vmat1[i];
+}
+for(var i=0;i<vmat2.length;i++){
+  Total_2+=vmat2[i];
+}
+if(Total_1>Total_2){
+  result=1;
+}
+if(Total_1<Total_2){
+  result=2;
+}
+  //数の一致
+for(var i=0;i<arr1.length;i++){
+  var A=arr2.indexOf(arr1[i]);
+  if(A==-1){return result};
+  if(vmat1[i]!==vmat2[A]){return result}
+}
+return -1;
+}
     function drawbuttom(x,y,word,type=0,w=80,z=40,R=1){
       //type->活性化時 Rを大きくすると文字の大きさを小さくします
       cx2.lineWidth = 2;
@@ -7943,6 +10714,16 @@ function compareFunc(a,b){return a-b;}
         Cstar.scale=0.7
         clearBG.addChild(Cstar);
         totalcardmove+=duelLog.length-1;
+        if(henirarea[0].cleared>2 && playMode[0]!==4){
+        var E=duelLog.length%assembleA.length;
+        for(var i=E;i<E+5;i++){
+          if(i>assembleA.length){i-=assembleA.length};
+          if(AssemCompare(assembleA[i],-1) && userRecipe.indexOf(assembleA[i])==-1){
+            userRecipe.push(-assembleA[i]);
+            //console.log(i,assembleA[i])
+            break;
+          }}
+        };
         var Rank="F";
         disp();
         switch(A){
@@ -8030,6 +10811,20 @@ function compareFunc(a,b){return a-b;}
               t.y=175;
               clearBG.addChild(t);
               break;
+              case 4:
+                createjs.Tween.get(Exlists[5])
+                .to({x:-200,alpha:0},300)
+                .call(ex5);
+                function ex5(){
+                field.removeChild(Exlists[5])
+                }
+                var t=new createjs.Text("Get item","24px メイリオ","white");
+                t.x=600;
+                t.y=100;
+                clearBG.addChild(t);
+                InvConfig(0);
+                return true;
+                break;  
             }
             var t=new createjs.Text("time","22px メイリオ","white");
             t.x=600;
@@ -8288,6 +11083,12 @@ function compareFunc(a,b){return a-b;}
               clearBG.addChild(t);
               break;
             case 4:
+              createjs.Tween.get(Exlists[5])
+              .to({x:-200,alpha:0},300)
+              .call(ex5);
+              function ex5(){
+              field.removeChild(Exlists[5])
+              }
               var t=new createjs.Text("Get item","24px メイリオ","white");
               t.x=600;
               t.y=100;
@@ -8302,6 +11103,7 @@ function compareFunc(a,b){return a-b;}
                   t.y=130+i*23;
                   clearBG.addChild(t);
                   UserItem[A]+=B.length;
+                  if(UserItem[A]>itemMax[itemMax[0]]){UserItem[A]=itemMax[itemMax[0]]};
                   if(UserLibrary[A]==0){UserLibrary[A]=1};
               }
               var M=0;
@@ -8320,6 +11122,7 @@ function compareFunc(a,b){return a-b;}
               t.y=380;
               clearBG.addChild(t);
               UserItem[A]+=1;
+              if(UserItem[A]>itemMax[itemMax[0]]){UserItem[A]=itemMax[itemMax[0]]};
               if(UserLibrary[A]==0){UserLibrary[A]=1};
               }
               InvConfig(0);
@@ -8367,11 +11170,16 @@ function compareFunc(a,b){return a-b;}
             break;
         }
       function nextgame(){
+        if(playMode[0]!==4){
+        retry_bt3.x=600;
+        retry_bt3.y=420;
+        clearBG.addChild(retry_bt3);
         retry_bt.x=600;
-        retry_bt.y=420;
+        retry_bt.y=470;
         clearBG.addChild(retry_bt);
+        }
         retry_bt2.x=600;
-        retry_bt2.y=480;
+        retry_bt2.y=520;
         clearBG.addChild(retry_bt2);
       cLock=true;
       }
@@ -8380,11 +11188,10 @@ function compareFunc(a,b){return a-b;}
       //狭間との会話
       if(opLock!==0 && opLock!==11){return false};
       if(equipeditem==8){
-    var R=9+Math.floor(Math.random()*6);
+    var R=9+Math.floor(Math.random()*10);
       }else{
     var R=Math.floor(Math.random()*9);
       }
-    //Message(word,detail="　",chr=0,chrop=0,textspeed=3,first=0)
     switch(R){
       case 0:
         MsgAry.push(["　","――時折、空間に隙間が現れて、外の世界が見える。",-1,0,3,1])
@@ -8418,7 +11225,9 @@ function compareFunc(a,b){return a-b;}
         MsgAry.push(["　","あまりに有名なので、&クロンダイクのことをソリティアだと思っている人も&いるくらいだ。",-1]);
         MsgAry.push(["狭間","クロンダイクという名前は、遠い昔に金が発見されて、&ゴールドラッシュが巻き起こった地に由来しているんだって。",1]);
         MsgAry.push(["リティア","へぇー、カードという山を掘り進めていく動きを&ゴールドラッシュに見立ててるってわけ？"]);
-        MsgAry.push(["リティア","これ、カードを色が交互になるように&重ねないといけないのが、じれったいのよねー。"]);
+        MsgAry.push(["狭間","面白い考察だね。",1]);
+        MsgAry.push(["リティア","カードを色が交互になるように&重ねないといけないのが、じれったいのよねー。"]);
+        MsgAry.push(["狭間","山札のカードの移動は、慎重にした方がいいよ。",1]);
         MsgAry.push(["リティア","まぁ、どーせ時間はたっぷりあるんだし？&あたしの独り言でも聴きながら？　見てなさいよ。"]);
         MsgAry.push(["狭間","はいはい。",1]);
         MsgAry.push(["end"]);
@@ -8428,7 +11237,7 @@ function compareFunc(a,b){return a-b;}
         MsgAry.push(["　","――マグマンタは、5組のトランプを使ったソリティアだ。",-1,0,3,1])
         MsgAry.push(["狭間","マグマンタという名前は、&エリオスにいる巨大グモの魔物が由来だよ。",1]);
         MsgAry.push(["リティア","8列使うから、列の数がちょうどクモの足の数と同じなのね。"]);
-        MsgAry.push(["リティア","でもさ、流石にクモはなくない？&もっと可愛い名前なかったの？"]);
+        MsgAry.push(["リティア","でもさ、流石にクモはなくない？&もっと可愛い名前なかったの？&ベベとか、モーリーとか。"]);
         MsgAry.push(["狭間","ぼくに言われても……。&ただ、一つだけ捕捉しておくと……。",1]);
         MsgAry.push(["狭間","残念ながらマグマンタの足の数は6本らしい。",1]);
         MsgAry.push(["リティア","どっちでもいいよ！"]);
@@ -8440,8 +11249,11 @@ function compareFunc(a,b){return a-b;}
         MsgAry.push(["リティア","あたしが学会の依頼を受けたの、&エリアノドが復活してすぐのことだし……。&結構最近生まれたルールなんじゃないの？"]);
         MsgAry.push(["狭間","ソリティアも歴史が長いし、&似たようなゲームがもっと前から存在していても&おかしくないけどね。",1]);
         MsgAry.push(["リティア","知らない魔物の絵もあるけど……、&各スートのモンスターになにか共通点はあるの？"]);
-        MsgAry.push(["狭間","さあ……ぼくには分からないよ。",1]);
+        MsgAry.push(["狭間","さあ……ぼくには分からないな……。",1]);
         MsgAry.push(["リティア","じゃあ、これ作った人もそこまで考えてないってことね！"]);
+        MsgAry.push(["狭間","そう決めつけるのはまだ早いよ。",1]);
+        MsgAry.push(["狭間","一見繋がりのなさそうなものに共通点を&見出すのが、探求者のあるべき姿じゃないの？",1]);
+        MsgAry.push(["リティア","人はそれを屁理屈と呼ぶのよ。"]);
         MsgAry.push(["end"]);
         MsgNext(-1);
         break;
@@ -8561,6 +11373,7 @@ function compareFunc(a,b){return a-b;}
         MsgAry.push(["狭間","自分の杖を好き勝手に弄るのと、&望まない改造で腕を機械に変えられるのは&訳が違うと思う……。",1])
         MsgAry.push(["リティア","えー。&でもさ、腕がナソードだったら、採掘も楽ちんだし。&本人も便利だと思ってるよ。きっと。"]);
         MsgAry.push(["狭間","念のため言っておくけど、&人類がみんな遺跡の探索や遺物のために&生きてるわけじゃないからね。",1])
+        MsgAry.push(["リティア","もう、冗談に決まってるじゃん。"]);
         MsgAry.push(["end"]);
         MsgNext(-1);
         break;
@@ -8578,12 +11391,61 @@ function compareFunc(a,b){return a-b;}
         MsgAry.push(["end"]);
         MsgNext(-1);
         break;
+      case 15:
+        MsgAry.push(["狭間","ラシェはハーメルの王家「セイカー家」の王子だよ。&魔族に堕落した父親を捜すために、&エル捜索隊と同行することになったみたいだ。",1,0,3,1]);
+        MsgAry.push(["リティア","王子様ね……。&ん……王子？　ちょっと待って。"])
+        MsgAry.push(["リティア","……男の子だったのか。"])
+        MsgAry.push(["狭間","そこなんだ。",1]);
+        MsgAry.push(["リティア","まあまあ。それはそれとして。&あたしとしては、この青い宝石が気になるのよね。"])
+        MsgAry.push(["狭間","セイカー家に伝わる「守護石」だね。&ラシェの鎧や武器は、ラシェの意志に反応して&守護石が姿を変えたものだという。",1])
+        MsgAry.push(["リティア","お～。守護石、かなり興味深いね。&お借りしていろいろ調べてみたいなぁ～！"])
+        MsgAry.push(["狭間","粉々になって帰ってきそうな予感がする……。",1])
+        MsgAry.push(["リティア","ま、ま、ま、まっさか～！"])
+        MsgAry.push(["end"]);
+        MsgNext(-1);
+        break;
+      case 16:
+        MsgAry.push(["リティア","白いキツネがいる。",0,0,3,1]);
+        MsgAry.push(["狭間","アラ・ハーンは、フルオネ出身の槍使い。&その身に九尾の狐、ハクを宿しているよ。",1])
+        MsgAry.push(["リティア","はぁん、人柱力ってこと？"])
+        MsgAry.push(["狭間","一向に加わった経緯はラシェと似ているけど、&魔族に堕ちてしまった兄を取り戻すために&旅に同行しているよ。",1]);
+        MsgAry.push(["リティア","失った家族を探して……か。&あたしも……ジョイに会いたいな……。"])
+        MsgAry.push(["狭間","ちなみに、覚醒すると九尾の力が解放されて&髪が白くなったり、尻尾が生えたりして、&冒頭の写真みたいな姿になるよ。",1]);
+        MsgAry.push(["リティア","ねー！　尻尾がもふもふだよ！　&もふもふ！　もふもふ！"])
+        MsgAry.push(["狭間","……。",1]);
+        MsgAry.push(["end"]);
+        MsgNext(-1);
+        break;
+      case 17:
+        MsgAry.push(["リティア","うわぁ。&目つきの悪い人がいるよ。",0,0,3,1]);
+        MsgAry.push(["狭間","エドワード……エドは、200年前から&タイムスリップしてきたナソード・ルーラー。&当初はイヴのコアを狙ってエル捜索隊を追っていたよ。",1])
+        MsgAry.push(["リティア","ストーカーじゃん。"])
+        MsgAry.push(["狭間","ぶっきらぼうな言動が目立つけど、&根は優しい少年だよ。",1]);
+        MsgAry.push(["リティア","育ちは良さそうだよね。&家族は？　家族も一緒にタイムスリップしちゃったの？"])
+        MsgAry.push(["狭間","それが、家族や過去の経歴は、&この本には一切載っていないんだ。",1]);
+        MsgAry.push(["リティア","え？"])
+        MsgAry.push(["狭間","知られたくない過去もあるのか……&あるいは、物語の根幹に関わる重大な何かが含まれていて&検閲が入ったのかも。",1]);
+        MsgAry.push(["end"]);
+        MsgNext(-1);
+        break;
+      case 18:
+        MsgAry.push(["リティア","お、魔族がいるよ。",0,0,3,1]);
+        MsgAry.push(["狭間","ルーこと、ルシエラ・R・サワークリームは、&魔界を支配する四大魔族の一人だった魔族だ。",1])
+        MsgAry.push(["リティア","……だった？"])
+        MsgAry.push(["狭間","部下に裏切られて、長い間封印されてしまっていたんだ。&封印が弱まってきた頃になんとかエリオスに逃げて、&シエルとの出会いが始まったよ。",1]);
+        MsgAry.push(["リティア","もしかしたら、フェリックスのことも知ってるかなぁ？"])
+        MsgAry.push(["狭間","どうだろう。&フェリックスって、ジョイが勝手につけた名前じゃなかった？",1]);
+        MsgAry.push(["リティア","あー、よく考えればそうだったよ。&けど、会えたら聞いてみたいな。"])
+        MsgAry.push(["end"]);
+        MsgNext(-1);
+        break;
     }
     }
-    function PathTalk(){
+    function PathTalk(henir=0){
       //event
       //125,300,525,800,1125,1500
       if(opLock!==0 && opLock!==11){return false};
+      if(henir==0){
       if(InvID(0)==1 && totalcardmove>=300){
         MsgAry.push(["狭間","カード裁きが手慣れてきたね。",1,0,3,1])
         MsgAry.push(["リティア","ふっ/ふっ/ふっ。&リティア様は物覚えも早いんだから。"])
@@ -8600,7 +11462,7 @@ function compareFunc(a,b){return a-b;}
         MsgAry.push(["狭間","……。",1,0,3,1])
         MsgAry.push(["リティア","ふー。ちょっと休憩しよ……。",0,-1])
         MsgAry.push(["狭間","……。",1,-2]);
-        MsgAry.push(["狭間","すみません。&少し、いいかな。",1,-2]);
+        MsgAry.push(["狭間","あの。&少し、いいかな。",1,-2]);
         MsgAry.push(["狭間","そう、そこでリティアと一緒にソリティアをしてる&キミに向かって話しかけている。",1,-2]);
         MsgAry.push(["狭間","お願いがあるんだ。&どうか、協力してほしい。",1,-2]);
         MsgAry.push(["狭間","リティアを外に、エリオスに出してあげたい。",1,-2]);
@@ -8637,6 +11499,12 @@ function compareFunc(a,b){return a-b;}
       }
       if(InvID(0)==5){
         //menu
+        musicnum=1;
+        Bgm.stop();
+        if(mute=="ON"){
+        Bgm=new Music(bgm1data);
+        Bgm.playMusic();
+        }
       MsgAry.push(["　","――パスワードを入力すると、&自然と扉が開き、光が差し込んできた。",-1,0,3,1])
       MsgAry.push(["狭間","やった……やってくれたんだね……！",1]);
       MsgAry.push(["リティア","むにゃ……。"]);
@@ -8660,16 +11528,58 @@ function compareFunc(a,b){return a-b;}
         MsgAry.push(["リティア","扉の向こうへは出られたんだけど、&「抵抗力を上げるアイテム」がないと、&先に進めないみたいでさ。"]);
         MsgAry.push(["狭間","抵抗力を上げるアイテムか……。",1]);
         MsgAry.push(["リティア","昔、あたしが体調を崩した時に、&ジョイが作ってくれたスイーツがあったよ。"]);
-        MsgAry.push(["狭間","それなら、何とかなるかもしれないよ。&この部屋は、リティアの小さい頃の記憶をもとに作りだされている。",1]);
-        MsgAry.push(["狭間","だから、この空間を探せば材料を見つけられるかもしれない。",1]);
+        MsgAry.push(["狭間","それなら、何とかなるかもしれないよ。&この部屋は、リティアの小さい頃の記憶をもとに&作りだされている。",1]);
+        MsgAry.push(["狭間","だから、この空間を探せば&材料を見つけられるかもしれない。",1]);
         MsgAry.push(["リティア","トマトとメロンに氷のクリソナを使った、&最高のデザート。きっとあれがあれば……。"]);
         MsgAry.push(["end"]);
         MsgNext(-1);
       }
-      if(henirarea[0].cleared==1){
-        //**
-        henirarea[0].cleared=2;
+      saveLocal();
+      return false;
+    }
+      if(henir==1){
+        if(henirarea[0].cleared==1){
+          MsgAry.push(["リティア","…/…/。",0,-2,3,1])
+          MsgAry.push(["リティア","ねぇ、おじさん！&いるんでしょ～！",0,-2]);
+          MsgAry.push(["リティア","あたしをここから出してくださーい！",0,-2]);
+          MsgAry.push(["男の声","ククク、先の話をもう忘れたのか？",2]);
+          MsgAry.push(["リティア","ほーら、やっぱりいるじゃん。",0,-2]);
+          MsgAry.push(["リティア","忘れてないですー。&このポータルの向こうまで行ったのに、&全然あたくしを出してくれないから言ってるんですー。",0,-2]);
+          MsgAry.push(["男の声","遠いと言ったろう。&エリアを一つ越えた程度で調子に乗らないことだ。",2]);
+          MsgAry.push(["男の声","いずれ、&そちらからもエリオスの風景が見える場所まで&辿り着けるだろう。",2]);
+          MsgAry.push(["リティア","ふーん。&まぁ、そんなことだろうとは思ってたよ。",0,-2]);
+          MsgAry.push(["リティア","けど、困ったな。&さっきの森のエリアから先に進むためには&また別のアイテムが必要になりそうなんだよね。",0,-2]);
+          MsgAry.push(["リティア","記憶の中に答えがある保証はないよね。&あの森で採集はできそうだけど、&扉を開くアイテムが手に入るかどうか……。",0,-2]);
+          MsgAry.push(["男の声","貴様も魔法使いなら、少しは素材を活かしたらどうだ？",2]);
+          MsgAry.push(["リティア","素材…/…/？&……そうだ！&集めた素材とクリソナを使えば錬金術ができる！",0,-2]);
+          MsgAry.push(["リティア","錬金術で扉を開くアイテムを錬成すればいいじゃん！",0,-2]);
+          MsgAry.push(["リティア","クリソナ原石を『加工』すれば&クリソナが手に入るから！",0,-2]);
+          MsgAry.push(["リティア","素材とクリソナを選んで&『錬成』してみよう！",0,-2]);
+          MsgAry.push(["リティア","錬金術にチュートリアルなんてない。&ぶっつけ本番！",0,-2]);
+          MsgAry.push(["リティア","頼みの綱は、あたしの今までの経験と知識！&頼むよ、あたし！",0,-2]);
+          MsgAry.push(["assem"]);
+          MsgNext(-1);
+          henirarea[0].cleared=2;
+        }
+      if(henirarea[0].cleared==3){
+        MsgAry.push(["リティア","うん、クリソナができた！",0,-2,3,1])
+        MsgAry.push(["リティア","クリソナは、適当な素材と一緒に錬金術に使うことで&新たな素材を生み出すことができる魔法石。",0,-2]);
+        MsgAry.push(["リティア","純度が低かったり、複雑な錬成だと&たまに失敗しちゃうこともあるけど……。&やらなきゃはじまらない。",0,-2]);
+        MsgAry.push(["リティア","とりあえず、いくつか知ってる錬成レシピを書き留めておこう。&そのうち思い出したら追記していけばいいし。",0,-2]);
+        MsgAry.push(["リティア","レシピからの錬成で、いろいろ試してみよ！",0,-2]);
+        MsgAry.push(["recip"]);
+        MsgNext(-1);
+        henirarea[0].cleared=4;
+      }
+      if(henirarea[1].cleared==1){
+        MsgAry.push(["リティア","素材が集まってきたな……。",0,-2,3,1])
+        MsgAry.push(["リティア","今度は、自分で素材を選んで&新しいレシピをつくってみようかな。",0,-2]);
+        MsgAry.push(["リティア","この方法でもクリソナは消費しちゃうから、&素材選びは慎重にしないとね。",0,-2]);
+        MsgAry.push(["recip2"]);
+        MsgNext(-1);
+        henirarea[1].cleared=2;
       }
       saveLocal();
-    }
-};
+      }
+    };
+};//end of main
