@@ -1316,7 +1316,7 @@ const bgm1data ={
     volume: 0.1,
   };
   const bgm4data ={
-    src: "PerituneMaterial_Soft_day2_loop.mp3",
+    src: "PerituneMaterial_Soft_Day2_loop.mp3",
     loopStart: 0,
     loopEnd: 98160,
     volume: 0.1,
