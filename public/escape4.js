@@ -1,7 +1,8 @@
-// 錬成　ラストバトル～エンディングへ
+// ラストバトル～エンディングへ
 // 加工・錬成後にセーブ
-// getitemが加算されない？
-// 余裕あったら→図鑑、錬成のヘルプ画面、レシピメモ、状態異常耐性
+// 状態異常、回避のSE
+// チュートリアルのOKボタンのサイズ
+// 余裕あったら→錬成のヘルプ画面、レシピメモ、状態異常耐性、バフ状況画面
 window.onload = function(){
 main();
 };
@@ -203,9 +204,13 @@ circle2.addEventListener("click", {card:2,handleEvent:Soundcircle});
 Car1.addEventListener("click", {card:0,handleEvent:GameReady});
 titleCardTurn(0);
 submitPass();
+Letterbox=[];
 if(InvID(0)>=4){
 Letterbox.push(["不明","no title","ありません","qr_src2"])
 };
+if(UserLibrary[62]>0){
+Letterbox.push(["提供","クリア記念品","ここまでのプレイ、&ありがとうございます！&脱出を記念して、装備すると&クロンダイク・マグマンタを&通常と少し異なるルールで&遊べるアイテムを贈呈します。","ピッケル"]);
+}
 function Soundcircle(){
   switch(this.card){
     case 3:
@@ -515,7 +520,7 @@ var itemA=[
   {name:"エルドラシルの葉",price:12,class:"植物資源",detail:"ハーブとしても親しまれる、エルドラシルの貴重な葉。&エルの樹の麓でたまに採れる。"},
   {name:"エルダーベリー",price:11,class:"植物資源",detail:"エルドラシルが青紫色の実をつけたもの。&食べるとHPが約7回復する。&エルの樹の麓で採れる。"},
   {name:"ウィリアムりんご",price:13,class:"植物資源",detail:"ポールが育てているりんご。&様々な霊薬を錬成する材料になる。&食べるとHPが約10回復する。エルの樹の麓の敵から手に入る。"},
-  {name:"もりもりニンジン",price:14,class:"植物資源",detail:"苦みが少なく生でも美味しく食べられるニンジン。&食べるとHPが約20回復する。&アルテラ平原で採れる。"},
+  {name:"もりもりニンジン",price:14,class:"植物資源",detail:"苦みが少なく生でも美味しいニンジン。&食べるとHPが約20回復する。&アルテラ平原で採れる。"},
   {name:"マンドラタマネギ",price:15,class:"植物資源",detail:"火を噴きそうになるほど辛いタマネギ。&食べると少し攻撃力が上昇する。&竜の道で採れる。"},
   {name:"スノークリスタル",price:23,class:"植物資源",detail:"断面が雪の結晶のように見える木の実。&たまに実が星形になる品種もあるらしい。&天上の岐路で手に入る。"},
   {name:"クロライトシード",price:24,class:"製造",detail:"しょっぱい味のする変わった種。&金属の製錬に使われる。"},
@@ -536,7 +541,7 @@ var itemA=[
   {name:"ロブスターの抜け殻",price:73,class:"その他資源",detail:"金色の輝きを放つという&幻のロブスターの抜け殻。&トロッシュの巣で採れる。"},
   {name:"黄金ロブスター",price:74,class:"その他資源",detail:"金色の輝きを放つ、&生きた幻のロブスター。&トロッシュの巣でたまに採れる。"},
   {name:"獣肉",price:69,class:"その他資源",detail:"動物からとれた獣肉。&このままでは食べられない。&エルの樹の麓などの敵から手に入る。"},
-  {name:"生肉",price:70,class:"その他資源",detail:"獣肉を加工したもの。野生の味。&HPを回復するがたまに中毒状態になってしまう。&獣肉を分解すると手に入る。"},
+  {name:"生肉",price:70,class:"その他資源",detail:"獣肉を加工した生肉。野生の味。&HPを回復するが中毒に危険。&獣肉を分解すると手に入る。"},
   {name:"獣の皮",price:71,class:"その他資源",detail:"動物の皮。なめして革にする。&獣肉を分解すると手に入る。"},
   {name:"質のよい革",price:116,class:"製造",detail:"本や防具の加工に適した上質な革。&　"},
   {name:"ベタベタしたエキス",price:77,class:"その他資源",detail:"動物からとれる、鼻を刺すような臭いがするエキス。&好んで集める人もいる。&竜の道の敵から手に入る。"},
@@ -579,14 +584,14 @@ var itemA=[
   {name:"石のりんご",price:92,class:"製造",detail:"食べるとたちまち気配が消えてしまうりんご。&探索開始前に使用すると、&次の採取中のエンカウント率が低下する。"},
   {name:"デニフの氷球",price:96,class:"製造",detail:"水のマスターの名を冠する霊薬。&飲むと基礎防御力を5上げる。"},
   {name:"ロッソの火炎輪",price:95,class:"製造",detail:"火のマスターの名を冠する霊薬。&飲むと基礎攻撃力を5上げる。"},
-  {name:"炎の水晶玉",price:98,class:"製造",detail:"炎の力が込められた水晶玉。&投げると破裂して辺りを火の海にする。&戦闘で使うと敵にを火傷状態にする。"},
+  {name:"炎の水晶玉",price:98,class:"製造",detail:"炎の力が込められた水晶玉。&投げると破裂して辺りを火の海にする。&戦闘で使うと敵を火傷状態にする。"},
   {name:"氷の水晶玉",price:99,class:"製造",detail:"氷の力が込められた水晶玉。&投げると破裂して強烈な冷気が発生する。&戦闘で使うと敵を凍結状態にする。"},
   {name:"自然の水晶玉",price:100,class:"製造",detail:"自然の力が込められた水晶玉。&投げると破裂して毒霧を散布する。&戦闘で使うと敵を中毒状態にする。"},
-  {name:"光の水晶玉",price:101,class:"製造",detail:"光の力が込められた水晶玉。&投げると持続的な回復エリアを作り出す。&戦闘で使うと、しばらくの間行動後にHPが少し回復する。"},
-  {name:"闇の水晶玉",price:102,class:"製造",detail:"闇の力が込められた水晶玉。&投げると持続的に力を奪う結界を作り出す。&戦闘で使うと、しばらくの間敵の攻撃力を下げる。"},
-  {name:"風の水晶玉",price:103,class:"製造",detail:"風の力が込められた水晶玉。&投げると弾けて辺り一帯に風塵をばら撒く。&戦闘で使うと、しばらくの間敵の防御力を下げる。"},
+  {name:"光の水晶玉",price:101,class:"製造",detail:"光の力が込められた水晶玉。&投げると持続的な回復エリアを作り出す。&戦闘で使うと、行動後にHPが少し回復する。"},
+  {name:"闇の水晶玉",price:102,class:"製造",detail:"闇の力が込められた水晶玉。&投げると持続的に力を奪う結界を作り出す。&戦闘で使うと、敵の攻撃力を下げる。"},
+  {name:"風の水晶玉",price:103,class:"製造",detail:"風の力が込められた水晶玉。&投げると弾けて辺り一帯に風塵をばら撒く。&戦闘で使うと、敵の防御力を下げる。"},
   {name:"木の槍",price:104,class:"製造",detail:"木でできた槍。&敵に小ダメージを与える。&たまに相手をひるませる効果がある。"},
-  {name:"光の槍",price:105,class:"製造",detail:"光のエルの力を宿した槍。敵に中ダメージを与え、たまにひるませる。&グリッター系に特攻ダメージを与える。"},
+  {name:"光の槍",price:105,class:"製造",detail:"光のエルの力を宿した槍。&敵に中ダメージを与え、たまにひるませる。&グリッター系に特攻ダメージを与える。"},
   {name:"シュティルレンツェ",price:106,class:"製造",detail:"神聖なエルの力を宿した沈黙の槍。&敵に中ダメージを与え、たまにひるませる。&シャドウ系に特攻ダメージを与える。"},
   {name:"チャージドボルト",price:107,class:"製造",detail:"強力に帯電したうに。&敵に中ダメージを与える。&水棲系に特攻ダメージを与える。"},
   {name:"イラスティックボム",price:108,class:"製造",detail:"投擲用の小型爆弾。&敵に中ダメージを与える。&ナソード系に特攻ダメージを与える。"},
@@ -594,9 +599,9 @@ var itemA=[
   {name:"浮遊石",price:120,class:"製造",detail:"魔法に反応して浮力を発生させる石。&飛行船の動力源にも使われる。"},
   {name:"ネンヤ竹炭",price:118,class:"製造",detail:"ファルマン竹を原料として作られる炭。&燃料だけでなく、消臭剤にもなる。"},
   {name:"デボラ縫合糸",price:115,class:"製造",detail:"ルーブ糸に動物性線維を練りこみ、&伸縮性に優れた糸。"},
-  {name:"スポア軟膏",price:129,class:"製造",detail:"アルテラシアの花からとれる成分を使った塗り薬。&HPが64回復する。"},
+  {name:"スポア軟膏",price:129,class:"製造",detail:"アルテラシアの花からとれる&成分を使った塗り薬。&HPが64回復する。"},
   {name:"闘魂ドリンク",price:154,class:"製造",detail:"短時間だが効力のある精力剤。&味はゲロマズ。&戦闘中に使うと攻撃力が大きく上昇する。"},
-  {name:"ナソードアーマー",price:155,class:"製造",detail:"スイッチを入れると&一時的にナソードアーマーシールドを展開するギア。&戦闘中に使うと防御力が上昇する。"},
+  {name:"ナソードアーマー",price:155,class:"製造",detail:"スイッチを入れると一時的に&シールドを展開するナソードギア。&戦闘中に使うと防御力が上昇する。"},
   {name:"ＱＰエルゼリー",price:156,class:"製造",detail:"栄養の詰まったペット用のゼリー。&戦闘で使用すると、&モンスターと仲良くなれるかもしれない。"},
   {name:"ガッツポトフ",price:146,class:"製造",detail:"色んな野菜が入った栄養満点のポトフ。&戦闘中に使うと食いしばり効果を付与する。"},
   {name:"ボルケーノトルテ",price:149,class:"製造",detail:"火炎草を生地に混ぜ込んだ&トルティーヤ。病みつきになる味。&爆発攻撃が出やすくなる。"},
@@ -618,9 +623,9 @@ var itemA=[
   {name:"塩焼き魚",price:145,class:"製造",detail:"リザードバスを塩焼きにしたもの。&HPが120回復する。"},
   {name:"甘辛スキュアー",price:151,class:"製造",detail:"ピリ辛の串料理。スタミナ抜群。&HPが85回復し、攻撃力も上昇する。"},
   {name:"竹の葉餃子",price:147,class:"製造",detail:"北部地域でよく食べられる、&穀物粉の生地に肉などを包んだ料理。&HPが130回復する。"},
-  {name:"特選タコスランチ",price:152,class:"製造",detail:"サラダとスキュアーをトルティーヤに包んだスペシャルタコス。&攻撃力が上昇し、HPが最大値を超えて300回復する。"},
+  {name:"特選タコスランチ",price:152,class:"製造",detail:"肉や野菜をトルティーヤに包んだ&タコスランチ。攻撃力が上昇し、&HPが最大値を超えて300回復する。"},
   {name:"黄金海鮮三昧",price:153,class:"製造",detail:"海の幸を贅沢に詰め込んだ海鮮料理。&戦闘中に使うとHPを全回復する。"},
-  {name:"共存の祝祭パイ",price:148,class:"製造",detail:"共存の祝祭の間食べられるアップルパイ。&HPが約70回復する。"},
+  {name:"共存の祝祭パイ",price:148,class:"製造",detail:"共存の祝祭の間食べられるアップルパイ。&HPが70回復する。"},
   {name:"魔法のスクロール",price:117,class:"製造",detail:"破るとランダムな位置にワープするスクロール。&　"},
   {name:"ベリル式精製炉",price:126,class:"製造",detail:"鉱石からクリソナ成分を効率よく取り出せる炉。&所持していると、クリソナ原石から&より高純度なクリソナが加工できるようになる。"},
   {name:"ベリル式錬成陣",price:127,class:"製造",detail:"リティアが発明した、&クリソナを介することなく宝石を生み出す魔法陣。&鉱石を直接ジェムストーンに加工できるようになる。"},
@@ -637,7 +642,7 @@ var itemA=[
   {name:"リティア電気石",price:121,class:"鉱物資源",detail:"熱すると電気を帯びる性質を持つ、&黄緑色の結晶。&　"},
   {name:"エルダーミルク",price:100,class:"製造",detail:"麦を原料につくった植物性のミルク。&つい腰に手を当てて飲んでしまう。&HPが40回復する。"},
   {name:"イワトレーモン木",price:26,class:"植物資源",detail:"高所でより硬く育ったトレーモンの木。&樹脂を含んでいる。&天上の岐路でたまに採れる。"},
-  {name:"マジックスリング",price:110,class:"製造",detail:"リティアお得意の、伸び縮みするスリング。&戦闘中に使うと、そのターンの攻撃を必ず回避する。"},
+  {name:"マジックスリング",price:110,class:"製造",detail:"リティアお得意の、伸び縮みするスリング。&使用ターン中、攻撃を必ず回避する。"},
   {name:"トゥラックランタン",price:119,class:"製造",detail:"竹炭を燃料に明かりをつくり出すランタン。&どんな闇も明るく照らしてくれそうだ。"},
   {name:"凝縮したマナ",price:86,class:"その他資源",detail:"マナが詰まった球体。&ディシオン採掘場などの敵から手に入る。"},
   {name:"コモドのしっぽ",price:84,class:"その他資源",detail:"渓谷地帯に生息するトカゲのしっぽ。&竜の道の敵が持っている。"},
@@ -709,7 +714,7 @@ var Skilllist=[
   {sp:0,name:"遠くを見ている",detail:"は&遠くを見ている・・・",power:-1,PP:0,hitrate:100},//14
   {sp:0,name:"突進攻撃",detail:"は&突進してきた！",power:45,PP:0,hitrate:80},
   {sp:0,name:"ブレイズウィング",detail:"の&ブレイズウィング！",power:65,PP:0,hitrate:90},
-  {sp:0,name:"つつく",detail:"の&つっつき攻撃だ！",power:40,PP:0,hitrate:90},
+  {sp:0,name:"つつく攻撃",detail:"の&つっつき攻撃だ！",power:40,PP:0,hitrate:90},
   {sp:0,name:"回転",detail:"は&くるくるまわってる・・・",power:-1,PP:0,hitrate:100},//18
   {sp:0,name:"エレクトロンブースター",detail:"の&エレクトロンブースター！",power:85,PP:0,hitrate:65},
   {sp:0,name:"ブレス",detail:"はブレスを吐いた！",power:45,PP:0,hitrate:80},
@@ -1121,6 +1126,11 @@ if(p!==0){
   se26.volume(0);
   se27.volume(0);
   se28.volume(0);
+  se29.volume(0);
+  se30.volume(0);
+  se31.volume(0);
+  se32.volume(0);
+  jingle.volume(0);
 }else{
   se1.volume(0.2*sBar);
   se2.volume(0.4*sBar);
@@ -1150,6 +1160,11 @@ if(p!==0){
   se26.volume(0.3*sBar);
   se27.volume(0.2*sBar);
   se28.volume(0.3*sBar);
+  se29.volume(0.3*sBar);
+  se30.volume(0.3*sBar);
+  se31.volume(0.3*sBar);
+  se32.volume(0.3*sBar);
+  jingle.volume(0.1*sBar);
   }
 }
 var se1 = new Howl({
@@ -1264,6 +1279,26 @@ var se28 = new Howl({
   src:"glissando2.mp3",
   volume: 0.3,
   });
+var se29 = new Howl({
+  src:"chain.mp3",
+  volume: 0.3,
+  });
+var se30 = new Howl({
+  src:"swing.mp3",
+  volume: 0.3,
+  });
+var se31 = new Howl({
+  src:"crush3.mp3",
+  volume: 0.3,
+  });
+var se32 = new Howl({
+  src:"tukkomi1.mp3",
+  volume: 0.3,
+  });
+var jingle = new Howl({
+  src:"INSOMNIA.mp3",
+  volume: 0.15,
+})
 const bgm1data ={
     src: "PerituneMaterial_EpicBattle_Deity_loop.mp3",
     loopStart: 0,
@@ -1308,9 +1343,9 @@ const bgm1data ={
   };
   const bgm8data ={
     src: "soL_milestone_inst.mp3",
-    loopStart: 22290,
+    loopStart: 22300,
     loopEnd: 148500,
-    volume: 0.6,
+    volume: 0.55,
   };
   const bgm9data ={
     src: "soL_elision.mp3",
@@ -1459,7 +1494,7 @@ function UpdateParticles(event){
   if(gamestate==0 && duelLog.length>1 && (playMode[0]==1 || (playMode[0]==2 && playMode[1]==0))){yakumap_undo.alpha=1;}else{yakumap_undo.alpha=0;}
   if(gamestate==0 && duelLog.length && playMode[0]!==4){yakumap_reset.alpha=1;}else{yakumap_reset.alpha=0;}
   if(gamestate==0 && duelLog.length && playMode[0]!==4){yakumap_solve.alpha=1}else{yakumap_solve.alpha=0};
-  if(gamestate==0 && duelLog.length && henirarea[0].cleared>1){yakumap_giveup.alpha=1}else{yakumap_giveup.alpha=0};
+  if(gamestate==0 && duelLog.length && playMode[0]!==4){yakumap_giveup.alpha=1}else if(gamestate==0 && duelLog.length && playMode[0]==4 && henirarea[0].cleared>1){yakumap_giveup.alpha=1}else{yakumap_giveup.alpha=0};
 }
 function MouseCircle(event){
   //クリックした場所を教える
@@ -1988,6 +2023,7 @@ function menu(state=0,area=0){
           break;
           default:
           //各地域へ入場
+        if(opLock!==12){
           opLock=0;
           field.removeAllChildren();
           playMode[1]=this.card-1;
@@ -2017,6 +2053,7 @@ function menu(state=0,area=0){
           field.mask = shapeMask3;
           Henirmap(playMode[1],henirarea[playMode[1]].cleared);
           };
+        }
           break;
       }
     }
@@ -2832,8 +2869,6 @@ function menu(state=0,area=0){
               shape.graphics.beginFill("rgba(20,20,20,0.5)");
               shape.graphics.drawRect(100, 40, 610, 450);
               field.addChild(shape);
-              //test
-              //Letterbox.push(["提供","クリア記念品","ここまでのプレイ、&ありがとうございます！&脱出を記念して、装備すると&クロンダイク・マグマンタを&通常と少し異なるルールで&遊べるアイテムを贈呈します。","ピッケル"]);
               if(Letterbox.length){
               for(var i=0;i<Letterbox.length;i++){
               var shape = new createjs.Shape();
@@ -2954,7 +2989,7 @@ function menu(state=0,area=0){
           shape.graphics.drawRect(580, 394, 64, 64);
           field.addChild(shape);
           shape.addEventListener("click", {card:-3,handleEvent:Letterdetail});
-          var T =new createjs.Bitmap(Item_src[7]);
+          var T =new createjs.Bitmap(Item_src[2]);
           T.x=580;
           T.y=394;
           T.scale=0.5;
@@ -3194,8 +3229,17 @@ function menu(state=0,area=0){
         if(achieve_SS[0]>0 && achieve_SS[1]>0 && achieve_SS[2]>0){
           AK("SS魂");
         }
+        if(henirarea[0].cleared>0){
+          AK("フォーヘニル");
+        }
+        if(UserLibrary[62]>0){
+          AK("ソリティア・ベリル");
+        }
         if(cleared[0][0]>0 && cleared[0][1]>0 && cleared[0][2]>0 && totalcardmove>=2400){
           IK("エル・コレクション・ブック");
+        }
+        if(InvID(7)==0 && UserLibrary[62]>0){
+          PopAnm("手紙が届いています",800,220,35,30,165);
         }
         if(achievetemp.length){
         for (var i=0;i<achievetemp.length;i++){
@@ -4585,7 +4629,7 @@ if(this.type==0){
   var t = new createjs.Text("製造："+U+"/"+T.length, "24px serif", "white");
   Ary.push(t);
   var U=UserLibrary.filter(value=>value>0);
-  var t = new createjs.Text("全体：0/"+(itemA.length-1)+" (0％)　", "26px serif", "white");
+  var t = new createjs.Text("全体："+U.length+"/"+(itemA.length-1)+" ("+(100*U.length/(itemA.length-1)).toFixed(1)+"％)　", "26px serif", "white");
   Ary.push(t);
   for(var i=0;i<Ary.length;i++){
     Ary[i].x=700;
@@ -5567,6 +5611,10 @@ function Battle(Ev=-1){
   // アイテム欄を更新する
   stage.addChild(Ct);
   battleItem();
+  if(henirarea[8].cleared==2){
+  var A=Bufflist.findIndex(value=>value.name=="ジョイフルライト");
+  Pbuff.push(A);
+  }
 };
   if(gamestate==2 || gamestate==3){
     switch(this.card){
@@ -5609,6 +5657,7 @@ function Battle(Ev=-1){
         battleLog.push("リティア様の攻撃！&"+Ary[R]);
         var D=Damage(0,R);
         if(D==-1){
+        battleLog.push("kaihi");
         battleLog.push("空振りー！&　");
         }else{
         StatusE[0]-=D;
@@ -5618,6 +5667,7 @@ function Battle(Ev=-1){
         if(Ebuff.indexOf(B)!==-1){    
         battleLog.push(OPname+"は膝をついた！");
         battleLog.push("end of battle");
+        battleLogNext();
         return false;
         }    
         var B=Bufflist.findIndex(value=>value.name=="呪い")
@@ -5735,6 +5785,18 @@ function Battle(Ev=-1){
         se12.play();
         battleLogNext();
         break;
+      case "kaihi":
+        se30.play();
+        battleLogNext();
+        break;
+      case "crush":
+        se31.play();
+        battleLogNext();
+        break;
+      case "tukkomi":
+        se32.play();
+        battleLogNext();
+        break;
       case "turnend":
         var M=Enemylist.findIndex(value=>value.name==OPname);
         if(Enemylist[M].HPtrigger.length){
@@ -5758,6 +5820,11 @@ function Battle(Ev=-1){
                   break;
                 case "ドラバキ":
                   se8.play();
+                  var A=Bufflist.findIndex(value=>value.name=="凍結")
+                  if(Ebuff.indexOf(A)!==-1){
+                  Ebuff=Ebuff.filter(value=>value!==A);
+                  battleLog.push(OPname+"の氷が解けた！"); 
+                  }
                   battleLog.push(OPname+"はレイジモードに移行した！"); 
                   var A=Bufflist.findIndex(value=>value.name=="レイジモード")
                   var Ary=[A,A,A,A,A,A];
@@ -5776,7 +5843,7 @@ function Battle(Ev=-1){
                   Ebuff=Ebuff.filter(value=>value!==A);
                   battleLog.push(OPname+"の氷が解けた！"); 
                   }
-                  battleLog.push(OPname+"は雷分身を生み出した！"); 
+                  battleLog.push(OPname+"は雷分身を生み出した！&危険な攻撃の予感がする！"); 
                   var A=Bufflist.findIndex(value=>value.name=="雷分身")
                   var Ary=[A,A];
                   Ebuff=Ebuff.concat(Ary);
@@ -5986,7 +6053,7 @@ function Battle(Ev=-1){
           if(Bturn%4==1){Mon=44};
           break;
           case "火山の炎鷹":
-          Mon=16;
+          if(Bturn%3==1){Mon=16}else{Mon=17};
           break;
           case "アルポコピュリタ":
           Mon=19;
@@ -6024,6 +6091,7 @@ function Battle(Ev=-1){
           }
           if(D==-1){
           userPet[1]-=15;
+          battleLog.push("kaihi");
           battleLog.push("攻撃は外れちゃった！&　");
           }else{
           StatusE[0]-=D;
@@ -6037,6 +6105,7 @@ function Battle(Ev=-1){
             var Ary=[A,A,A];
             if(rate>Math.random()){
               Ebuff=Ebuff.concat(Ary);
+              battleLog.push("tukkomi");
               battleLog.push(OPname+"は&やけどを負った！");
             }
               break;
@@ -6051,6 +6120,7 @@ function Battle(Ev=-1){
             var Ary=[A,A,A];
             if(rate>Math.random()){
               Ebuff=Ebuff.concat(Ary);
+              battleLog.push("tukkomi");
               battleLog.push(OPname+"は&凍結した！");
             }
               break;
@@ -6060,6 +6130,7 @@ function Battle(Ev=-1){
             var Ary=[A,A,A];
             if(rate>Math.random()){
               Ebuff=Ebuff.concat(Ary);
+              battleLog.push("tukkomi");
               battleLog.push(OPname+"は&呪われた！");
             }
               break;
@@ -6069,6 +6140,7 @@ function Battle(Ev=-1){
             var Ary=[A,A,A];
             if(rate>Math.random()){
               Ebuff=Ebuff.concat(Ary);
+              battleLog.push("tukkomi");
               battleLog.push(OPname+"は&老化して攻撃力ダウン！");
             }
               break;
@@ -6078,6 +6150,7 @@ function Battle(Ev=-1){
             var Ary=[A,A,A,A];
             if(rate>Math.random()){
               Ebuff=Ebuff.concat(Ary);
+              battleLog.push("tukkomi");
               battleLog.push(OPname+"の&命中率が下がった！");
             }
               break;
@@ -6104,6 +6177,12 @@ function Battle(Ev=-1){
         battleLog.push("turnend"); 
         return false;
       }
+      var A=Bufflist.findIndex(value=>value.name=="反動");
+      if(Ebuff.indexOf(A)!==-1){
+        battleLog.push(OPname+"は&攻撃の反動で動けない！");  
+        battleLog.push("turnend"); 
+        return false;
+      }
       if(OPname=="マナイーター"){
         var R=Bturn/5+Math.random();
         if(R>1.3){
@@ -6118,6 +6197,9 @@ function Battle(Ev=-1){
       var Cd=Math.floor(Math.random()*Enemylist[M].route.length);
       var Command=Enemylist[M].route[Cd];
       //特殊裁定
+      if(OPname=="オベザール"){
+        Command=Enemylist[M].route[(Bturn+2)%3];
+      }
       var EE=Bufflist.findIndex(value=>value.name=="雷分身")
       var E=Ebuff.indexOf(EE)
       if(E!==-1){
@@ -6155,7 +6237,14 @@ function Battle(Ev=-1){
             }
       var D=Damage(1,Command);
       if(D==-1){
-        battleLog.push("よけたよー！&　");
+        //スリング
+        battleLog.push("kaihi");
+        var B=Bufflist.findIndex(value=>value.name=="スリング")
+          if(Pbuff.indexOf(B)!==-1){
+          battleLog.push("スリングで回避したよ！&　");
+          }else{
+          battleLog.push("よけたよー！&　");
+          }
         }else{
       //ガード持ち
       if(userPet.length){
@@ -6224,6 +6313,7 @@ function Battle(Ev=-1){
           var Ary=[A,A,A];
           if(rate>Math.random()){
             Pbuff=Pbuff.concat(Ary);
+            battleLog.push("tukkomi");
             battleLog.push("あっつい！　やけどしちゃった！"); 
             }
           break;
@@ -6233,6 +6323,7 @@ function Battle(Ev=-1){
           var Ary=[A,A,A];
           if(rate>Math.random()){
             Pbuff=Pbuff.concat(Ary);
+            battleLog.push("tukkomi");
             battleLog.push("あっつい！　やけどしちゃった！"); 
             }
           break;
@@ -6247,6 +6338,7 @@ function Battle(Ev=-1){
           var Ary=[A,A];
           if(rate>Math.random() && Pbuff.indexOf(A)==-1){
             Pbuff=Pbuff.concat(Ary);
+            battleLog.push("tukkomi");
             battleLog.push("凍っちゃった！"); 
             }
           break;
@@ -6256,6 +6348,7 @@ function Battle(Ev=-1){
           var Ary=[A,A,A];
           if(rate>Math.random() && Pbuff.indexOf(A)==-1){
             Pbuff=Pbuff.concat(Ary);
+            battleLog.push("tukkomi");
             battleLog.push("凍っちゃった！"); 
             }
           break;
@@ -6265,6 +6358,7 @@ function Battle(Ev=-1){
           var Ary=[A,A,A];
           if(rate>Math.random()){
             Pbuff=Pbuff.concat(Ary);
+            battleLog.push("tukkomi");
             battleLog.push("呪われちゃった！"); 
             }
           break;
@@ -6274,6 +6368,7 @@ function Battle(Ev=-1){
           var Ary=[A,A,A,A];
           if(rate>Math.random()){
             Pbuff=Pbuff.concat(Ary);
+            battleLog.push("tukkomi");
             battleLog.push("老化で攻撃力が下がっちゃった！"); 
             }
           break;
@@ -6283,6 +6378,7 @@ function Battle(Ev=-1){
             var Ary=[A,A,A];
             if(rate>Math.random()){
               Pbuff=Pbuff.concat(Ary);
+              battleLog.push("tukkomi");
               battleLog.push("矢の毒を受けてしまった！"); 
               }
             break;
@@ -6581,18 +6677,21 @@ function Battle(Ev=-1){
             break;
           case 147:
             var A=Bufflist.findIndex(value=>value.name=="スリング")
-            Buff([A],"かかってきなさい！&　");
+            Buff([A],"このターンの攻撃は必ず回避するよ！&　");
             break;
           case 89:
             var A=Bufflist.findIndex(value=>value.name=="やけど")
+            battleLog.push("tukkomi");
             Buff([A,A,A,A],OPname+"は火傷を負ったよ！&　",1,0.7);
             break;
           case 90:
             var A=Bufflist.findIndex(value=>value.name=="凍結")
+            battleLog.push("tukkomi");
             Buff([A,A,A,A],OPname+"を氷漬けにしてやったよ！&　",1,0.5);
             break;
           case 91:
             var A=Bufflist.findIndex(value=>value.name=="中毒")
+            battleLog.push("tukkomi");
             Buff([A,A,A,A],OPname+"を中毒状態にしたよ！&　",1,0.7);
             break;
           case 92:
@@ -6601,10 +6700,12 @@ function Battle(Ev=-1){
             break;
           case 93:
             var A=Bufflist.findIndex(value=>value.name=="闇の水晶玉")
+            battleLog.push("crush3");
             Buff([A,A,A,A,A,A],OPname+"の攻撃力が下がったよ！&　",1);
             break;
           case 94:
             var A=Bufflist.findIndex(value=>value.name=="風の水晶玉")
+            battleLog.push("crush3");
             Buff([A,A,A,A,A,A],OPname+"の防御力が下がったよ！&　",1);
             break;
           //エルゼリー
@@ -6747,6 +6848,7 @@ function Battle(Ev=-1){
           }
           var D=Damage(0,R);
           if(D==-1){
+            battleLog.push("kaihi");
             battleLog.push("外れちゃったー！");  
           }else{
           StatusE[0]-=D;
@@ -6786,7 +6888,7 @@ function Battle(Ev=-1){
         }
         function HPrec(num,Mod=0,overrun=0){
           //HPマンタンの時は使用できない Mod->回復のブレ over->最大値を超えて回復
-        if(StatusP[0]>=UserStatus[0]){
+        if(StatusP[0]>=UserStatus[0] && overrun==0){
           pickMsg("今は使っても意味がなさそう。&　");
           return false;
         }
@@ -6808,7 +6910,9 @@ function Battle(Ev=-1){
         //生肉判定
         if(equipeditem==46){
           var R=Math.random()*3
-        if(R<1){
+          var EE=Bufflist.findIndex(value=>value.name=="ジョイフルライト")
+          var E=Pbuff.indexOf(EE)
+        if(E!==-1 && R<1){
         battleLog.push("うっ！　お腹壊したかも……。");
         var D=Bufflist.findIndex(value=>value.name=="中毒");
         Pbuff.push(D,D,D);
@@ -10121,7 +10225,7 @@ function AssemCompare(product,type,loop){
       break;
     case 131:
       arr1.push(48,39,20);
-      arr2.push(20,1,3);
+      arr2.push(10,1,3);
       break;
     case 132:
       arr1.push(68,64,102,52);
@@ -11095,10 +11199,12 @@ window.addEventListener("keyup", keyupHandler, false);
             break;
             case 87:
               UserStatus[2]+=5;
+              if(UserStatus[2]>=255){UserStatus[2]=255};
               PopAnm("防御力が5上がりました！",800,280,35,30,130);
               break;
             case 88:
               UserStatus[1]+=5;
+              if(UserStatus[1]>=255){UserStatus[1]=255};
               PopAnm("攻撃力が5上がりました！",800,280,35,30,130);
               break;
             case 110:
@@ -11108,7 +11214,7 @@ window.addEventListener("keyup", keyupHandler, false);
               break;
             case 111:
               UserStatus[3]+=1;
-              if(UserStatus[3]>30){UserStatus[3]=30};
+              if(UserStatus[3]>20){UserStatus[3]=20};
               PopAnm("生成されるクリソナの純度が1%上昇します！",800,330,35,30,130);
               break;
           };
@@ -11223,7 +11329,7 @@ window.addEventListener("keyup", keyupHandler, false);
         return false;
       case "assem":
         Loadmap.removeAllChildren();
-        Dialogue("錬金術が解放されました","手に入れた素材を加工したり、錬成して、&新しいアイテムを生み出しましょう。",-1,-1,"OK");
+        Dialogue("錬金術が解放されました","手に入れた素材を加工したり、錬成して、&新しいアイテムを生み出しましょう。",-1,-1,"OK",350,340,80,35);
         var Opicon3 = new createjs.Bitmap("soL_opicon3.png");
         Opicon3.x=610;
         Opicon3.y=540;
@@ -11235,7 +11341,7 @@ window.addEventListener("keyup", keyupHandler, false);
         return false;
       case "recip":
         Loadmap.removeAllChildren();
-        Dialogue("レシピからの錬成が解放されました","素材とクリソナを使い、レシピに沿って錬成が行えます。&レシピはソリティアをプレイすると&思い出すことがあります。",-1,-1,"OK");
+        Dialogue("レシピからの錬成","素材とクリソナを使って錬成が行えます。&レシピはソリティアをプレイしているうちに&判明することがあります。",-1,-1,"OK",350,340,80,35);
         var Opicon3 = new createjs.Bitmap("soL_opicon3.png");
         Opicon3.x=610;
         Opicon3.y=540;
@@ -11244,7 +11350,7 @@ window.addEventListener("keyup", keyupHandler, false);
         return false;
       case "recip2":
         Loadmap.removeAllChildren();
-        Dialogue("選んで錬成が解放されました","素材と自由に選んで錬成が行えます。&素材の種類と数が一致していれば、&新たなレシピを生み出せるでしょう。",-1,-1,"OK");
+        Dialogue("選んで錬成","素材と自由に選んで錬成が行えます。&素材の組み合わせ次第で、&新たなレシピを生み出せるでしょう。",-1,-1,"OK",350,340,80,35);
         var Opicon3 = new createjs.Bitmap("soL_opicon3.png");
         Opicon3.x=610;
         Opicon3.y=540;
@@ -11347,10 +11453,87 @@ window.addEventListener("keyup", keyupHandler, false);
               cLock=true;
               MsgNext();
               return false;
-            case "white_out":
+            case "Cut_5":
+              var T=new createjs.Bitmap("Card_images/soL_clearBG.png");
+                T.alpha=0;
+                T.scale=960/1024;
+                createjs.Tween.get(T)
+                .to({scale:800/1024,alpha:1},1200);
+                Loadmap.addChild(T);
+                MessageText[4].push(T);
+                cLock=true;
+                MsgNext();
+                return false;
+            case "Cut_4":
+          //クリア画面
+          var T = new createjs.Shape();
+          T.graphics.beginFill("rgba(255,255,255,1)");
+          T.graphics.drawRect(0, 0, 800, 600);
+          T.alpha=0;
+          createjs.Tween.get(T)
+          .to({alpha:1},800)
+            cLock=true;
+            MsgNext();
+            return false;
+            case "game_over":
+          var T = new createjs.Shape();
+          T.graphics.beginFill("rgba(255,255,255,1)");
+          T.graphics.drawRect(0, 0, 800, 600);
+          T.alpha=1;
+          field.addChild(T);
+          Loadmap.removeAllChildren();
+          opLock=0;
+          //failed...
+          gamestate=1;
+          cx2.clearRect(0,0,800,600);
+          field.removeChild(Cbutton)
+          Cbt=canvas2.toDataURL();
+          Cbutton = new createjs.Bitmap(Cbt);
+          field.addChild(Cbutton);
+          Cbtlist=[];
+          Cbtlist.push(Cbutton);
+          clear_1.x=800;
+          clear_1.y=0;
+          clearBG.addChild(clear_1);
+          createjs.Tween.get(clear_1)
+          .to({x:0,alpha:1},300);
+          Cstar.x=580;
+          Cstar.y=50;
+          Cstar.rotation=15;
+          Cstar.scale=0.7
+          clearBG.addChild(Cstar);
+          var shape = new createjs.Shape();
+          shape.graphics.beginFill("black");
+          shape.graphics.drawRect(0, 0, 800, 600);
+          shape.alpha=0;
+          clearBG.addChild(shape);
+          createjs.Tween.get(shape)
+          .to({x:0,alpha:0.3},900)
+          .wait(1000)
+          .call(Next)  
+          var t=new createjs.Text("F","bold 64px  メイリオ","#d14d4d");
+          t.x=610;
+          t.y=305;
+          clearBG.addChild(t);    
+          clearBG.addChild(t);
+          clear_4.x=-20;
+          clear_4.y=-20;
+          clear_4.alpha=0;
+          clearBG.addChild(clear_4);
+          createjs.Tween.get(clear_4)
+          .wait(450)
+          .to({x:20,alpha:1},300)
+          function Next(){
+          retry_bt2.x=600;
+          retry_bt2.y=520;
+          clearBG.addChild(retry_bt2);
+          cLock=true;
+          }
+          return false;
+          case "white_out":
         //背景を表示
         var T = new createjs.Shape();
-          T.graphics.beginFill("rgba(255,255,255,0.7)");
+          T.graphics.beginFill("rgba(255,255,255,1)");
           T.graphics.drawRect(0, 0, 800, 600);
           T.alpha=0;
           createjs.Tween.get(T)
@@ -11360,6 +11543,260 @@ window.addEventListener("keyup", keyupHandler, false);
           cLock=true;
           MsgNext();
         return false;
+        case "black_out":
+          //背景を表示
+          var T = new createjs.Shape();
+            T.graphics.beginFill("rgba(0,0,0,1)");
+            T.graphics.drawRect(0, 0, 800, 600);
+            T.alpha=0;
+            createjs.Tween.get(T)
+            .to({alpha:1},800)
+            .call(Nex)
+            Loadmap.addChild(T);
+            MessageText[4].push(T);
+            function Nex(){
+            if(musicnum!==3){
+              Bgm.stop();
+              musicnum=3;
+              if(mute=="ON"){
+              Bgm=new Music(bgm3data);
+              Bgm.playMusic();
+              }}
+            cLock=true;
+            MsgNext();
+            };
+          return false;
+          case "end of log":
+            //メッセージ枠を削除
+            Loadmap.removeAllChildren();
+            opLock=0;
+            var T=new createjs.Bitmap("Card_images/soL_clear.png");
+            T.alpha=0;
+            T.scale=800/1024;
+            createjs.Tween.get(T)
+            .to({alpha:1},400)
+            clearBG.addChild(T);
+              console.log('gameover');
+                field.removeChild(Cbutton)
+                Cbt=canvas2.toDataURL();
+                Cbutton = new createjs.Bitmap(Cbt);
+                field.addChild(Cbutton);
+                Cbtlist=[];
+                Cbtlist.push(Cbutton);
+                clear_1.x=800;
+                clear_1.y=0;
+                clearBG.addChild(clear_1);
+                createjs.Tween.get(clear_1)
+                .to({x:0,alpha:1},300)
+                .wait(1000)
+                .call(nextgame)
+                var Rank="SS";
+                    var t=new createjs.Text("Get item","24px メイリオ","white");
+                    t.x=600;
+                    t.y=100;
+                    clearBG.addChild(t);
+                    var A=itemA.findIndex(value=>value.name=="虹霓球")
+                    t= new createjs.Text(itemA[A].name+"×1", "bold 20px 'メイリオ'", "#f06787");
+                    t.x=580;
+                    t.y=130;
+                    clearBG.addChild(t);
+                    UserItem[itemA[A].id]+=1;
+                    if(UserItem[itemA[A].id]>itemMax[itemMax[0]]){UserItem[itemA[A].id]=itemMax[itemMax[0]]};
+                    if(UserLibrary[itemA[A].id]==0){UserLibrary[itemA[A].id]=1};
+                    InvConfig(0);
+                    var t=new createjs.Text(Rank,"bold 64px  メイリオ","#d14d4d");
+                    t.x=610;
+                    t.y=330;
+                    clearBG.addChild(t);
+                    clear_3.x=0;
+                    clear_3.y=-20;
+                    clear_3.alpha=0;
+                    Letterbox.push(["提供","クリア記念品","ここまでのプレイ、&ありがとうございます！&脱出を記念して、装備すると&クロンダイク・マグマンタを&通常と少し異なるルールで&遊べるアイテムを贈呈します。","ピッケル"]);                      
+                    if(Exlists.length>4){
+                      createjs.Tween.get(Exlists[5])
+                      .to({x:-200,alpha:0},300)
+                      .call(ex5);
+                    }
+                    function ex5(){
+                    field.removeChild(Exlists[5])
+                    }
+              function nextgame(){
+                var RT=new createjs.Bitmap("soL_option_bt5.png");
+                RT.x=600;
+                RT.y=520;
+                clearBG.addChild(RT);
+                RT.addEventListener("click", {handleEvent:Ending});
+                cLock=true;
+              };
+            //
+            function Ending(){
+              //えんどろーる
+            cLock=false;
+            stage.addChild(Ct);
+            Ct.removeAllChildren();
+            Ct.x=0;
+            Ct.y=0;
+            Ct.alpha=1;
+            var T = new createjs.Shape();
+            T.graphics.beginFill("rgba(0,0,0,1)");
+            T.graphics.drawRect(0, 0, 800, 5700);
+            T.alpha=0;
+            Ct.addChild(T);
+            createjs.Tween.get(T)
+            .to({alpha:1},1000)
+            .wait(100)
+            .call(rem);
+            function rem(){
+              field.removeAllChildren();
+              clearBG.removeAllChildren();
+              if(musicnum!==0){
+                Bgm.stop();
+                musicnum=0;
+                };
+              jingle.play();
+              createjs.Tween.get(Ct)
+              .to({y:-5100},70000)
+              .wait(1000)
+              .call(returnBt);
+            }
+            function returnBt(){
+              var RTB = new createjs.Bitmap("soL_retry_bt2.png");
+              RTB.scale=1.5;
+              RTB.x=300;
+              RTB.y=5500;
+              Ct.addChild(RTB);
+              RTB.addEventListener("click", {handleEvent:End});
+            }
+            function End(){
+              stage.removeChild(Ct);
+              Gameend();
+            }
+            var Ary=[];
+            var t=new createjs.Text("リティアのソリティア","36px メイリオ","white");
+            Ary.push(t);
+            var t=new createjs.Text("　","36px メイリオ","white");
+            Ary.push(t);
+            var t=new createjs.Text("原作","36px メイリオ","white");
+            Ary.push(t);
+            var t=new createjs.Text("　　","36px メイリオ","white");
+            Ary.push(t);
+            var t=new createjs.Text("Elsword　KOG Studios","36px メイリオ","white");
+            Ary.push(t);
+            var t=new createjs.Text("　","36px メイリオ","white");
+            Ary.push(t);
+            var t=new createjs.Text("音楽","36px メイリオ","white");
+            Ary.push(t);
+            var t=new createjs.Text("　　","36px メイリオ","white");
+            Ary.push(t);
+            var t=new createjs.Text("PeriTune.com","36px メイリオ","white");
+            Ary.push(t);
+            var t=new createjs.Text("「Whistling_Winds」","32px メイリオ","white");
+            Ary.push(t);
+            var t=new createjs.Text("「Daybreak」","32px メイリオ","white");
+            Ary.push(t);
+            var t=new createjs.Text("「Soft_Day2」","32px メイリオ","white");
+            Ary.push(t);
+            var t=new createjs.Text("「Foreboding」","32px メイリオ","white");
+            Ary.push(t);
+            var t=new createjs.Text("「EpicBattle_Deity」","32px メイリオ","white");
+            Ary.push(t);
+            var t=new createjs.Text("「Lost_place5」","32px メイリオ","white");
+            Ary.push(t);
+            var t=new createjs.Text("「Irregular」","32px メイリオ","white");
+            Ary.push(t);
+            var t=new createjs.Text("　　","36px メイリオ","white");
+            Ary.push(t);
+            var t=new createjs.Text("　　","36px メイリオ","white");
+            Ary.push(t);
+            var t=new createjs.Text("From Elsword music","36px メイリオ","white");
+            Ary.push(t);
+            var t=new createjs.Text("「エルの樹」「天上の岐路」","32px メイリオ","white");
+            Ary.push(t);
+            var t=new createjs.Text("「アルテラ平原」「ディシオン採掘場」","32px メイリオ","white");
+            Ary.push(t);
+            var t=new createjs.Text("「トロッシュの巣」「影の鉱脈」","32px メイリオ","white");
+            Ary.push(t);
+            var t=new createjs.Text("-該当ステージbgm","32px メイリオ","white");
+            Ary.push(t);
+            var t=new createjs.Text("「ザヤ山」","32px メイリオ","white");
+            Ary.push(t);
+            var t=new createjs.Text("-ベスマ湖 ステージbgm","32px メイリオ","white");
+            Ary.push(t);
+            var t=new createjs.Text("<耳コピアレンジ>/提供","32px メイリオ","white");
+            Ary.push(t);
+            var t=new createjs.Text("　　","36px メイリオ","white");
+            Ary.push(t);
+            var t=new createjs.Text("　　","36px メイリオ","white");
+            Ary.push(t);
+            var t=new createjs.Text("リティアテーマソング「Milestone」","32px メイリオ","white");
+            Ary.push(t);
+            var t=new createjs.Text("<耳コピアレンジ>/提供","32px メイリオ","white");
+            Ary.push(t);
+            var t=new createjs.Text("　","36px メイリオ","white");
+            Ary.push(t);
+            var t=new createjs.Text("効果音","36px メイリオ","white");
+            Ary.push(t);
+            var t=new createjs.Text("　　","36px メイリオ","white");
+            Ary.push(t);
+            var t=new createjs.Text("Springin' Sound Stock","32px メイリオ","white");
+            Ary.push(t);
+            var t=new createjs.Text("効果音ラボ","32px メイリオ","white");
+            Ary.push(t);
+            var t=new createjs.Text("くらげ工匠","32px メイリオ","white");
+            Ary.push(t);
+            var t=new createjs.Text("魔王魂","32px メイリオ","white");
+            Ary.push(t);
+            var t=new createjs.Text("キラキラ効果音工房","32px メイリオ","white");
+            Ary.push(t);
+            var t=new createjs.Text("　","36px メイリオ","white");
+            Ary.push(t);
+            var t=new createjs.Text("背景","36px メイリオ","white");
+            Ary.push(t);
+            var t=new createjs.Text("　　","36px メイリオ","white");
+            Ary.push(t);
+            var t=new createjs.Text("Pixabay.com","32px メイリオ","white");
+            Ary.push(t);
+            var t=new createjs.Text("　","36px メイリオ","white");
+            Ary.push(t);
+            var t=new createjs.Text("エンディング曲","36px メイリオ","white");
+            Ary.push(t);
+            var t=new createjs.Text("「INSOMNIA」龍崎一","36px メイリオ","white");
+            Ary.push(t);
+            var t=new createjs.Text("　from DOVA-SYNDROME","32px メイリオ","white");
+            Ary.push(t);
+            var t=new createjs.Text("　","36px メイリオ","white");
+            Ary.push(t);
+            var t=new createjs.Text("環境","36px メイリオ","white");
+            Ary.push(t);
+            var t=new createjs.Text("　　","36px メイリオ","white");
+            Ary.push(t);
+            var t=new createjs.Text("javascript","32px メイリオ","white");
+            Ary.push(t);
+            var t=new createjs.Text("　　","36px メイリオ","white");
+            Ary.push(t);
+            var t=new createjs.Text("ライブラリ","36px メイリオ","white");
+            Ary.push(t);
+            var t=new createjs.Text("Howler.js","32px メイリオ","white");
+            Ary.push(t);
+            var t=new createjs.Text("createjs.js","32px メイリオ","white");
+            Ary.push(t);
+            var t=new createjs.Text("　","36px メイリオ","white");
+            Ary.push(t);
+            var t=new createjs.Text("　","36px メイリオ","white");
+            Ary.push(t);
+            var t=new createjs.Text("製作　提供","36px メイリオ","white");
+            Ary.push(t);
+            var Y=5;
+            for(var i=0;i<Ary.length;i++){
+              Ary[i].x=200;
+              Ary[i].y=400+40*Y;
+              console.log(400+40*Y)
+              Ct.addChild(Ary[i])
+              Y+=1;
+              if(Ary[i].text=="　"){Y+=8};
+            }
+          };
+            return false;
           case "Cut_reset":
             //背景を消去
             for(var i=0;i<MessageText[4].length;i++){
@@ -11436,10 +11873,39 @@ window.addEventListener("keyup", keyupHandler, false);
           break;
           case 8:
             if(henirarea[8].cleared<=1){
+              field.removeChild(Exlists[5]);
+              for(var i=0;i<Exlists[4].length;i++){
+              field.removeChild(Exlists[4][i]);
+              }
               henirarea[8].cleared=2;
+              se5.play();
+              if(musicnum!==21){
+                Bgm.stop();
+                musicnum=21;
+                if(mute=="ON"){
+                Bgm=new Music(bgm21data);
+                Bgm.playMusic();
+                }}
+            }else if(henirarea[8].cleared==2){
+              se29.play();
+              if(musicnum!==0){
+                Bgm.stop();
+                musicnum=0;
+              }
             }
             break;
           }
+          cLock=true;
+          MsgNext();
+          return false;
+      case "music_1":
+        if(musicnum!==1){
+          Bgm.stop();
+          musicnum=1;
+          if(mute=="ON"){
+          Bgm=new Music(bgm1data);
+          Bgm.playMusic();
+          }}
           cLock=true;
           MsgNext();
           return false;
@@ -11618,12 +12084,39 @@ window.addEventListener("keyup", keyupHandler, false);
                   MsgAry.push(["music_default"]);
                   MsgAry.push(["リティア","鎖が……！",0,-2,3,1]);
                   MsgAry.push(["オベザール","グオオオオオオォォ！",2]);
-                  MsgAry.push(["ending"]);
+                  MsgAry.push(["リティア","やっ……た……。&はは……動けないや。",0,-2]);
+                  MsgAry.push(["white_out"]);
+                  MsgAry.push(["リティア","……。",2]);
+                  MsgAry.push(["仮面の男","気を失ったか。",-10]);
+                  MsgAry.push(["仮面の男","今頃になってベリル家の名を再び聞くことになるとは。&あの事件から、完全に廃れたものと思っていたんだがな。",2]);
+                  MsgAry.push(["仮面の男","……やれやれ。&その名に免じて、身柄は預かっておいてやろう。",2]);
+                  MsgAry.push(["","……。&…………。",2]);
+                  MsgAry.push(["black_out"]);
+                  MsgAry.push(["リティア","……あたしが目を覚ましたのは、&それからしばらく経ってからだった。",-10]);
+                  MsgAry.push(["リティア","エリアノドにいるマスターや巫女たちが、&あたしを保護して看病してくれたよ。",-10]);
+                  MsgAry.push(["リティア","仮面の男……グレイヴっていう名前らしいけど……&その人がマスターにあたしのことを知らせてくれたらしい。",-10]);
+                  MsgAry.push(["リティア","まぁ……マスターの人たちは、&ヘニル教団の容疑者として&あたしの身柄を確保する目的もあったみたいだけど。",-10]);
+                  MsgAry.push(["リティア","意外だったのは、&気が遠くなるほど長い間あの空間に居たはずなのに、&実際にはそんなに時間が経っていないことだった。",-10]);
+                  MsgAry.push(["リティア","狭間の中の時間の進み具合は、現実と違うんだろうね。",-10]);
+                  MsgAry.push(["Cut_5"]);
+                  MsgAry.push(["リティア","ベリル家の名声を取り戻すこと。&ジョイが完成させられなかった研究の完成。&そして…/…/。",-10]);
+                  MsgAry.push(["リティア","狭間に意識だけ取り残されたあんたを助け出すこと。",-10]);
+                  MsgAry.push(["リティア","散々あたしの妄想のフリをして……&絶対助け出してやるんだから、覚悟して待ってなさいよね。",-10]);
+                  MsgAry.push(["　","……。",-10]);
+                  MsgAry.push(["black_out"]);
+                  MsgAry.push(["商人","いらっしゃい！　何をお求めですか？",-10]);
+                  MsgAry.push(["リティア","あの……トランプをください！",-10]);
+                  MsgAry.push(["商人","まいどあり！",-10]);
+                  MsgAry.push(["リティア","……へへ。&たまには買いたいものを買わなきゃね。",-10])
+                  MsgAry.push(["リティア","これも、これから始まる&リティア・ベリルの伝説への布石！",-10]);
+                  MsgAry.push(["　","To be continued in& game epic &[Lithia] Ep 10.",-10]);
+                  MsgAry.push(["end of log"])
                 }
                 if(henirarea[8].cleared<=1){
                 MsgAry.push(["music_default"]);
                 MsgAry.push(["リティア","はぁ……はぁ……。&おーい、終わったよ！",0,-2,3,1]);
                 MsgAry.push(["仮面の男","まだだ。",2]);
+                MsgAry.push(["music_1"]);
                 MsgAry.push(["オベザール","グオオオオオ！",2]);
                 MsgAry.push(["リティア","いっ…たい！！",0,-2]);
                 MsgAry.push(["リティア","やば……モロに食らっちゃった……。",0,-2]);
@@ -11631,11 +12124,15 @@ window.addEventListener("keyup", keyupHandler, false);
                 MsgAry.push(["リティア","パワーアップした！？&む、むちゃくちゃだ！",0,-2]);
                 MsgAry.push(["リティア","ねぇ！　さっさとあれ封印してよ！",0,-2]);
                 MsgAry.push(["仮面の男","無理だ。&抵抗する力がなくなれば&自動的に封印される仕組みになっている。",2]);
-                MsgAry.push(["リティア","じゃーせめてあんたも戦え！",0,-2]);
+                MsgAry.push(["リティア","じゃーせめてあんたも戦ったら！",0,-2]);
                 MsgAry.push(["仮面の男","私に戦闘能力があると思うか？",2]);
                 MsgAry.push(["リティア","こ、この……！",0,-2]);
                 MsgAry.push(["オベザール","グオオォォ！",2]);
                 MsgAry.push(["music_stop"]);
+                var U=UserLibrary.filter(value=>value>0);
+                var I=100*U.length/(itemA.length-1)
+                console.log(I)
+                if(I>=80){
                 MsgAry.push(["リティア","ここで…/…/終わり？",0,-2]);
                 MsgAry.push(["リティア","ベリル家もここでおしまい…/…/？&このままジョイにも会えないまま…/…/？",2]);
                 MsgAry.push(["white_out"]);
@@ -11647,6 +12144,11 @@ window.addEventListener("keyup", keyupHandler, false);
                 MsgAry.push(["リティア","あたしにはまだまだやることがいっぱいあるんだ！&こんなところで終われない！！",-10]);
                 MsgAry.push(["リティア","何度だってやってやる！！",-10]);
                 MsgAry.push(["battle_6"]);
+                }else{
+                MsgAry.push(["white_out"]);
+                MsgAry.push(["リティア","ここで…/…/終わり？",0,-2]);
+                MsgAry.push(["game_over"]);
+                }
                 };
             break;
             }
