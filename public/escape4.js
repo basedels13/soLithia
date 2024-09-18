@@ -1,8 +1,6 @@
-// ラストバトル～エンディングへ
+// ver 1.0
 // 加工・錬成後にセーブ
-// 状態異常、回避のSE
-// チュートリアルのOKボタンのサイズ
-// 余裕あったら→錬成のヘルプ画面、レシピメモ、状態異常耐性、バフ状況画面
+// 余裕あったら→採取で現在手に入れたアイテム、錬成のヘルプ画面、レシピメモ、状態異常耐性、バフ状況画面
 window.onload = function(){
 main();
 };
@@ -99,7 +97,7 @@ Invcursor.alpha=0;
 var dragPointX;
 var dragPointY;
 var mute="ON"
-var debugmode=true;//出荷時にfalseにする
+var debugmode=false;//出荷時にfalseにする
 var cLock=true;//true->操作可能
 var opLock=0;//漫然と使っている -1->gamestartまで 10->×ボタンを禁止する　その他いろいろ
 var mLock=true;//deckめくっている最中falseとする
@@ -682,8 +680,8 @@ var Enemylist=[
   {name:"アルポコピュリタ",St:[190,160,60,4],Dropitem:[153],HPtrigger:[],route:[0,19]},
   {name:"コマンドオーガニックコア",St:[140,110,70,4],Dropitem:[38],HPtrigger:[],route:[0,35]},
   {name:"グリッターランサー",St:[180,170,75,1],Dropitem:[40],HPtrigger:[],route:[0,15]},
-  {name:"グリッターアーチャー",St:[140,200,55,1],Dropitem:[40],HPtrigger:[],route:[0,42,43]},
-  {name:"マーマン",St:[120,200,60,3],Dropitem:[42],HPtrigger:[],route:[0,14,45]},
+  {name:"グリッターアーチャー",St:[130,180,55,1],Dropitem:[40],HPtrigger:[],route:[0,42,43]},
+  {name:"マーマン",St:[120,160,60,3],Dropitem:[42],HPtrigger:[],route:[0,14,45]},
   {name:"ラグズ",St:[145,120,120,3],Dropitem:[138],HPtrigger:[],route:[0,26,32]},
   {name:"イース",St:[160,135,60,3],Dropitem:[137],HPtrigger:[],route:[0,33]},
   {name:"ファイアコモド",St:[160,120,110,0],Dropitem:[150],HPtrigger:[],route:[0,20]},
@@ -3168,7 +3166,6 @@ function menu(state=0,area=0){
                 T.text+=numPW[i];
               };
               if(T.text==playMode[2]){
-                console.log('出口');
                 opLock=0;
                 se10.play();
                 field.removeAllChildren();
@@ -5169,7 +5166,6 @@ function DeckReset_H(p=0,point=0,X=0){
     .call(step);
     function step(){
       if(Extras[0]>=0){
-        console.log(deckfaces.length);
       if(deckfaces.length==1){
         if(userPet.length){
         pickMsg(userPet[0]+"と一緒に&採取スタート！")
@@ -5332,7 +5328,7 @@ function DeckReset_H(p=0,point=0,X=0){
               }}
             break;
             default:
-              console.log('no pet')
+              //('no pet')
               switch(R){
                 case 0:
                   pickMsg("他の所で採取してみよー！&　");
@@ -5621,7 +5617,7 @@ function Battle(Ev=-1){
       case -1:
         //メッセージ
         if(cLock){
-        console.log("battle!")
+        //console.log("battle!")
         if(battleLog.length){
           battleLogNext();
         }
@@ -5803,7 +5799,7 @@ function Battle(Ev=-1){
           for (var i=0;i<Enemylist[M].HPtrigger.length;i++){
             if(StatusE[0]<Enemylist[M].HPtrigger[i] && HPtrigger_li[i]==0){
               HPtrigger_li[i]=1;
-              console.log('hptrigger',i);
+              //console.log('hptrigger',i);
               break;
             }
           };
@@ -6726,7 +6722,7 @@ function Battle(Ev=-1){
           var M=Enemylist.findIndex(value=>value.name==OPname);
           var rate=Math.floor(250*50/Enemylist[M].St[0]);//捕獲率 1/5 ~ 1/25 くらい
           var rate_2=10+((Enemylist[M].St[0]*3-StatusE[0]*2)*rate*1.5)/(Enemylist[M].St[0]*3);
-          console.log(rate,rate_2);
+          if(debugmode){console.log(rate,rate_2)};
           if(rate_2>127){rate_2=127};
           var R=Math.random()*127
           if(rate_2>R){
@@ -6734,7 +6730,6 @@ function Battle(Ev=-1){
             battleLog.push(OPname+"はエルゼリーに&食いついた！　気に入ったみたい！");
             battleLog.push(OPname+"が&しばらく採取についてくるようになった！");
             userPet=[OPname,Enemylist[M].St[0]];
-            console.log(userPet);
             battleLog.push(OPname+"との戦いは&平和的に終わった！&　");
             battleLog.push("result")
             battleLog.push(itemA[itemID(Enemylist[M].Dropitem[0])].name+"をゲットしたよ！&　");
@@ -6858,7 +6853,6 @@ function Battle(Ev=-1){
           };
           battleLog.push(OPname+"に&"+D+"のダメージ！");
           //スタン判定
-          console.log(R);
           switch(R){
             case 8:
               if(Math.random()>0.8){
@@ -7021,7 +7015,6 @@ function monsterMove(){
     }
   };
   for(var i=0;i<4;i++){
-    //console.log(hands[i][hands[i].length-1],Efuda(hands[i][hands[i].length-1]));
     if(Efuda(hands[i][hands[i].length-1])){
       //移動する
       //移動先に追加する
@@ -7175,6 +7168,7 @@ function Destraction(i=0,A,B,C){
   attacker[i][0]=-1;
   Exlists[i]=[];
   Atklists[i][0]=-1;
+  Sprite1.scale=1;
   Sprite1.x=115;
   Sprite1.y=70+140*i;
   Sprite1.gotoAndPlay('walk');
@@ -8337,7 +8331,6 @@ function handleClick(event){
     var J=this.card%100;
     if(J==hands[I].length-1){
       var TT=deckfaces[deckfaces.length-1]
-      console.log(hands[I][J],TT);
       Getcard=hands[I][J];
       var A=hands[I][J]%10;
       var B=TT%10;
@@ -8444,7 +8437,6 @@ function handleClick(event){
           break;
         case 2:
           Fever=3;
-          console.log('fever!',Fever);
           Clvup.alpha=0;
           field.addChild(Clvup);
           Clvup.x=-400;
@@ -8480,7 +8472,6 @@ function handleClick(event){
           for(var i=0;i<3;i++){
             if(Exlists[3].length){
             var I=Math.floor(Math.random()*(Exlists[3].length-1));
-            console.log(I,Exlists[3][I])
             Exlists[3].push(Exlists[3][I]);
             }
           }
@@ -8507,7 +8498,7 @@ function handleClick(event){
     var Ary=Array(B);
     Ary.fill(A);
     Exlists[3]=Exlists[3].concat(Ary);
-    console.log(Exlists[3]);
+    if(debugmode){console.log(Exlists[3])};
     cLock=true;
     //end判定
     var M=0;
@@ -8534,7 +8525,6 @@ function handleClick(event){
   }
 }
 function SoundConfig(event,p=0){
-  //console.log('soundconfig',p)
   if(p!==0){
     //sound on/offボタンを作成する
   var shape = new createjs.Shape();
@@ -10397,7 +10387,7 @@ function AssemCompare(product,type,loop){
   shape.alpha=0.7;
   Ct.addChild(shape);
   var R=Math.random()*100;
-  console.log(R,successRate)
+  if(debugmode){console.log(R,successRate)}
   if(R>successRate){
     //失敗
     cookready(5+loop,"錬成中・・・",false);
@@ -10712,7 +10702,6 @@ function Crisonaset(){
     AsmAry2.push(Matbar);
     AsmAry2.push(Materialmap);
     var H=UserItem.slice(0,4);
-    console.log(H);
     var HH=H.filter(value=>value>0);
     var Hash=(HH.length+Crisona.length)*25;
     function MatDown(){
@@ -10923,7 +10912,7 @@ function Crisonaset(){
   }else{
   result=Math.floor(RR*Math.floor(Math.floor(X*Pow*(StatusP[1]*ATK)/(StatusE[2]*DEF))/50+2));
   }
-  console.log('damage',P,Sid,result);
+  if(debugmode){console.log('damage',P,Sid,result)};
   return result;
 }else{
     var R=Math.random()*100;
@@ -10954,9 +10943,8 @@ function Crisonaset(){
   var E=Ebuff.indexOf(EE)
   if(E!==-1){ATK=ATK*1.25};
   var RR=(85+Math.floor(Math.random()*16))/100
-  console.log(ATK,DEF);
   result=Math.floor(RR*Math.floor(Math.floor(X*Pow*StatusE[1]*ATK/StatusP[2]*DEF)/50+2));
-  console.log('damage',P,Sid,result);
+  if(debugmode){console.log('damage',P,Sid,result)};
   return result;  
 }
  }
@@ -11576,7 +11564,6 @@ window.addEventListener("keyup", keyupHandler, false);
             createjs.Tween.get(T)
             .to({alpha:1},400)
             clearBG.addChild(T);
-              console.log('gameover');
                 field.removeChild(Cbutton)
                 Cbt=canvas2.toDataURL();
                 Cbutton = new createjs.Bitmap(Cbt);
@@ -11790,7 +11777,6 @@ window.addEventListener("keyup", keyupHandler, false);
             for(var i=0;i<Ary.length;i++){
               Ary[i].x=200;
               Ary[i].y=400+40*Y;
-              console.log(400+40*Y)
               Ct.addChild(Ary[i])
               Y+=1;
               if(Ary[i].text=="　"){Y+=8};
@@ -12131,7 +12117,6 @@ window.addEventListener("keyup", keyupHandler, false);
                 MsgAry.push(["music_stop"]);
                 var U=UserLibrary.filter(value=>value>0);
                 var I=100*U.length/(itemA.length-1)
-                console.log(I)
                 if(I>=80){
                 MsgAry.push(["リティア","ここで…/…/終わり？",0,-2]);
                 MsgAry.push(["リティア","ベリル家もここでおしまい…/…/？&このままジョイにも会えないまま…/…/？",2]);
@@ -12505,6 +12490,7 @@ function Gameretry(t=0){
       }}
     deckfaces=[];
     Extras=[0,13,26,39];
+    Exlists=[[],[],[],[]];
   for(var i=0;i<hands.length;i++){
     for(var j=0;j<hands[i].length;j++){
     if(playMode[1]==0){
@@ -13527,16 +13513,15 @@ return -1;
           if(UserStatus[4]>0){UserStatus[4]=0}
         };
         if(henirarea[0].cleared>2){
-        var E=playMode[0]*30+duelLog.length%assembleA.length;
-        var F=1+Math.floor(duelLog.length/20);
-        if(playMode[0]==4 && F>2){F=2};
+        var E=(playMode[0]-1)*30+duelLog.length%assembleA.length;
+        var F=3+Math.floor(duelLog.length/10);
         for(var i=0;i<F;i++){
           var I=i+E;
           if(I>assembleA.length){I-=assembleA.length};
-          console.log(I);
+          if(debugmode){console.log(I)};
           if(AssemCompare(assembleA[I],-1) && userRecipe.indexOf(assembleA[I])==-1){
             userRecipe.push(-assembleA[I]);
-            console.log(assembleA[I]);
+            if(debugmode){console.log(assembleA[I])};
             break;
           }}
         };
@@ -13910,7 +13895,7 @@ return -1;
               t.y=100;
               clearBG.addChild(t);
                 var ExlistsAry = Exlists[3].filter((element, index) => Exlists[3].indexOf(element) === index);
-                console.log(ExlistsAry);
+                if(debugmode){console.log(ExlistsAry)};
               for(var i=ExlistsAry.length-1; i>=0; i--){
                   var A=itemA.findIndex(value=>value.id==ExlistsAry[i])
                   var B=Exlists[3].filter(value=>value==ExlistsAry[i]);
