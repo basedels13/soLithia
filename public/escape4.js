@@ -1,7 +1,5 @@
 // ver 1.01
-// プレイデータ画面で左上のアイコンを表示する
-// 加工・錬成後にセーブ
-// 余裕あったら→採取で現在手に入れたアイテム、錬成のヘルプ画面、レシピメモ、状態異常耐性、バフ状況画面
+// 余裕あったら→加工・錬成後にセーブ、採取の暫定獲得アイテム、錬成のヘルプ画面、レシピメモ、状態異常耐性、バフ状況画面
 window.onload = function(){
 main();
 };
@@ -966,7 +964,7 @@ Titleyard.removeAllChildren();
 Configmap.removeAllChildren();
 Titleyard.addChild(t);
 TitleGrh();
-var t = new createjs.Text("v1.0/Click Card to START", "24px serif", "white");
+var t = new createjs.Text("v1.01/Click Card to START", "24px serif", "white");
   t.textAlign = "end";
   t.x=790;
   Titleyard.addChild(t);
