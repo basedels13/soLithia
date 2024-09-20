@@ -5790,7 +5790,7 @@ function Battle(Ev=-1){
         se30.play();
         battleLogNext();
         break;
-      case "crush":
+      case "crush3":
         se31.play();
         battleLogNext();
         break;
