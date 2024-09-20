@@ -1,4 +1,4 @@
-// ver 1.02 加工・錬成後にセーブ
+// ver 1.02 加工・錬成後にセーブ？
 // 余裕あったら→採取の暫定獲得アイテム、状態異常耐性、バフ状況画面
 window.onload = function(){
 main();
@@ -651,6 +651,7 @@ var itemA=[
   {name:"炎のスムージー",price:136,class:"製造",detail:"燃えるような赤色のジュース。&使うと凍結状態を回復する。"},
   {name:"貪欲のメダル",price:111,class:"製造",detail:"持っているだけで&素材が集まってくる魔法のメダル。&持っているとアイテムドロップが2倍になる（自動消費）"},
   {name:"茹でロブスター",price:75,class:"製造",detail:"茹で上がった金色ロブスター。&食べるのがもったいないほどの高級感だ。&HPが70回復する。"},
+  {name:"アポカリプスピッケル",price:158,class:"製造",detail:"無限のエネルギーを秘めた武器。&持っていると攻撃力が上がる。"},
 ]
   for(var i=0; i<itemA.length;i++){
     itemA[i].id=i;
@@ -773,7 +774,7 @@ var userPet=[];
 //素材を選んでつくる
 //分解、錬成フィルター用
 const disassemble=new Array(5,14,15,17,32,33,38,44,45,56,63,65,69,70,71,72,73,77,146)
-const assembleA=new Array(1,2,3,4,7,8,9,11,12,13,16,17,28,48,59,61,64,65,67,68,72,74,78,81,82,83,84.85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,119,120,121,122,123,124,125,126,127,128,129,130,131,132,133,135,143,144,145,147,148,149,154,155,156)
+const assembleA=new Array(1,2,3,4,7,8,9,11,12,13,16,17,28,48,59,61,64,65,67,68,72,74,78,81,82,83,84.85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,119,120,121,122,123,124,125,126,127,128,129,130,131,132,133,135,143,144,145,147,148,149,154,155,156,158)
 //戦闘
 const consumptionA=new Array(9,23,24,25,26,29,30,31,35,36,41,46,89,90,91,92,93,94,95,96,97,98,99,100,104,105,106,107,108,109,112,113,114,115,116,117,118,119,120,121,122,123,124,125,126,127,128,129,130,131,134,145,147,154,155,157);
 const medicineA=new Array(84,85,86,87,88,110,111);
@@ -6572,6 +6573,9 @@ function Battle(Ev=-1){
           case 46:
             HPrec(25,5);
           break;
+          case 104:
+            HPrec(64);
+          break;
           case 112:
             HPrec(45);
           break;
@@ -6681,17 +6685,17 @@ function Battle(Ev=-1){
             break;
           case 89:
             var A=Bufflist.findIndex(value=>value.name=="やけど")
-            battleLog.push("tukkomi");
+            battleLog.push("crush3");
             Buff([A,A,A,A],OPname+"は火傷を負ったよ！&　",1,0.7);
             break;
           case 90:
             var A=Bufflist.findIndex(value=>value.name=="凍結")
-            battleLog.push("tukkomi");
+            battleLog.push("crush3");
             Buff([A,A,A,A],OPname+"を氷漬けにしてやったよ！&　",1,0.5);
             break;
           case 91:
             var A=Bufflist.findIndex(value=>value.name=="中毒")
-            battleLog.push("tukkomi");
+            battleLog.push("crush3");
             Buff([A,A,A,A],OPname+"を中毒状態にしたよ！&　",1,0.7);
             break;
           case 92:
@@ -6815,7 +6819,9 @@ function Battle(Ev=-1){
             battleLog.push("attack");
             battleLog.push(itemA[itemID(equipeditem)].name+"を使うよ！&　");
             if(rate>Math.random()){
-            if(word!==-1){battleLog.push(word)};
+            if(word!==-1){
+              battleLog.push("tukkomi");
+              battleLog.push(word)};
             if(p==0){
             Pbuff=Pbuff.concat(Ary);
             }else if(p==1){
@@ -10272,6 +10278,10 @@ function AssemCompare(product,type,loop){
       arr1.push(140,80,70);
       arr2.push(1,2,3);
       break;
+    case 158:
+      arr1.push(135,147,62);
+      arr2.push(1,1,1);
+      break;
     case 134:
       //がらくた
       arr1=vmatnameA.concat();
@@ -10896,6 +10906,7 @@ function Crisonaset(){
         R=Math.random()*70;
       }
       var Pow=Skilllist[Sid].power;
+      if(UserItem[158]>0){Pow*=1.5};
       if(subpow>0){Pow=subpow};
       if(Skilllist[Sid].sp>0 && Skilllist[Sid].sp==StatusE[3]){
         //特攻判定 必中
