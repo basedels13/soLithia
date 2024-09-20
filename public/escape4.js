@@ -1,4 +1,5 @@
-// ver 1.02 加工・錬成後にセーブ？
+// ver 1.02 加工・錬成後にセーブ
+// 疾風のりんご？
 // 余裕あったら→採取の暫定獲得アイテム、状態異常耐性、バフ状況画面
 window.onload = function(){
 main();
@@ -470,6 +471,7 @@ var achieve=[
   {name:"SS魂",sub:"3つのモードをSSランクでクリアする"},
   {name:"フォーヘニル",sub:"狭間から脱出する"},
   {name:"ソリティア・ベリル",sub:"ヘニルの時空を突破する"},
+  {name:"究極の真理",sub:"アイテム図鑑をコンプリートする"},
 ];
 for(var i=0; i<achieve.length;i++){
   achieve[i].id=i;
@@ -897,6 +899,8 @@ userPet=getdata.Pet.concat();
 UserLibrary=getdata.UserLibrary.concat();
 UserStatus=getdata.Status.concat();
 defeatedmonster=getdata.Monster;
+UserLibrary[0]=0;
+UserLibrary[76]=0;
 //追加データ部分　undefinedなら初期値にしておく
 for(var i=0; i<getdata.Achieve.length; i++){
   var A=achieve.findIndex(value=>value.name==getdata.Achieve[i].name);
@@ -1066,6 +1070,8 @@ function saveUP(){
   userRecipe=getdata.Recipe.concat();
   userPet=getdata.Pet.concat();
   defeatedmonster=getdata.Monster;
+  UserLibrary[0]=0;
+  UserLibrary[76]=0;
   //追加データ部分　undefinedなら初期値にしておく
   for(var i=0; i<getdata.Achieve.length; i++){
     var A=achieve.findIndex(value=>value.name==getdata.Achieve[i].name);
@@ -3233,6 +3239,10 @@ function menu(state=0,area=0){
         if(UserLibrary[62]>0){
           AK("ソリティア・ベリル");
         }
+        var U=UserLibrary.filter(value=>value>0);
+        if(U.length>=157){
+          AK("究極の真理");
+        }
         if(cleared[0][0]>0 && cleared[0][1]>0 && cleared[0][2]>0 && totalcardmove>=1500){
           IK("エル・コレクション・ブック");
         }
@@ -4619,15 +4629,16 @@ if(this.type==0){
   var T=itemA.filter(value=>value.class=="クリソナ");
   var U=0;
   for(var i=1;i<T.length;i++){U+=UserLibrary[T[i].id];};
-  var t = new createjs.Text("クリソナ： "+U+"/"+(T.length-1)+"　", "24px serif", "white");
+  var t = new createjs.Text("クリソナ： "+U+"/"+(T.length-2)+"　", "24px serif", "white");
   Ary.push(t);
   var T=itemA.filter(value=>value.class=="製造");
   var U=0;
-  for(var i=0;i<T.length;i++){U+=UserLibrary[T[i].id];};
+  for(var i=0;i<T.length;i++){
+      U+=UserLibrary[T[i].id];};
   var t = new createjs.Text("製造："+U+"/"+T.length, "24px serif", "white");
   Ary.push(t);
   var U=UserLibrary.filter(value=>value>0);
-  var t = new createjs.Text("全体："+U.length+"/"+(itemA.length-1)+" ("+(100*U.length/(itemA.length-1)).toFixed(1)+"％)　", "26px serif", "white");
+  var t = new createjs.Text("全体："+U.length+"/"+(itemA.length-2)+" ("+(100*U.length/(itemA.length-2)).toFixed(1)+"％)　", "26px serif", "white");
   Ary.push(t);
   for(var i=0;i<Ary.length;i++){
     Ary[i].x=700;
@@ -4641,14 +4652,14 @@ if(this.type==0){
   function counterI(ts,tflame,A=0,delay=0){
     //1文字ずつ描画 A->文字送りの速さ
     if(opLock!==4){
-      Ary[Ary.length-1].text="全体："+tflame+"/"+(itemA.length-1)+" ("+(100*tflame/(itemA.length-1)).toFixed(1)+"％)　"
+      Ary[Ary.length-1].text="全体："+tflame+"/"+(itemA.length-2)+" ("+(100*tflame/(itemA.length-2)).toFixed(1)+"％)　"
       return false;
     }
     A+=Math.floor(tflame/50);
-    Ary[Ary.length-1].text="全体："+A+"/"+(itemA.length-1)+" ("+(100*A/(itemA.length-1)).toFixed(1)+"％)　"
+    Ary[Ary.length-1].text="全体："+A+"/"+(itemA.length-2)+" ("+(100*A/(itemA.length-2)).toFixed(1)+"％)　"
     if(A>tflame){
       A=U.length;
-      Ary[Ary.length-1].text="全体："+A+"/"+(itemA.length-1)+" ("+(100*A/(itemA.length-1)).toFixed(1)+"％)　"
+      Ary[Ary.length-1].text="全体："+A+"/"+(itemA.length-2)+" ("+(100*A/(itemA.length-2)).toFixed(1)+"％)　"
     }else{
     window.requestAnimationFrame((ts)=>counterI(ts,tflame,A));
     }
@@ -5794,6 +5805,10 @@ function Battle(Ev=-1){
         se31.play();
         battleLogNext();
         break;
+      case "HPrecSE":
+        se26.play();
+        battleLogNext();
+        break;
       case "tukkomi":
         se32.play();
         battleLogNext();
@@ -6820,7 +6835,11 @@ function Battle(Ev=-1){
             battleLog.push(itemA[itemID(equipeditem)].name+"を使うよ！&　");
             if(rate>Math.random()){
             if(word!==-1){
+              if(p==0){
               battleLog.push("tukkomi");
+              }else if(p==1){
+              battleLog.push("HPrecSE");
+              }
               battleLog.push(word)};
             if(p==0){
             Pbuff=Pbuff.concat(Ary);
@@ -10498,7 +10517,6 @@ function AssemCompare(product,type,loop){
     Ct.addChild(t);
     }
   if(R>successRate){
-    //失敗時、材料は消費されない
     var t=new createjs.Text("素材は一部返還されます。","24px serif","white");
     t.x=260;
     t.y=270;
@@ -10969,7 +10987,7 @@ function Crisonaset(){
   var E=Ebuff.indexOf(EE)
   if(E!==-1){ATK=ATK*1.25};
   var RR=(85+Math.floor(Math.random()*16))/100
-  result=Math.floor(RR*Math.floor(Math.floor(X*Pow*StatusE[1]*ATK/StatusP[2]*DEF)/50+2));
+  result=Math.floor(RR*Math.floor(Math.floor(X*Pow*(StatusE[1]*ATK)/(StatusP[2]*DEF))/50+2));
   if(debugmode){console.log('damage',P,Sid,result)};
   return result;  
 }
