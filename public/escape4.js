@@ -97,6 +97,7 @@ var dragPointX;
 var dragPointY;
 var mute="ON"
 var debugmode=false;//出荷時にfalseにする
+var titletext="v1.01/Click Card to START";
 var cLock=true;//true->操作可能
 var opLock=0;//漫然と使っている -1->gamestartまで 10->×ボタンを禁止する　その他いろいろ
 var mLock=true;//deckめくっている最中falseとする
@@ -964,7 +965,7 @@ Titleyard.removeAllChildren();
 Configmap.removeAllChildren();
 Titleyard.addChild(t);
 TitleGrh();
-var t = new createjs.Text("v1.01/Click Card to START", "24px serif", "white");
+var t = new createjs.Text(titletext, "24px serif", "white");
   t.textAlign = "end";
   t.x=790;
   Titleyard.addChild(t);
@@ -1471,7 +1472,7 @@ function handleFileLoadComplete(event) {
 function handleComplete() {
   console.log("LOAD COMPLETE");
   Loadmap.removeAllChildren();
-  var t = new createjs.Text("v1.0/Click Card to START", "24px serif", "white");
+  var t = new createjs.Text(titletext, "24px serif", "white");
   t.textAlign = "end";
   t.x=790;
   Titleyard.addChild(t);
@@ -11147,7 +11148,7 @@ window.addEventListener("keyup", keyupHandler, false);
           Configmap.removeAllChildren();
           Titleyard.addChild(t);
           TitleGrh();
-          var t = new createjs.Text("v1.0/Click Card to START", "24px serif", "white");
+          var t = new createjs.Text(titletext, "24px serif", "white");
           t.textAlign = "end";
           t.x=790;
           Titleyard.addChild(t);
