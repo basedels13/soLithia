@@ -5781,6 +5781,10 @@ function Battle(Ev=-1){
         se12.play();
         battleLogNext();
         break;
+      case "se_14":
+        se14.play();
+        battleLogNext();
+        break;
       case "kaihi":
         se30.play();
         battleLogNext();
@@ -6728,12 +6732,14 @@ function Battle(Ev=-1){
           if(rate_2>R){
             //捕獲成功
             battleLog.push(OPname+"はエルゼリーに&食いついた！　気に入ったみたい！");
+            battleLog.push("se_14");
             battleLog.push(OPname+"が&しばらく採取についてくるようになった！");
             userPet=[OPname,Enemylist[M].St[0]];
             battleLog.push(OPname+"との戦いは&平和的に終わった！&　");
             battleLog.push("result")
             battleLog.push(itemA[itemID(Enemylist[M].Dropitem[0])].name+"をゲットしたよ！&　");
             battleLog.push("end of battle"); 
+            Exlists[3]=Exlists[3].concat(Enemylist[M].Dropitem[0]);
             battleLogNext();
             return false;
           }else{
