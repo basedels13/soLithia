@@ -1,5 +1,5 @@
-// ver 1.01
-// 余裕あったら→加工・錬成後にセーブ、採取の暫定獲得アイテム、状態異常耐性、バフ状況画面
+// ver 1.02 加工・錬成後にセーブ
+// 余裕あったら→採取の暫定獲得アイテム、状態異常耐性、バフ状況画面
 window.onload = function(){
 main();
 };
@@ -97,7 +97,7 @@ var dragPointX;
 var dragPointY;
 var mute="ON"
 var debugmode=false;//出荷時にfalseにする
-var titletext="v1.01/Click Card to START";
+var titletext="v1.02/Click Card to START";
 var cLock=true;//true->操作可能
 var opLock=0;//漫然と使っている -1->gamestartまで 10->×ボタンを禁止する　その他いろいろ
 var mLock=true;//deckめくっている最中falseとする
@@ -9635,7 +9635,7 @@ function Alchemyset(e,type,product,loop=1){
     case 45:
       vmatnameA.push(46,47);
       vmatnumA.push(2,1);
-      if(type==2){Alchemy(0,[product],[7],vmatnameA,vmatnumA,loop);return true;};
+      if(type==2){Alchemy(0,[product],[1],vmatnameA,vmatnumA,loop);return true;};
       break;
     case 56:
       vmatnameA.push(57,142,73);
@@ -9690,7 +9690,7 @@ function Alchemyset(e,type,product,loop=1){
     case 146:
       vmatnameA.push(15,16);
       vmatnumA.push(1,1);
-      if(type==2){Alchemy(0,[product],[7],vmatnameA,vmatnumA,loop);return true;};
+      if(type==2){Alchemy(0,[product],[1],vmatnameA,vmatnumA,loop);return true;};
       break;
    default:
   return false;
@@ -10350,10 +10350,17 @@ function AssemCompare(product,type,loop){
       if(A<90){A=Math.floor(A)};
       if(A>99.9){A=99.9};
       Crisona.push(A);
+      if(j==6){
+        var t=new createjs.Text("ほか合計"+mnumA[i]*loop+"つのアイテムを獲得しました","20px serif","white");
+        t.x=230;
+        t.y=150+30*i+30*j;
+        Ct.addChild(t);
+      }else if(j<6){
       var t=new createjs.Text(itemA[itemID(materialA[i])].name+"（純度"+A+"%) ×1","24px serif","white");
       t.x=230;
       t.y=150+30*i+30*j;
       Ct.addChild(t);
+      }
       }
       J+=mnumA;
     }else{
@@ -10370,6 +10377,7 @@ function AssemCompare(product,type,loop){
     Ct.addChild(t);
     }
     InvConfig(0);
+    if(!debugmode){saveLocal();}
   }
   };
   if(type==1){
@@ -10488,6 +10496,7 @@ function AssemCompare(product,type,loop){
     }
   }
   InvConfig(0);
+  if(!debugmode){saveLocal();}
   }
   function cookready(length=20,word="加工中・・・",success=true){
     var DL= new createjs.Bitmap("soL_dialogue.png");
@@ -13906,6 +13915,7 @@ return -1;
                   UserItem[itemA[A].id]+=B.length;
                   if(UserItem[itemA[A].id]>itemMax[itemMax[0]]){UserItem[itemA[A].id]=itemMax[itemMax[0]]};
                   if(UserLibrary[itemA[A].id]==0){UserLibrary[itemA[A].id]=1};
+                  //console.log(itemA[A].id,UserItem[itemA[A].id]);
               }
               var M=0;
               for(var i=0;i<6;i++){
