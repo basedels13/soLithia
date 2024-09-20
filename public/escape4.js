@@ -1,4 +1,5 @@
-// ver 1.0
+// ver 1.01
+// プレイデータ画面で左上のアイコンを表示する
 // 加工・錬成後にセーブ
 // 余裕あったら→採取で現在手に入れたアイテム、錬成のヘルプ画面、レシピメモ、状態異常耐性、バフ状況画面
 window.onload = function(){
@@ -4309,7 +4310,7 @@ shape.graphics
      .drawRect(30, 53, 730, 510);
 shape.alpha=0.4;
 field.addChild(shape);
-var BG1 = new createjs.Bitmap("SoL_header2.png");
+var BG1 = new createjs.Bitmap("soL_header2.png");
 BG1.y=-8;
 field.addChild(BG1);
 var option_bt5 = new createjs.Bitmap('soL_batu.png');
@@ -14245,6 +14246,7 @@ return -1;
     function PathTalk(henir=0){
       //event
       //125,300,525,800,1125,1500
+      console.log(InvID(0),totalcardmove);
       if(opLock!==0 && opLock!==11){return false};
       if(henir==0){
       if(InvID(0)==1 && totalcardmove>=300){
@@ -14263,10 +14265,10 @@ return -1;
         MsgAry.push(["狭間","……。",1,0,3,1])
         MsgAry.push(["リティア","ふー。ちょっと休憩しよ……。",0,-1])
         MsgAry.push(["狭間","……。",1,-2]);
-        MsgAry.push(["狭間","あの。&少し、いいかな。",1,-2]);
-        MsgAry.push(["狭間","そう、そこでリティアと一緒にソリティアをしてる&キミに向かって話しかけている。",1,-2]);
-        MsgAry.push(["狭間","お願いがあるんだ。&どうか、協力してほしい。",1,-2]);
-        MsgAry.push(["狭間","リティアを外に、エリオスに出してあげたい。",1,-2]);
+        MsgAry.push(["狭間","あの。&ちょっと、いいかな。",1,-2]);
+        MsgAry.push(["狭間","そう、そこでリティアと一緒にソリティアをしてる&キミに話しかけているよ。",1,-2]);
+        MsgAry.push(["狭間","お願いがあるんだ。&リティアを外に、エリオスに出してあげたい。",1,-2]);
+        MsgAry.push(["狭間","どうか、協力してほしい。",1,-2]);
         MsgAry.push(["リティア","ううん……。"]);
         MsgAry.push(["狭間","あっ、続きはまた詳しく話すよ。",1]);
         MsgAry.push(["リティア","あれ、誰かとお話してた？"]);
