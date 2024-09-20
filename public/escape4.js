@@ -3233,7 +3233,7 @@ function menu(state=0,area=0){
         if(UserLibrary[62]>0){
           AK("ソリティア・ベリル");
         }
-        if(cleared[0][0]>0 && cleared[0][1]>0 && cleared[0][2]>0 && totalcardmove>=2400){
+        if(cleared[0][0]>0 && cleared[0][1]>0 && cleared[0][2]>0 && totalcardmove>=1500){
           IK("エル・コレクション・ブック");
         }
         if(InvID(7)==0 && UserLibrary[62]>0){
@@ -14249,7 +14249,7 @@ return -1;
       console.log(InvID(0),totalcardmove);
       if(opLock!==0 && opLock!==11){return false};
       if(henir==0){
-      if(InvID(0)==1 && totalcardmove>=300){
+      if(InvID(0)==1 && totalcardmove>=125){
         MsgAry.push(["狭間","カード裁きが手慣れてきたね。",1,0,3,1])
         MsgAry.push(["リティア","ふっ/ふっ/ふっ。&リティア様は物覚えも早いんだから。"])
         MsgAry.push(["狭間","……。",1]);
@@ -14261,7 +14261,7 @@ return -1;
       InvID(0,2);
       return true;
       }
-      if(InvID(0)==2 && totalcardmove>=525){
+      if(InvID(0)==2 && totalcardmove>=300){
         MsgAry.push(["狭間","……。",1,0,3,1])
         MsgAry.push(["リティア","ふー。ちょっと休憩しよ……。",0,-1])
         MsgAry.push(["狭間","……。",1,-2]);
@@ -14280,7 +14280,7 @@ return -1;
       InvID(0,3);
       return true;
       }
-      if(InvID(0)==3 && totalcardmove>=800){
+      if(InvID(0)==3 && totalcardmove>=525){
         MsgAry.push(["狭間","……。",1,0,3,1])
         MsgAry.push(["リティア","ふぁぁ……。ちょっと、ひと眠りするね。",0,-1])
         MsgAry.push(["狭間","……。",1,-2]);
