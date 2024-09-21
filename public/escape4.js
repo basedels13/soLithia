@@ -784,7 +784,7 @@ var vpronum=0;
 var vmatnameA=[]
 var vmatnumA=[]
 //思いついた・覚えたレシピを随時追加
-var userRecipe=[1,11,82];
+var userRecipe=[1,11,81,82,113];
 //錬成補助
 var AsmAry=[];
 var AsmAry2=[];
@@ -956,7 +956,7 @@ UserItem.fill(0);
 UserLibrary=new Array(160);
 UserLibrary.fill(0);
 Crisona=[];
-userRecipe=[1,11,82];
+userRecipe=[1,11,81,82,113];
 userPet=[];
 GamestartT=0;
 defeatedmonster=0;
