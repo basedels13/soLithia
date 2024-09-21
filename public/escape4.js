@@ -1,5 +1,5 @@
 // ver 1.02 加工・錬成後にセーブ
-// 疾風のりんご？
+// スポア-山札の枚数が増える？
 // 余裕あったら→採取の暫定獲得アイテム、状態異常耐性、バフ状況画面
 window.onload = function(){
 main();
@@ -5223,7 +5223,7 @@ function DeckReset_H(p=0,point=0,X=0){
               }else if(R==1){
                 pickMsg(userPet[0]+"は寝そべってる！&　")
               }else{
-              userPet[1]-=10+Math.floor(Math.random()*5);
+              userPet[1]-=7+Math.floor(Math.random()*5);
               Exlists[3].push(24);
               se10.play();
               if(userPet[1]>0){
@@ -6265,10 +6265,22 @@ function Battle(Ev=-1){
       //ガード持ち
       if(userPet.length){
         switch(userPet[0]){
+          case "シャドウガード":
+            if(Bturn%4!==1){
+            battleLog.push("shake");
+            battleLog.push(userPet[0]+"が攻撃をかばって&"+D+"のダメージを受けた！"); 
+            userPet[1]-=D;
+            if(userPet[1]<=0){
+            battleLog.push(userPet[0]+"はどこかへ逃げてしまった…"); 
+            userPet=[];
+            }
+            battleLog.push("turnend");
+            return false;
+          }
+          break;
           case "ヘルナオーブ":
             case "シャドウドリラー":
-              case "シャドウガード":
-                case "ストーンゴーレム":
+              case "ストーンゴーレム":
           battleLog.push("shake");
           battleLog.push(userPet[0]+"が攻撃をかばって&"+D+"のダメージを受けた！"); 
           userPet[1]-=D;
@@ -6836,9 +6848,9 @@ function Battle(Ev=-1){
             if(rate>Math.random()){
             if(word!==-1){
               if(p==0){
-              battleLog.push("tukkomi");
+                battleLog.push("HPrecSE");
               }else if(p==1){
-              battleLog.push("HPrecSE");
+                battleLog.push("tukkomi");
               }
               battleLog.push(word)};
             if(p==0){
@@ -11687,7 +11699,7 @@ window.addEventListener("keyup", keyupHandler, false);
               jingle.play();
               createjs.Tween.get(Ct)
               .to({y:-5100},70000)
-              .wait(1000)
+              .wait(1500)
               .call(returnBt);
             }
             function returnBt(){
@@ -11757,8 +11769,6 @@ window.addEventListener("keyup", keyupHandler, false);
             Ary.push(t);
             var t=new createjs.Text("　　","36px メイリオ","white");
             Ary.push(t);
-            var t=new createjs.Text("　　","36px メイリオ","white");
-            Ary.push(t);
             var t=new createjs.Text("リティアテーマソング「Milestone」","32px メイリオ","white");
             Ary.push(t);
             var t=new createjs.Text("<耳コピアレンジ>/提供","32px メイリオ","white");
@@ -11792,6 +11802,8 @@ window.addEventListener("keyup", keyupHandler, false);
             var t=new createjs.Text("エンディング曲","36px メイリオ","white");
             Ary.push(t);
             var t=new createjs.Text("「INSOMNIA」龍崎一","36px メイリオ","white");
+            Ary.push(t);
+            var t=new createjs.Text("（Short Ver）","32px メイリオ","white");
             Ary.push(t);
             var t=new createjs.Text("　from DOVA-SYNDROME","32px メイリオ","white");
             Ary.push(t);
@@ -14034,7 +14046,7 @@ return -1;
       //狭間との会話
       if(opLock!==0 && opLock!==11){return false};
       if(equipeditem==8){
-    var R=9+Math.floor(Math.random()*10);
+    var R=9+Math.floor(Math.random()*12);
       }else{
     var R=Math.floor(Math.random()*9);
       }
@@ -14205,10 +14217,11 @@ return -1;
       case 12:
         MsgAry.push(["　","レナ・エリンデルは、心優しいエルフの弓使い。年齢不詳。&隊の中ではお姉さん的な存在で、たまに怒ると怖い。&弓を射る時には、弦と矢はマナで生成している。",-1,0,3,1]);
         MsgAry.push(["リティア","でっか……コホン。&初期メンバーは、&エルス、アイシャ、レナの3人だったんだよね。"]);
-        MsgAry.push(["狭間","当初は隊の中で一番大人だったから、&よくエルスとアイシャの面倒をみてあげていたそうだよ。",1])
+        MsgAry.push(["狭間","当初は隊の中で一番大人だったから、&よくエルスとアイシャの面倒をみてあげていたらしい。",1])
         MsgAry.push(["リティア","頼れる大人がそばにいるのは、ありがたいことだよね。"]);
         MsgAry.push(["リティア","すごく若く見えるけど、何歳くらいなのかな。"]);
         MsgAry.push(["狭間","うーん。エルフという種族が何百年も生きる種族だからね。&レナに限らずエル捜索隊のメンバーは&年齢不詳とされる人が少なくないよ。",1])
+        MsgAry.push(["リティア","ホイホイ年齢不詳がいるのはどうなのよ……。"]);
         MsgAry.push(["end"]);
         MsgNext(-1);
         break;
@@ -14259,6 +14272,7 @@ return -1;
         MsgAry.push(["狭間","ちなみに、覚醒すると九尾の力が解放されて&髪が白くなったり、尻尾が生えたりして、&冒頭の写真みたいな姿になるよ。",1]);
         MsgAry.push(["リティア","ねー！　尻尾がもふもふだよ！　&もふもふ！　もふもふ！"])
         MsgAry.push(["狭間","……。",1]);
+        MsgAry.push(["リティア","もふもふ！"])
         MsgAry.push(["end"]);
         MsgNext(-1);
         break;
@@ -14285,6 +14299,47 @@ return -1;
         MsgAry.push(["end"]);
         MsgNext(-1);
         break;
+        case 19:
+          MsgAry.push(["リティア","この金髪のお姉様は誰？&何となく雰囲気が他の人と違うような。",0,0,3,1]);
+          MsgAry.push(["狭間","彼女……ロゼは別の次元からエリオスにやってきた、&いわゆるコラボキャラなんだ。&雰囲気が違うのはそのせいじゃないかな。",1])
+          MsgAry.push(["リティア","こらぼ……？"])
+          MsgAry.push(["狭間","そうだわよ。",1])
+          MsgAry.push(["リティア","……？"])
+          MsgAry.push(["狭間","……ロゼは天界の皇女に仕える側近部隊、&「皇女の庭園」に属する軍のエリート。職業はガンナー。&ロゼという名前も、コードネームなんだって。",1])
+          MsgAry.push(["リティア","コードネームって、カッコいいよねー！&あたしも欲しいな。そういうの。"])
+          MsgAry.push(["狭間","リティアは目立つから、&コードネーム使ってても&すぐに本名が割れちゃう気がするけど……。",1])
+          MsgAry.push(["リティア","そーですか、そーですか！&それで……ガンナーってことは、銃を使って戦うんだよね？"])
+          MsgAry.push(["狭間","いや……リボルバーだけじゃなくて、&連射に長けたオートガン、貫通力に優れたマスケット、&一発が重いハンドキャノンと、4種類の武器を使い分けるよ。",1]);
+          MsgAry.push(["狭間","4種類もの武器を使い分けることができるのは、&隣にいるメカのゼロが&彼女をサポートしているからなんだ。",1])
+          MsgAry.push(["リティア","へー、やるじゃん。"])
+          MsgAry.push(["リティア","銃か……銃ねぇ……。"])
+          MsgAry.push(["狭間","また何を考えてるの？",1])
+          MsgAry.push(["リティア","ん？&ピッケルから銃弾が撃てたら面白いかなーって。"])
+          MsgAry.push(["リティア","ババババーン！/　って撃った後に、&フッ、って銃口の煙を吹き消すの。"])
+          MsgAry.push(["狭間","念のため聞いておくけど、&それは杖なんだよね？",1])
+          MsgAry.push(["リティア","杖でもあり、ピッケルでもあり、銃でもある。&いわば……ウェポンパックなのよ！"])
+          MsgAry.push(["狭間","ははは。",1])
+          MsgAry.push(["end"]);
+          MsgNext(-1);
+          break;
+        case 20:
+          MsgAry.push(["リティア","ねぇ、ピンクの子供が混ざってるよ。&こんな子供がエル捜索隊なわけ？",0,0,3,1]);
+          MsgAry.push(["狭間","ラビィは見た目や言動こそ子供に見えるけど、&立派なメンバーの一員だよ。",1])
+          MsgAry.push(["リティア","マ、マジ……？"])
+          MsgAry.push(["狭間","ラビィはかなり特殊な出自をしていて、&長い間ペイターの黒い森に閉じ込められていたという。",1])
+          MsgAry.push(["狭間","3度目の青い光に導かれて、&大地のマスターと共に森から出て旅が始まり、&やがてエリアノドに辿り着くんだ。",1])
+          MsgAry.push(["リティア","3度目の青い光って？"])
+          MsgAry.push(["狭間","エリオスではこれまでに3回、&天地を揺るがす大きな事象が起きている。",1])
+          MsgAry.push(["狭間","一つ目は約1000年前のナソード戦争。&二つ目は500年前のエルの爆発。&そして三つ目はエルスによるエリアノド復元。",1])
+          MsgAry.push(["狭間","ラビィが今までに見た3つの青い光は、&これらを指していると考えられているよ。",1])
+          MsgAry.push(["リティア","んー……。ということは……？&ナソード戦争の頃からずーっと森で過ごしてたってこと！？"])
+          MsgAry.push(["リティア","そんなことって、あり得るのかな。&フツーの時の流れの中で生きていて、そんな……。"])
+          MsgAry.push(["狭間","ちなみに彼女のテーマ曲の「夜の迷宮」は&なんと5ヵ国語でカバーされているよ。",1])
+          MsgAry.push(["リティア","ひゃー。すごい人気だね。&あたしのテーマ曲も、たくさん歌ってほしいな。"])
+          MsgAry.push(["リティア","「マイルストーン」をよろしくね！！"])
+          MsgAry.push(["end"]);
+          MsgNext(-1);
+          break;
     }
     }
     function PathTalk(henir=0){
