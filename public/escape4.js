@@ -794,7 +794,7 @@ var successRate=0;
 var henirarea=[
   {name:"エルの樹の麓",Nitem:[[5,5,29],[54]],Ritem:[[14,23],[73]],SRitem:[[22],[69]],Monster:["パピリオ","ポール","グリピグ"]},
   {name:"天上の岐路",Nitem:[[27,36],[60]],Ritem:[[37,32],[56]],SRitem:[[146],[61]],Monster:["ヘルナオーブ","コマンドオーガニックコア","イース"]},
-  {name:"アルテラ平原",Nitem:[[5,33],[25]],Ritem:[[12],[141]],SRitem:[[19],[71]],Monster:["グリッターランサー","アルロン","グリピグ","グリッターアーチャー"]},
+  {name:"アルテラ平原",Nitem:[[33],[25]],Ritem:[[12],[141]],SRitem:[[19],[71]],Monster:["グリッターランサー","アルロン","グリピグ","グリッターアーチャー"]},
   {name:"ディシオン採掘場",Nitem:[[32],[54,55]],Ritem:[[13],[63]],SRitem:[[21],[65]],Monster:["プリンチュ","アルポコピュリタ","マナイーター"]},
   {name:"ザヤ山",Nitem:[[5,34,34],[26,30]],Ritem:[[41],[66,60]],SRitem:[[20],[152]],Monster:["ソソ","火山の炎鷹","パピリオ","マナイーター"]},
   {name:"トロッシュの巣",Nitem:[[10,17],[53,66]],Ritem:[[43,35],[66,79]],SRitem:[[44],[80]],Monster:["ラグズ","マーマン","トロッシュ","マナイーター"]},
@@ -10059,15 +10059,15 @@ function AssemCompare(product,type,loop){
       break;
     case 84:
       arr1.push(24,25,10);
-      arr2.push(3,2,2);
+      arr2.push(1,2,2);
       break;
     case 85:
       arr1.push(24,26,10);
-      arr2.push(3,1,2);
+      arr2.push(1,2,2);
       break;
     case 86:
       arr1.push(24,30,10);
-      arr2.push(3,1,2);
+      arr2.push(1,1,2);
       break;
     case 87:
       arr1.push(11,137,53);
@@ -10254,7 +10254,7 @@ function AssemCompare(product,type,loop){
     case 130:
       vpronum=5;
       arr1.push(50,145,24,51);
-      arr2.push(10,6,3,1);
+      arr2.push(8,5,2,1);
       break;
     case 131:
       arr1.push(48,39,20);
