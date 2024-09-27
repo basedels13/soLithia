@@ -150,7 +150,7 @@ Titleyard.addChild(t);
 //たいとるがめん
 function Title(){
 loadLocal();
-saveUP();
+if(debugmode){saveUP()};
 var circle1 = new createjs.Shape();
 circle1.graphics.beginFill("#2c4a3f")
 .drawCircle(0, 0, 80);
@@ -8820,7 +8820,9 @@ function OptionConfig(){
           option_bt.x=152;
           option_bt.y=690;
           Configmap.addChild(option_bt)
+          if(debugmode){
           option_bt.addEventListener("click", {handleEvent:saveDLcomfirm});
+          }
           function saveDLcomfirm(){
           var result = window.confirm('セーブファイルをダウンロードします！');
           if( result) {
