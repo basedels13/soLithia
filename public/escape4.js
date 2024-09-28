@@ -1,6 +1,5 @@
-// ver 1.02 加工・錬成後にセーブ
+// ver 1.03 上に上げたカードを降ろせるように
 // スポア-山札の枚数が増える？
-// 余裕あったら→採取の暫定獲得アイテム、状態異常耐性、バフ状況画面
 window.onload = function(){
 main();
 };
@@ -432,6 +431,8 @@ var HenirPathT=[];//選択中のヘニルパスを格納
 var HenirPathS=[];
 var Fever=0;
 var EvAry=[];
+var PathTextnum=-1;
+var PathTextAry=[];
 field.addChild(Cbutton);
 Cbtlist.push(Cbutton);
 //ボタン描画用
@@ -4837,7 +4838,19 @@ function undoButton(event){
                 case 11:
                   case 12:
                     case 13:
-                      break;
+              //再度上へ上げる
+                Extras[TX]+=1;
+                var newCard = new createjs.Bitmap(Card_src[T]);
+                newCard.x=50+(Ary.to)*(cardWidth+cardgapX);
+                newCard.y=150+(hands[Ary.to].length-1)*cardgapY;
+                field.addChild(newCard);
+                createjs.Tween.get(newCard)
+                .to({x:50+(Ary.from-7)*(cardWidth+cardgapX),y:5},70);
+                Exlists[Ary.from-10].push(newCard);
+                newCard.addEventListener("mousedown", {card:Ary.from,handleEvent:handleDown});
+                newCard.addEventListener("pressmove", {card:Ary.from,handleEvent:handleMove});
+                newCard.addEventListener("pressup", {card:Ary.from,handleEvent:handleUp});
+                break;
               default:
                 var newCard = new createjs.Bitmap(Card_src[T]);
                 switch(Ary.to){
@@ -7285,6 +7298,9 @@ function moveAllow(card=0){
         }else{
           return false;
         };
+      }else if(this.card>=10 && this.card<=13){
+        //クリア済みのカード
+        return true;
       }
       var I=Math.floor(card/100);
       var J=card%100;
@@ -7394,7 +7410,15 @@ switch(playMode[0]){
           T.alpha=0.5;
           se1.play()
           return true;
-          };
+          }else if(this.card>=10 && this.card<=13){
+            //クリア済みのカード
+            var T=Exlists[this.card-10][Exlists[this.card-10].length-1];
+            dragPointX = stage.mouseX - T.x;
+            dragPointY = stage.mouseY - T.y;
+            T.alpha=0.5;
+            se1.play()
+            return true;
+          }
         var I=Math.floor(this.card/100);
         var J=this.card%100;
         if(J < hands[I].length){
@@ -7489,6 +7513,12 @@ function handleMove(event) {
                 var T=DeckFacelists[decksNow-1]
                 T.x = stage.mouseX-dragPointX;
                 T.y = stage.mouseY-dragPointY;
+              return true;
+            }else if(this.card>=10 && this.card<=13){
+              //クリア済みのカード
+              var T=Exlists[this.card-10][Exlists[this.card-10].length-1];
+              T.x = stage.mouseX-dragPointX;
+              T.y = stage.mouseY-dragPointY;
               return true;
             }
             var I=Math.floor(this.card/100);
@@ -7585,28 +7615,7 @@ function handleUp(event) {
               //自動的にUP
               TX=Math.floor((X-1)/13);
               if(X==Extras[TX]+1){
-                se12.play();
-                Extras[TX]+=1;
-                var newCard = new createjs.Bitmap(Card_src[X]);
-                newCard.x=T.x
-                newCard.y=T.y
-                field.addChild(newCard);
-                //extraへ追加
-                createjs.Tween.get(newCard)
-                .to({x:50+(TX+3)*(cardWidth+cardgapX),y:5},70)
-                .call(endPhase);
-                Exlists[TX].push(newCard);
-                //cardlistから消去
-                deckmap.removeChild(T);
-                DeckFacelists.splice(decksNow-1,1);
-                decksNow-=1;
-                decksNow2-=1;
-                deckfaces.pop();
-                duelLog.push({card:[X],from:-1,to:10+TX});
-                //クリア条件
-                if(Extras[0]==13 && Extras[1]==26 && Extras[2]==39 && Extras[3]==52){
-                  Gameover();
-                }
+                UpCard(0);
               }else{
                 ExitCard(-1);            
               };
@@ -7616,28 +7625,7 @@ function handleUp(event) {
                 case 2:
                   case 3:
               if(X==Extras[TX]+1){
-                se12.play();
-                Extras[TX]+=1;
-                var newCard = new createjs.Bitmap(Card_src[X]);
-                newCard.x=T.x
-                newCard.y=T.y
-                field.addChild(newCard);
-                //extraへ追加
-                createjs.Tween.get(newCard)
-                .to({x:50+(TX+3)*(cardWidth+cardgapX),y:5},70)
-                .call(endPhase);
-                Exlists[TX].push(newCard);
-                //cardlistから消去
-                deckmap.removeChild(T);
-                DeckFacelists.splice(decksNow-1,1);
-                decksNow-=1;
-                decksNow2-=1
-                deckfaces.pop();
-                duelLog.push({card:[X],from:-1,to:10+TX});
-                //クリア条件
-                if(Extras[0]==13 && Extras[1]==26 && Extras[2]==39 && Extras[3]==52){
-                  Gameover();
-                }
+                UpCard(0)
               }else{
                 ExitCard(-1);            
               };
@@ -7693,6 +7681,60 @@ function handleUp(event) {
             }
           };
           return true;
+        }else if(this.card>=10 && this.card<=13){
+          //クリア済みのカード
+          se1.play()
+          cLock=false;
+          var T=Exlists[this.card-10][Exlists[this.card-10].length-1];
+          var TX=Math.floor((stage.mouseX-70)/90);
+          var TY=stage.mouseY;
+          var X=Extras[this.card-10];
+          if(debugmode){console.log(this.card,X,TX,TY)};
+        if(TY<140){
+          ExitCard(this.card);
+        }else{
+          switch(TX){
+          case 0:
+          case 1:
+          case 2:
+          case 3:
+          case 4:
+          case 5:
+          case 6:
+            var A=X%13;
+            var B=hands[TX][hands[TX].length-1]%13;
+            if(A==0){A+=13}
+            if(B==0){B+=13};
+            var C=Math.floor((X-1)/13);
+            var D=Math.floor((hands[TX][hands[TX].length-1]-1)/13);
+            if((hands[TX].length==0 && A==13) || (B-A==1 && (C+D)%2==1)){
+              //移動先に追加する
+                  var newCard = new createjs.Bitmap(Card_src[X]);
+                  newCard.x=T.x;
+                  newCard.y=T.y;
+                  field.addChild(newCard);
+                  hands[TX].push(X);
+                  Cardlists[TX].push(newCard);
+                  var HashCard=TX*100+hands[TX].length-1;
+                  newCard.addEventListener("mousedown", {card:HashCard,handleEvent:handleDown});
+                  newCard.addEventListener("pressmove", {card:HashCard,handleEvent:handleMove});
+                  newCard.addEventListener("pressup", {card:HashCard,handleEvent:handleUp});
+                  createjs.Tween.get(newCard)
+                  .to({x:50+TX*(cardWidth+cardgapX),y:150+(hands[TX].length-1)*cardgapY},70)
+                  .call(endPhase);
+                  //listから消去
+                  field.removeChild(T);
+                  Exlists[this.card-10].pop();
+                  Extras[this.card-10]-=1;
+                  duelLog.push({card:[X],from:this.card,to:TX});
+            }else{
+              ExitCard(this.card);
+            }
+            break;
+          default:
+            ExitCard(this.card);
+            }}
+          return true;
         }
         //一般のカード
         cLock=false;
@@ -7711,27 +7753,7 @@ function handleUp(event) {
                 case 2:
                   case 3:
               if(hands[I][J]==Extras[TX]+1){
-                se12.play();
-                var C=hands[I][J];
-                Extras[TX]+=1;
-                var newCard = new createjs.Bitmap(Card_src[hands[I][J]]);
-                newCard.x=T.x
-                newCard.y=T.y
-                field.addChild(newCard);
-                //extraへ追加
-                createjs.Tween.get(newCard)
-                .to({x:50+(TX+3)*(cardWidth+cardgapX),y:5},70)
-                .call(endPhase);
-                Exlists[TX].push(newCard);
-                //cardlistから消去
-                field.removeChild(T);
-                Cardlists[I].splice(J,1);
-                hands[I].splice(J,1);
-                duelLog.push({card:[C],from:I,to:10+TX});
-                //クリア条件
-                if(Extras[0]==13 && Extras[1]==26 && Extras[2]==39 && Extras[3]==52){
-                  Gameover();
-                }
+                UpCard(1);
               }else{
                 ExitCard();            
               };
@@ -7753,27 +7775,7 @@ function handleUp(event) {
               //自動的にUP
               TX=Math.floor((hands[I][J]-1)/13);
               if(hands[I][J]==Extras[TX]+1){
-                se12.play();
-                var C=hands[I][J];
-                Extras[TX]+=1;
-                var newCard = new createjs.Bitmap(Card_src[hands[I][J]]);
-                newCard.x=T.x
-                newCard.y=T.y
-                field.addChild(newCard);
-                //extraへ追加
-                createjs.Tween.get(newCard)
-                .to({x:50+(TX+3)*(cardWidth+cardgapX),y:5},70)
-                .call(endPhase);
-                Exlists[TX].push(newCard);
-                //cardlistから消去
-                field.removeChild(T);
-                Cardlists[I].splice(J,1);
-                hands[I].splice(J,1);
-                duelLog.push({card:[C],from:I,to:10+TX});
-                //クリア条件
-                if(Extras[0]==13 && Extras[1]==26 && Extras[2]==39 && Extras[3]==52){
-                  Gameover();
-                }
+                UpCard(1);
                 break;
               }else{ExitCard();break;};
           }
@@ -8307,6 +8309,15 @@ function handleUp(event) {
       }
       switch(playMode[0]){
         case 1:
+          if(t>=10){
+            //クリア済みのカード
+            var T=Exlists[t-10][Exlists[t-10].length-1];
+            createjs.Tween.get(T)
+            .to({x:50+(t-7)*(cardWidth+cardgapX),y:5},90)
+            .call(endPhase);
+            T.alpha=1;  
+            return true; 
+          }
           if(J < hands[I].length){
             var X=0;
             for(var i=J;i<hands[I].length;i++){
@@ -8362,6 +8373,48 @@ function handleUp(event) {
           break;
       }
     }
+    //右上へのアップ@クロンダイク
+    function UpCard(from=0){
+      se12.play();
+      Extras[TX]+=1;
+      if(from==0){
+        //デッキからのアップ
+        var newCard = new createjs.Bitmap(Card_src[X]);
+      }else{
+        //場からのアップ
+        var newCard = new createjs.Bitmap(Card_src[hands[I][J]]);
+      }
+      newCard.x=T.x
+      newCard.y=T.y
+      field.addChild(newCard);
+      //extraへ追加
+      createjs.Tween.get(newCard)
+      .to({x:50+(TX+3)*(cardWidth+cardgapX),y:5},70)
+      .call(endPhase);
+      Exlists[TX].push(newCard);
+      newCard.addEventListener("mousedown", {card:10+TX,handleEvent:handleDown});
+      newCard.addEventListener("pressmove", {card:10+TX,handleEvent:handleMove});
+      newCard.addEventListener("pressup", {card:10+TX,handleEvent:handleUp});
+      if(from==0){
+        //cardlistから消去
+        deckmap.removeChild(T);
+        DeckFacelists.splice(decksNow-1,1);
+        decksNow-=1;
+        decksNow2-=1
+        deckfaces.pop();
+        duelLog.push({card:[X],from:-1,to:10+TX});
+      }else{
+        //cardlistから消去
+        field.removeChild(T);
+        Cardlists[I].splice(J,1);
+        hands[I].splice(J,1);
+        duelLog.push({card:[C],from:I,to:10+TX});
+      }
+      //クリア条件
+      if(Extras[0]==13 && Extras[1]==26 && Extras[2]==39 && Extras[3]==52){
+        Gameover();
+      }
+      }
 }};
 function handleClick(event){
   //モンスター出現中
@@ -14046,12 +14099,36 @@ return -1;
     }};
     function PathText(){
       //狭間との会話
+      if(PathTextnum==-1){PathTextIni()};
+      function PathTextIni(){
+      if(equipeditem==8){
+      PathTextAry=new Array(12);
+      }else{
+      PathTextAry=new Array(11);
+      }
+      for (var i=0;i<PathTextAry.length;i++){
+      PathTextAry[i]=i;
+      }
+      shuffleTx();
+      PathTextnum=0;
+      }
+      function shuffleTx(){
+        for(var i =PathTextAry.length-1; i>0 ; i--){
+        var r =Math.floor(Math.random()*(i+1));
+        var temp = PathTextAry[i];
+        PathTextAry[i] = PathTextAry[r]
+        PathTextAry[r] = temp
+      }};
       if(opLock!==0 && opLock!==11){return false};
       if(equipeditem==8){
-    var R=9+Math.floor(Math.random()*12);
+    var R=11+PathTextAry[PathTextnum]
       }else{
-    var R=Math.floor(Math.random()*9);
+    var R=PathTextAry[PathTextnum]
       }
+    PathTextnum+=1;
+    if(PathTextnum>=PathTextAry.length){
+      PathTextIni();
+    }
     switch(R){
       case 0:
         MsgAry.push(["　","――時折、空間に隙間が現れて、外の世界が見える。",-1,0,3,1])
@@ -14160,19 +14237,35 @@ return -1;
         MsgNext(-1);
         break;
       case 8:
-        MsgAry.push(["リティア","……ねぇ。",0,0,3,1]);
-        MsgAry.push(["狭間","なに？",1])
-        MsgAry.push(["リティア","あんた、一体何者なの？"]);
-        MsgAry.push(["リティア","最初は、&あたしが会話相手欲しさに生み出した妄想だと思ってた。"]);
-        MsgAry.push(["リティア","それにしては反応がありありとしてて、&なんだか自分と会話してるって感じがしなくて。&まるで本当に誰かと会話してるみたいだよ。"]);
-        MsgAry.push(["狭間","……。",1])
-        MsgAry.push(["リティア","はあ。&こういう時に限ってうんともすんとも答えてくれないんだから。"]);
-        MsgAry.push(["狭間","……。",1]);
-        MsgAry.push(["リティア","いずれ分かるって言いたいの？&まぁ、あたしとしては、&どっちにしろ話し相手になってもらえればいいんだけどさ。"]);
+        MsgAry.push(["リティア","ん～！　……ちょっと休憩しよ。",0,0,3,1]);
+        MsgAry.push(["狭間","あ……そうだ。&この部屋、テーブルの他にも&いろいろ触れるものがあるよね。",1])
+        MsgAry.push(["リティア","ああ、床に転がってる地図とか、&壁にかかってる額縁とか？"]);
+        MsgAry.push(["リティア","昔っからあるものだし、&大して気にしてなかったけど。"]);
+        MsgAry.push(["狭間","ちょっとした謎が&隠されているかもしれないよ。",1])
+        MsgAry.push(["リティア","ソリティアと思ったら、今度は謎解き？"]);
+        MsgAry.push(["リティア","まぁ、このリティア・ベリルに解けない謎はないよ！"]);
+        MsgAry.push(["狭間","答えはソリティアの中にある。&覚えておくといいよ。",1]);
         MsgAry.push(["end"]);
         MsgNext(-1);
         break;
-      case 9:
+        case 9:
+          MsgAry.push(["リティア","宝の地図かと思ったら、楽譜だった。",0,0,3,1]);
+          MsgAry.push(["狭間","ああ、そこの床に転がってるやつ？",1])
+          MsgAry.push(["リティア","このマーク、どこかで見たことがあるのよねー……。&……どこだろう……。"]);
+          MsgAry.push(["狭間","クロンダイクの絵札をよく見てみたらどうかな。&なにか気づくかも。",1])
+          MsgAry.push(["リティア","絵札の模様？&全部似たような感じに見えるけどな……"]);
+          MsgAry.push(["end"]);
+          MsgNext(-1);
+        break;
+        case 10:
+          MsgAry.push(["リティア","ねぇ、そこに飾ってある意味ありげな額縁のこと、&何か知らない？",0,0,3,1]);
+          MsgAry.push(["リティア","このパネル、どこかで見たことがあるのよねー……。&……どこだろう……。"]);
+          MsgAry.push(["狭間","マグマンタの絵札をよく見てみたらどうかな。&なにか気づくかも。",1])
+          MsgAry.push(["リティア","絵札の模様？&全部似たような感じに見えるけどな……"]);
+          MsgAry.push(["end"]);
+          MsgNext(-1);
+        break;
+      case 11:
         MsgAry.push(["リティア","このトランプの絵札に描かれている人たち、&「エル捜索隊」よね。",0,0,3,1]);
         MsgAry.push(["狭間","エリオスの英雄。&今やエリオスで彼らのことを知らない者はいないだろうね。",1])
         MsgAry.push(["リティア","魔族の侵攻を幾度となく阻止して、&古代のエルも復元して、&今度は魔界に乗り込んでるんだっけ。"]);
@@ -14188,7 +14281,7 @@ return -1;
         MsgAry.push(["end"]);
         MsgNext(-1);
         break;
-      case 10:
+      case 12:
         MsgAry.push(["　","エルスは、エル捜索隊のリーダーの剣士だ。&赤い髪をした元気な少年で、真っすぐな性格。&エルを感じる能力は人一倍強い。",-1,0,3,1]);
         MsgAry.push(["リティア","ふーん、こっちがリーダーなんだ。&てっきり、エリシスがリーダーだと思ってたよ。"]);
         MsgAry.push(["狭間","エリシスは赤い騎士団の団長も兼任しているから、&エル捜索隊のリーダーに見えるのも納得がいくよ。",1])
@@ -14203,7 +14296,7 @@ return -1;
         MsgAry.push(["end"]);
         MsgNext(-1);
         break;
-      case 11:
+      case 13:
         MsgAry.push(["リティア","エル捜索隊の中にもレンダールがいるよね。",0,0,3,1]);
         MsgAry.push(["狭間","アイシャ・レンダールのことだね。",1])
         MsgAry.push(["リティア","コレクション・ブックの紹介文は、っと……。"]);
@@ -14216,7 +14309,7 @@ return -1;
         MsgAry.push(["end"]);
         MsgNext(-1);
         break;
-      case 12:
+      case 14:
         MsgAry.push(["　","レナ・エリンデルは、心優しいエルフの弓使い。年齢不詳。&隊の中ではお姉さん的な存在で、たまに怒ると怖い。&弓を射る時には、弦と矢はマナで生成している。",-1,0,3,1]);
         MsgAry.push(["リティア","でっか……コホン。&初期メンバーは、&エルス、アイシャ、レナの3人だったんだよね。"]);
         MsgAry.push(["狭間","当初は隊の中で一番大人だったから、&よくエルスとアイシャの面倒をみてあげていたらしい。",1])
@@ -14227,7 +14320,7 @@ return -1;
         MsgAry.push(["end"]);
         MsgNext(-1);
         break;
-      case 13:
+      case 15:
         MsgAry.push(["リティア","レイヴン・クロムウェル。&元傭兵で、左腕はナソードに改造されている、と。",0,0,3,1]);
         MsgAry.push(["狭間","クロムウェル家の名前はベルダーにいた頃に&耳にしたけど……クロムウェル家の養子は&世の中では死んだことになっているみたいだ。",1])
         MsgAry.push(["リティア","お～！　&あたし以外にも、ナソード技術を戦闘に応用している&賢い人がいるじゃない！"]);
@@ -14238,7 +14331,7 @@ return -1;
         MsgAry.push(["end"]);
         MsgNext(-1);
         break;
-      case 14:
+      case 16:
         MsgAry.push(["リティア","ナソードの女王、イヴ。&すごい。ナソードなのに、人間そっくりだよ。",0,0,3,1]);
         MsgAry.push(["狭間","ナソードの歴史は古代エリアン王国の時代まで遡る。&アドリアンが生み出したナソードという発明は革命的だった。&王国はすぐさまナソードの大量生産を依頼した。",1])
         MsgAry.push(["リティア","おおかた、軍需兵器としての利用ね。"])
@@ -14252,7 +14345,7 @@ return -1;
         MsgAry.push(["end"]);
         MsgNext(-1);
         break;
-      case 15:
+      case 17:
         MsgAry.push(["狭間","ラシェはハーメルの王家「セイカー家」の王子だよ。&魔族に堕落した父親を捜すために、&エル捜索隊と同行することになったみたいだ。",1,0,3,1]);
         MsgAry.push(["リティア","王子様ね……。&ん……王子？　ちょっと待って。"])
         MsgAry.push(["リティア","……男の子だったのか。"])
@@ -14265,7 +14358,7 @@ return -1;
         MsgAry.push(["end"]);
         MsgNext(-1);
         break;
-      case 16:
+      case 18:
         MsgAry.push(["リティア","白いキツネがいる。",0,0,3,1]);
         MsgAry.push(["狭間","アラ・ハーンは、フルオネ出身の槍使い。&その身に九尾の狐、ハクを宿しているよ。",1])
         MsgAry.push(["リティア","はぁん、人柱力ってこと？"])
@@ -14278,7 +14371,7 @@ return -1;
         MsgAry.push(["end"]);
         MsgNext(-1);
         break;
-      case 17:
+      case 19:
         MsgAry.push(["リティア","うわぁ。&目つきの悪い人がいるよ。",0,0,3,1]);
         MsgAry.push(["狭間","エドワード……エドは、200年前から&タイムスリップしてきたナソード・ルーラー。&イヴのコアを狙ってエル捜索隊を追い続けて……。",1])
         MsgAry.push(["リティア","ストーカーじゃん。"])
@@ -14290,7 +14383,7 @@ return -1;
         MsgAry.push(["end"]);
         MsgNext(-1);
         break;
-      case 18:
+      case 20:
         MsgAry.push(["リティア","お、フェリックスと同じ魔族がいるよ。",0,0,3,1]);
         MsgAry.push(["狭間","ルーこと、ルシエラ・R・サワークリームは、&魔界を支配する四大魔族の一人だった魔族だ。",1])
         MsgAry.push(["リティア","……だった？"])
@@ -14301,7 +14394,7 @@ return -1;
         MsgAry.push(["end"]);
         MsgNext(-1);
         break;
-        case 19:
+        case 21:
           MsgAry.push(["リティア","この金髪のお姉様は誰？&何となく雰囲気が他の人と違うような。",0,0,3,1]);
           MsgAry.push(["狭間","彼女……ロゼは別の次元からエリオスにやってきた、&いわゆるコラボキャラなんだ。&雰囲気が違うのはそのせいじゃないかな。",1])
           MsgAry.push(["リティア","こらぼ……？"])
@@ -14324,7 +14417,7 @@ return -1;
           MsgAry.push(["end"]);
           MsgNext(-1);
           break;
-        case 20:
+        case 22:
           MsgAry.push(["リティア","ねぇ、ピンクの子供が混ざってるよ。&こんな子供がエル捜索隊なわけ？",0,0,3,1]);
           MsgAry.push(["狭間","ラビィは見た目や言動こそ子供に見えるけど、&立派なメンバーの一員だよ。",1])
           MsgAry.push(["リティア","マ、マジ……？"])
@@ -14342,6 +14435,19 @@ return -1;
           MsgAry.push(["end"]);
           MsgNext(-1);
           break;
+          default:
+            MsgAry.push(["リティア","……ねぇ。",0,0,3,1]);
+            MsgAry.push(["狭間","なに？",1])
+            MsgAry.push(["リティア","あんた、一体何者なの？"]);
+            MsgAry.push(["リティア","最初は、&あたしが会話相手欲しさに生み出した妄想だと思ってた。"]);
+            MsgAry.push(["リティア","それにしては反応がありありとしてて、&なんだか自分と会話してるって感じがしなくて。&まるで本当に誰かと会話してるみたいだよ。"]);
+            MsgAry.push(["狭間","……。",1])
+            MsgAry.push(["リティア","はあ。&こういう時に限ってうんともすんとも答えてくれないんだから。"]);
+            MsgAry.push(["狭間","……。",1]);
+            MsgAry.push(["リティア","いずれ分かるって言いたいの？&まぁ、あたしとしては、&どっちにしろ話し相手になってもらえればいいんだけどさ。"]);
+            MsgAry.push(["end"]);
+            MsgNext(-1);
+            break;
     }
     }
     function PathTalk(henir=0){
