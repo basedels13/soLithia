@@ -1,6 +1,5 @@
 // ver 1.03 上に上げたカードを降ろせるように
 // スポア-山札の枚数が増える？
-// やっぱりやる気あれば→採取地ごとに判明しやすいレシピの追加、レシピ判明のヒント
 window.onload = function(){
 main();
 };
@@ -97,7 +96,7 @@ Invcursor.alpha=0;
 var dragPointX;
 var dragPointY;
 var mute="ON"
-var debugmode=false;//出荷時にfalseにする
+var debugmode=true;//出荷時にfalseにする
 var titletext="v1.031/Click Card to START";
 var cLock=true;//true->操作可能
 var opLock=0;//漫然と使っている -1->gamestartまで 10->×ボタンを禁止する　その他いろいろ
@@ -782,6 +781,17 @@ const assembleA=new Array(1,2,3,4,7,8,9,11,12,13,16,17,28,48,59,61,64,65,67,68,7
 //戦闘
 const consumptionA=new Array(9,23,24,25,26,29,30,31,35,36,41,46,89,90,91,92,93,94,95,96,97,98,99,100,104,105,106,107,108,109,112,113,114,115,116,117,118,119,120,121,122,123,124,125,126,127,128,129,130,131,134,145,147,154,155,157);
 const medicineA=new Array(84,85,86,87,88,110,111);
+//各エリアごとで獲得可能なレシピ
+const areaRecipe=[
+  [7,8,84,96,119,120,147],
+  [2,48,85,87,106,109,121],
+  [3,98,104,144,145,112,117],
+  [110,111,99,101,105,126,78],
+  [107,108,88,94,124,102,89],
+  [147,103,90,92,125,132,28],
+  [59,67,116,118,135,131,148],
+  [4,93,97,100,133,156]
+]
 //const
 var vpronum=0;
 var vmatnameA=[]
@@ -10399,6 +10409,28 @@ function AssemCompare(product,type,loop){
   //ドン
   opLock=10;
   cookready(3+loop,"加工中・・・");
+  Ct.removeAllChildren();
+  Ct.alpha=0;
+  var shape = new createjs.Shape();
+  shape.graphics.beginFill("black");
+  shape.graphics.beginStroke("white");
+  shape.graphics.setStrokeStyle(2);
+  shape.graphics.drawRect(200, 60, 400, 400);
+  shape.alpha=0.7;
+  Ct.addChild(shape);
+  Cstar.x=270;
+  Cstar.y=90;
+  Cstar.rotation=-15;
+  Cstar.scale=0.7
+  Ct.addChild(Cstar);
+  var t=new createjs.Text("RESULT","32px serif","orange");
+  t.x=320;
+  t.y=90;
+  Ct.addChild(t);
+  var shapeBG = new createjs.Shape();
+  shapeBG.graphics.beginFill("#f06787");
+  shapeBG.graphics.drawRect(330, 350, 105, 60);
+  Ct.addChild(shapeBG);
   UserItem[product]-=pnum*loop;
   var J=0;
   for(var i=0;i<materialA.length;i++){
@@ -10442,30 +10474,8 @@ function AssemCompare(product,type,loop){
     InvConfig(0);
     if(!debugmode){saveLocal();}
   }
-  Ct.removeAllChildren();
-  Ct.alpha=0;
-  var shape = new createjs.Shape();
-  shape.graphics.beginFill("black");
-  shape.graphics.beginStroke("white");
-  shape.graphics.setStrokeStyle(2);
-  shape.graphics.drawRect(200, 60, 400, 400);
-  shape.alpha=0.7;
-  Ct.addChild(shape);
-  Cstar.x=270;
-  Cstar.y=90;
-  Cstar.rotation=-15;
-  Cstar.scale=0.7
-  Ct.addChild(Cstar);
-  var t=new createjs.Text("RESULT","32px serif","orange");
-  t.x=320;
-  t.y=90;
-  Ct.addChild(t);
-  var shape = new createjs.Shape();
-  shape.graphics.beginFill("#f06787");
-  shape.graphics.drawRect(330, 350, 105, 60);
-  Ct.addChild(shape);
   if(Crisona.length && henirarea[0].cleared==2){
-  shape.addEventListener("click", {card:1,handleEvent:AssembleTurt});
+  shapeBG.addEventListener("click", {card:1,handleEvent:AssembleTurt});
   function AssembleTurt(){
     se11.play();
     field.removeAllChildren();
@@ -10475,7 +10485,7 @@ function AssemCompare(product,type,loop){
     PathTalk(1);
   }
   }else{
-  shape.addEventListener("click", {card:1,handleEvent:Assemble});
+  shapeBG.addEventListener("click", {card:1,handleEvent:Assemble});
   }
   var t=new createjs.Text("OK","bold 24px 'メイリオ'","white");
   t.x=360;
@@ -12753,15 +12763,16 @@ function Gameretry(t=0){
         var M=1+Math.floor(Math.random()*(decks.length-2));
         decks.splice(M,1,-100);
       }
-      if(playMode[1]==0 && henirarea[0].cleared==1){
-        //チュートリアル
-        hands=[[],[1],[10,8],[9],[],[]];
-        decks=[7];
-      }
       Fever=0;
       EvAry=[{id:0,word:"アイテムロスト！　3つ落としちゃった！"},{id:1,word:"タイプチェンジ！　カッターとドリルがチェンジ！"},{id:2,word:"フィーバー！　好きなカードを3枚取れるよ！"},{id:3,word:"アイテム増加！　所持アイテムが増えたよ！"}];
       Extras=[0,0,0,0];//0->連鎖数 1->0:カッター1:ドリル 2->獲得素材id 3->個数
       Exlists=[[],[],[],[],[],[]];//0->extras[1]テキスト 1->extras[2] 2->extras[3] 3->getitem 4->メッセージ格納 5->chara画像
+      if(playMode[1]==0 && henirarea[0].cleared==1){
+        //チュートリアル
+        hands=[[],[1],[10,8],[9],[],[]];
+        decks=[7];
+        EvAry=[{id:1,word:"タイプチェンジ！　カッターとドリルがチェンジ！"}]
+      }
     for(var i=0;i<hands.length;i++){
       for(var j=0;j<hands[i].length;j++){
       var newCard = new createjs.Bitmap(Card_src[hands[i][j]]);
@@ -13621,6 +13632,15 @@ return -1;
           if(UserStatus[4]>0){UserStatus[4]=0}
         };
         if(henirarea[0].cleared>2){
+          if(playMode[0]==4){
+            for(var i=0;i<areaRecipe[playMode[1]].length;i++){
+              if(AssemCompare(areaRecipe[playMode[1]][i],-1) && userRecipe.indexOf(areaRecipe[playMode[1]][i])==-1){
+                userRecipe.push(-areaRecipe[playMode[1]][i]);
+                if(debugmode){console.log(areaRecipe[playMode[1]][i])};
+              break;
+            }
+          }
+        }else{
         var E=(playMode[0]-1)*30+duelLog.length%assembleA.length;
         var F=3+Math.floor(duelLog.length/10);
         for(var i=0;i<F;i++){
@@ -13631,7 +13651,8 @@ return -1;
             userRecipe.push(-assembleA[I]);
             if(debugmode){console.log(assembleA[I])};
             break;
-          }}
+            }}
+          };
         };
         var Rank="F";
         disp();
@@ -14234,6 +14255,20 @@ return -1;
         MsgNext(-1);
         break;
       case 8:
+        if(UserLibrary.indexOf(1)!==-1){
+          MsgAry.push(["リティア","今回は、&クリソナを使った錬成について教えてあげる！",0,0,3,1]);
+          MsgAry.push(["狭間","ぼくに？",1])
+          MsgAry.push(["リティア","クリソナは、いろいろな鉱石に含まれる鉱物で、&世界の境界を開く力を秘めているんだよ。"]);
+          MsgAry.push(["リティア","その力を応用したのがクリソナを使った錬成。&物質と物質の境界を開いて中和させることで、&新たな組成の物質を生み出す仕組みなの。"]);
+          MsgAry.push(["リティア","クリソナの純度が高ければ高いほど、&力も強く、錬成も成功しやすくなる。&……ダメなときはダメだけど。"]);
+          MsgAry.push(["狭間","……。",1])
+          MsgAry.push(["リティア","昔ジョイに教わったんだ。&錬成を極めたら……ジョイに辿り着けるかな……。"]);
+          MsgAry.push(["狭間","……。",1])
+          MsgAry.push(["リティア","……もしかして、寝てた？"]);
+          MsgAry.push(["狭間","……あ。いや？　そんなことないよ。",1])
+          MsgAry.push(["狭間","えーと……&たくさんの種類のアイテムを錬成して、&思いが届くといいね。",1])
+          MsgAry.push(["end"]);
+        }else{
         MsgAry.push(["リティア","ん～！　……ちょっと休憩しよ。",0,0,3,1]);
         MsgAry.push(["狭間","あ……そうだ。&この部屋、テーブルの他にも&いろいろ触れるものがあるよね。",1])
         MsgAry.push(["リティア","ああ、床に転がってる地図とか、&壁にかかってる額縁とか？"]);
@@ -14243,24 +14278,51 @@ return -1;
         MsgAry.push(["リティア","まぁ、このリティア・ベリルに解けない謎はないよ！"]);
         MsgAry.push(["狭間","答えはソリティアの中にある。&覚えておくといいよ。",1]);
         MsgAry.push(["end"]);
+        }
         MsgNext(-1);
         break;
         case 9:
+          if(UserLibrary.indexOf(1)!==-1){
+            MsgAry.push(["リティア","うーん……。",0,0,3,1]);
+            MsgAry.push(["狭間","何を悩んでるの？",1])
+            MsgAry.push(["リティア","素材が集まらない～。&錬成のレシピが思いつかない～。"]);
+            MsgAry.push(["狭間","最初のトランプの色と、連鎖数によって、&手に入る素材は変わるみたいだよ。",1])
+            MsgAry.push(["リティア","広く浅く採取してたら&ルーブ草しか手に入らない……&っていうこともあるわけね。"]);
+            MsgAry.push(["狭間","錬成のレシピは、&ヘニルの時空の採取地に通うことでも&思いつくけど……。",1])
+            MsgAry.push(["狭間","クロンダイクやマグマンタ、防衛戦でも&レシピが浮かぶことがあるみたいだよ。",1])
+            MsgAry.push(["リティア","面倒だなあ。"]);
+            MsgAry.push(["狭間","そんなこと言わずに、たまにはこっちにも遊びにおいでよ。",1])
+            MsgAry.push(["end"]);
+          }else{
           MsgAry.push(["リティア","宝の地図かと思ったら、楽譜だった。",0,0,3,1]);
           MsgAry.push(["狭間","ああ、そこの床に転がってるやつ？",1])
           MsgAry.push(["リティア","このマーク、どこかで見たことがあるのよねー……。&……どこだろう……。"]);
           MsgAry.push(["狭間","クロンダイクの絵札をよく見てみたらどうかな。&なにか気づくかも。",1])
           MsgAry.push(["リティア","絵札の模様？&全部似たような感じに見えるけどな……"]);
           MsgAry.push(["end"]);
+          }
           MsgNext(-1);
         break;
         case 10:
+          if(UserLibrary.indexOf(1)!==-1){
+            MsgAry.push(["リティア","いたたた……&もう！　ひどい目に遭った。",0,0,3,1]);
+            MsgAry.push(["狭間","大丈夫？",1])
+            MsgAry.push(["リティア","採取地のモンスターが強すぎるのよ！"]);
+            MsgAry.push(["リティア","せっかく採取したアイテムも&全部捨てて、逃げ帰ってくる羽目になるし。"]);
+            MsgAry.push(["狭間","弱点をつける攻撃アイテムがあると便利だよね。&それから、特定のアイテムを使うと&リティアのステータスを強化することができるよ。",1])
+            MsgAry.push(["狭間","逆に、あまりバトルにこだわらないのも一つの方法だよ。",1])
+            MsgAry.push(["狭間","「疾風のりんご」を持っているなら、&逃げた時にも素材を獲得できるし。",1])
+            MsgAry.push(["狭間","「ＱＰエルゼリー」を持っているなら、&モンスターを仲間にできるかもしれないよ。",1])
+            MsgAry.push(["リティア","疾風のりんごに、エルゼリーね……。&オッケー！"]);
+            MsgAry.push(["end"]);
+          }else{
           MsgAry.push(["リティア","ねぇ、そこに飾ってある意味ありげな額縁のこと、&何か知らない？",0,0,3,1]);
           MsgAry.push(["リティア","このパネル、どこかで見たことがあるのよねー……。&……どこだろう……。"]);
           MsgAry.push(["狭間","マグマンタの絵札をよく見てみたらどうかな。&なにか気づくかも。",1])
           MsgAry.push(["リティア","絵札の模様？&全部似たような感じに見えるけどな……"]);
           MsgAry.push(["end"]);
           MsgNext(-1);
+          }
         break;
       case 11:
         MsgAry.push(["リティア","このトランプの絵札に描かれている人たち、&「エル捜索隊」よね。",0,0,3,1]);
@@ -14542,6 +14604,7 @@ return -1;
         MsgAry.push(["リティア","トマトとメロンに氷のクリソナを使った、&最高のデザート。きっとあれがあれば……。"]);
         MsgAry.push(["end"]);
         MsgNext(-1);
+        InvID(0,8);
       }
       saveLocal();
       return false;
