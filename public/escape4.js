@@ -97,7 +97,7 @@ var dragPointX;
 var dragPointY;
 var mute="ON"
 var debugmode=false;//出荷時にfalseにする
-var titletext="v1.02/Click Card to START";
+var titletext="v1.03/Click Card to START";
 var cLock=true;//true->操作可能
 var opLock=0;//漫然と使っている -1->gamestartまで 10->×ボタンを禁止する　その他いろいろ
 var mLock=true;//deckめくっている最中falseとする
