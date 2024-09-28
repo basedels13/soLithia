@@ -96,7 +96,7 @@ Invcursor.alpha=0;
 var dragPointX;
 var dragPointY;
 var mute="ON"
-var debugmode=true;//出荷時にfalseにする
+var debugmode=false;//出荷時にfalseにする
 var titletext="v1.031/Click Card to START";
 var cLock=true;//true->操作可能
 var opLock=0;//漫然と使っている -1->gamestartまで 10->×ボタンを禁止する　その他いろいろ
@@ -7286,6 +7286,7 @@ function Destraction(i=0,A,B,C){
   Decklists.push(newCard);
   createjs.Tween.get(newCard)
   .to({x:680,y:425-Decklists.length*0.5},80)
+  Sprite1.scale=1;
   Sprite1.x=115;
   Sprite1.y=70+140*i;
   Sprite1.gotoAndPlay('walk');
