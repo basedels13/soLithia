@@ -1,5 +1,7 @@
 // ver 1.03 上に上げたカードを降ろせるように
 // スポア-山札の枚数が増える？
+// やっぱりやる気あれば→採取地ごとに判明しやすいレシピの追加、レシピ判明のヒント
+// 敵のドロップアイテム数を増やす？
 window.onload = function(){
 main();
 };
@@ -10399,45 +10401,6 @@ function AssemCompare(product,type,loop){
   //ドン
   opLock=10;
   cookready(3+loop,"加工中・・・");
-  Ct.removeAllChildren();
-  Ct.alpha=0;
-  var shape = new createjs.Shape();
-  shape.graphics.beginFill("black");
-  shape.graphics.beginStroke("white");
-  shape.graphics.setStrokeStyle(2);
-  shape.graphics.drawRect(200, 60, 400, 400);
-  shape.alpha=0.7;
-  Ct.addChild(shape);
-  Cstar.x=270;
-  Cstar.y=90;
-  Cstar.rotation=-15;
-  Cstar.scale=0.7
-  Ct.addChild(Cstar);
-  var t=new createjs.Text("RESULT","32px serif","orange");
-  t.x=320;
-  t.y=90;
-  Ct.addChild(t);
-  var shape = new createjs.Shape();
-  shape.graphics.beginFill("#f06787");
-  shape.graphics.drawRect(330, 350, 105, 60);
-  Ct.addChild(shape);
-  if(Crisona.length && henirarea[0].cleared==2){
-  shape.addEventListener("click", {card:1,handleEvent:AssembleTurt});
-  function AssembleTurt(){
-    se11.play();
-    field.removeAllChildren();
-    opLock=0;
-    Titleyard.alpha=1;
-    henirarea[0].cleared=3;
-    PathTalk(1);
-  }
-  }else{
-  shape.addEventListener("click", {card:1,handleEvent:Assemble});
-  }
-  var t=new createjs.Text("OK","bold 24px 'メイリオ'","white");
-  t.x=360;
-  t.y=365;
-  Ct.addChild(t); 
   UserItem[product]-=pnum*loop;
   var J=0;
   for(var i=0;i<materialA.length;i++){
@@ -10481,6 +10444,45 @@ function AssemCompare(product,type,loop){
     InvConfig(0);
     if(!debugmode){saveLocal();}
   }
+  Ct.removeAllChildren();
+  Ct.alpha=0;
+  var shape = new createjs.Shape();
+  shape.graphics.beginFill("black");
+  shape.graphics.beginStroke("white");
+  shape.graphics.setStrokeStyle(2);
+  shape.graphics.drawRect(200, 60, 400, 400);
+  shape.alpha=0.7;
+  Ct.addChild(shape);
+  Cstar.x=270;
+  Cstar.y=90;
+  Cstar.rotation=-15;
+  Cstar.scale=0.7
+  Ct.addChild(Cstar);
+  var t=new createjs.Text("RESULT","32px serif","orange");
+  t.x=320;
+  t.y=90;
+  Ct.addChild(t);
+  var shape = new createjs.Shape();
+  shape.graphics.beginFill("#f06787");
+  shape.graphics.drawRect(330, 350, 105, 60);
+  Ct.addChild(shape);
+  if(Crisona.length && henirarea[0].cleared==2){
+  shape.addEventListener("click", {card:1,handleEvent:AssembleTurt});
+  function AssembleTurt(){
+    se11.play();
+    field.removeAllChildren();
+    opLock=0;
+    Titleyard.alpha=1;
+    henirarea[0].cleared=3;
+    PathTalk(1);
+  }
+  }else{
+  shape.addEventListener("click", {card:1,handleEvent:Assemble});
+  }
+  var t=new createjs.Text("OK","bold 24px 'メイリオ'","white");
+  t.x=360;
+  t.y=365;
+  Ct.addChild(t); 
   };
   if(type==1){
   //カッ
@@ -10583,14 +10585,11 @@ function AssemCompare(product,type,loop){
     t.y=180;
     Ct.addChild(t);
     }
-  if(R>successRate){
-    var t=new createjs.Text("素材は一部返還されます。","24px serif","white");
+  if(R>successRate || product==134){
+    var t=new createjs.Text("素材は返還されます。","24px serif","white");
     t.x=260;
     t.y=270;
     Ct.addChild(t);
-    for(var i=0;i<materialA.length;i++){
-      UserItem[materialA[i]]-=Math.floor(mnumA[i]*loop/2);
-    }
   }else{
     for(var i=0;i<materialA.length;i++){
       UserItem[materialA[i]]-=mnumA[i]*loop;
