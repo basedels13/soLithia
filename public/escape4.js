@@ -97,7 +97,7 @@ var dragPointX;
 var dragPointY;
 var mute="ON"
 var debugmode=false;//出荷時にfalseにする
-var titletext="v1.031/Click Card to START";
+var titletext="v1.032/Click Card to START";
 var cLock=true;//true->操作可能
 var opLock=0;//漫然と使っている -1->gamestartまで 10->×ボタンを禁止する　その他いろいろ
 var mLock=true;//deckめくっている最中falseとする
@@ -7603,6 +7603,7 @@ function handleMove(event) {
     }
 }};
 function handleUp(event) {
+  if(debugmode){console.log(cLock);}
   if(cLock && mLock && opLock==0){
     switch(playMode[0]){
       case 1:
@@ -8282,6 +8283,7 @@ function handleUp(event) {
           }
           if(playMode[1]==1){CardTurn();};
           cLock=true;
+          console.log('endPhase',cLock)
           break;
         case 2:
           CardTurn();
@@ -8401,6 +8403,7 @@ function handleUp(event) {
       //extraへ追加
       createjs.Tween.get(newCard)
       .to({x:50+(TX+3)*(cardWidth+cardgapX),y:5},70)
+      .wait(300)
       .call(endPhase);
       Exlists[TX].push(newCard);
       newCard.addEventListener("mousedown", {card:1000+TX,handleEvent:handleDown});
