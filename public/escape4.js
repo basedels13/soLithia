@@ -9582,8 +9582,10 @@ function Assemble(){
         //錬成
           var Hash=25+userRecipe.length*25;
           //知っているレシピをぜんぶ表示
+          //負の物は正にもどす、ダブっているものは重複を解除
           userRecipe.sort(compareFunc);
         for(var i=0;i<userRecipe.length;i++){
+          if(userRecipe[i]>0){
             var t = new createjs.Shape();
             t.graphics.beginFill("black");
             t.graphics.drawRect(55, 100+25*i, 265, 25);
@@ -9600,6 +9602,7 @@ function Assemble(){
             t.addEventListener("click", {type:1,product:userRecipe[i],loop:1,handleEvent:Alchemyset});
             //材料が足りない物は色を変える
           }
+        }
         break;  
         case 3:
           //えらんで錬成
@@ -12477,6 +12480,30 @@ function Gameend(){
   deckmap.removeAllChildren();
   Backyard.removeAllChildren();
   MsgAry=[];
+  //レシピ
+  if(henirarea[0].cleared>2){
+    if(playMode[0]==4){
+      for(var i=0;i<areaRecipe[playMode[1]].length;i++){
+        if(AssemCompare(areaRecipe[playMode[1]][i],-1) && userRecipe.indexOf(areaRecipe[playMode[1]][i])==-1){
+          userRecipe.push(-areaRecipe[playMode[1]][i]);
+          if(debugmode){console.log(areaRecipe[playMode[1]][i])};
+        break;
+      }
+    }
+  }else{
+  var E=(playMode[0]-1)*30+duelLog.length%assembleA.length;
+  var F=3+Math.floor(duelLog.length/10);
+  for(var i=0;i<F;i++){
+    var I=i+E;
+    if(I>assembleA.length){I-=assembleA.length};
+    if(debugmode){console.log(I)};
+    if(AssemCompare(assembleA[I],-1) && userRecipe.indexOf(assembleA[I])==-1){
+      userRecipe.push(-assembleA[I]);
+      if(debugmode){console.log(assembleA[I])};
+      break;
+      }}
+    };
+  };
   if(henirarea[8].cleared>1){henirarea[8].cleared=1}
   opLock=0;
   menu(1);
@@ -13634,29 +13661,6 @@ return -1;
         totalcardmove+=duelLog.length-1;
         if(playMode[0]==4){
           if(UserStatus[4]>0){UserStatus[4]=0}
-        };
-        if(henirarea[0].cleared>2){
-          if(playMode[0]==4){
-            for(var i=0;i<areaRecipe[playMode[1]].length;i++){
-              if(AssemCompare(areaRecipe[playMode[1]][i],-1) && userRecipe.indexOf(areaRecipe[playMode[1]][i])==-1){
-                userRecipe.push(-areaRecipe[playMode[1]][i]);
-                if(debugmode){console.log(areaRecipe[playMode[1]][i])};
-              break;
-            }
-          }
-        }else{
-        var E=(playMode[0]-1)*30+duelLog.length%assembleA.length;
-        var F=3+Math.floor(duelLog.length/10);
-        for(var i=0;i<F;i++){
-          var I=i+E;
-          if(I>assembleA.length){I-=assembleA.length};
-          if(debugmode){console.log(I)};
-          if(AssemCompare(assembleA[I],-1) && userRecipe.indexOf(assembleA[I])==-1){
-            userRecipe.push(-assembleA[I]);
-            if(debugmode){console.log(assembleA[I])};
-            break;
-            }}
-          };
         };
         var Rank="F";
         disp();
