@@ -1,7 +1,6 @@
 // ver 1.03 上に上げたカードを降ろせるように
 // スポア-山札の枚数が増える？
 // やっぱりやる気あれば→採取地ごとに判明しやすいレシピの追加、レシピ判明のヒント
-// 敵のドロップアイテム数を増やす？
 window.onload = function(){
 main();
 };
@@ -98,7 +97,7 @@ Invcursor.alpha=0;
 var dragPointX;
 var dragPointY;
 var mute="ON"
-var debugmode=false;//出荷時にfalseにする
+var debugmode=true;//出荷時にfalseにする
 var titletext="v1.03/Click Card to START";
 var cLock=true;//true->操作可能
 var opLock=0;//漫然と使っている -1->gamestartまで 10->×ボタンを禁止する　その他いろいろ
@@ -4779,7 +4778,7 @@ function undoButton(event){
         console.log(Ary);
         console.log(Ary.card,Ary.card[0]);
       }
-      //-1 Deck 10- Ex
+      //-1 Deck 1000- Ex
           for(var i=0;i<Ary.card.length;i++){
             var T=Ary.card[i];
             switch(Ary.from){
@@ -4815,11 +4814,11 @@ function undoButton(event){
                   newCard.addEventListener("pressmove", {card:HashCard,handleEvent:handleMove});
                   newCard.addEventListener("pressup", {card:HashCard,handleEvent:handleUp});
                   switch(Ary.to){
-                    case 10:
-                      case 11:
-                        case 12:
-                          case 13:
-                  newCard.x=230+(Ary.to-10)*(cardWidth+cardgapX);
+                    case 1000:
+                      case 1001:
+                        case 1002:
+                          case 1003:
+                  newCard.x=230+(Ary.to-1000)*(cardWidth+cardgapX);
                   newCard.y=5;
                   newCard.alpha=1;
                   createjs.Tween.get(newCard)
@@ -4836,19 +4835,19 @@ function undoButton(event){
                   .call(step);
                   }
               break;
-              case 10:
-                case 11:
-                  case 12:
-                    case 13:
+              case 1000:
+                case 1001:
+                  case 1002:
+                    case 1003:
               //再度上へ上げる
-                Extras[TX]+=1;
+                Extras[Ary.from-1000]+=1;
                 var newCard = new createjs.Bitmap(Card_src[T]);
                 newCard.x=50+(Ary.to)*(cardWidth+cardgapX);
                 newCard.y=150+(hands[Ary.to].length-1)*cardgapY;
                 field.addChild(newCard);
                 createjs.Tween.get(newCard)
-                .to({x:50+(Ary.from-7)*(cardWidth+cardgapX),y:5},70);
-                Exlists[Ary.from-10].push(newCard);
+                .to({x:50+(Ary.from+3-1000)*(cardWidth+cardgapX),y:5},70);
+                Exlists[Ary.from-1000].push(newCard);
                 newCard.addEventListener("mousedown", {card:Ary.from,handleEvent:handleDown});
                 newCard.addEventListener("pressmove", {card:Ary.from,handleEvent:handleMove});
                 newCard.addEventListener("pressup", {card:Ary.from,handleEvent:handleUp});
@@ -4856,11 +4855,11 @@ function undoButton(event){
               default:
                 var newCard = new createjs.Bitmap(Card_src[T]);
                 switch(Ary.to){
-                  case 10:
-                    case 11:
-                      case 12:
-                        case 13:
-                newCard.x=230+(Ary.to-10)*(cardWidth+cardgapX);
+                  case 1000:
+                    case 1001:
+                      case 1002:
+                        case 1003:
+                newCard.x=230+(Ary.to-1000)*(cardWidth+cardgapX);
                 newCard.y=5;
                   break;
                   default:
@@ -4879,12 +4878,12 @@ function undoButton(event){
               break;
             }
             switch(Ary.to){
-              case 10:
-                case 11:
-                  case 12:
-                    case 13:
+              case 1000:
+                case 1001:
+                  case 1002:
+                    case 1003:
                       //Ex
-                      var TX=Ary.to -10;
+                      var TX=Ary.to-1000;
                         Extras[TX]-=1;
                         var T=Exlists[TX].pop();
                         field.removeChild(T);
@@ -7300,7 +7299,7 @@ function moveAllow(card=0){
         }else{
           return false;
         };
-      }else if(this.card>=10 && this.card<=13){
+      }else if(card>=1000 && card<=1003){
         //クリア済みのカード
         return true;
       }
@@ -7412,9 +7411,9 @@ switch(playMode[0]){
           T.alpha=0.5;
           se1.play()
           return true;
-          }else if(this.card>=10 && this.card<=13){
+          }else if(this.card>=1000 && this.card<=1003){
             //クリア済みのカード
-            var T=Exlists[this.card-10][Exlists[this.card-10].length-1];
+            var T=Exlists[this.card-1000][Exlists[this.card-1000].length-1];
             dragPointX = stage.mouseX - T.x;
             dragPointY = stage.mouseY - T.y;
             T.alpha=0.5;
@@ -7516,9 +7515,9 @@ function handleMove(event) {
                 T.x = stage.mouseX-dragPointX;
                 T.y = stage.mouseY-dragPointY;
               return true;
-            }else if(this.card>=10 && this.card<=13){
+            }else if(this.card>=1000 && this.card<=1003){
               //クリア済みのカード
-              var T=Exlists[this.card-10][Exlists[this.card-10].length-1];
+              var T=Exlists[this.card-1000][Exlists[this.card-1000].length-1];
               T.x = stage.mouseX-dragPointX;
               T.y = stage.mouseY-dragPointY;
               return true;
@@ -7683,14 +7682,14 @@ function handleUp(event) {
             }
           };
           return true;
-        }else if(this.card>=10 && this.card<=13){
+        }else if(this.card>=1000 && this.card<=1003){
           //クリア済みのカード
           se1.play()
           cLock=false;
-          var T=Exlists[this.card-10][Exlists[this.card-10].length-1];
+          var T=Exlists[this.card-1000][Exlists[this.card-1000].length-1];
           var TX=Math.floor((stage.mouseX-70)/90);
           var TY=stage.mouseY;
-          var X=Extras[this.card-10];
+          var X=Extras[this.card-1000];
           if(debugmode){console.log(this.card,X,TX,TY)};
         if(TY<140){
           ExitCard(this.card);
@@ -7726,8 +7725,8 @@ function handleUp(event) {
                   .call(endPhase);
                   //listから消去
                   field.removeChild(T);
-                  Exlists[this.card-10].pop();
-                  Extras[this.card-10]-=1;
+                  Exlists[this.card-1000].pop();
+                  Extras[this.card-1000]-=1;
                   duelLog.push({card:[X],from:this.card,to:TX});
             }else{
               ExitCard(this.card);
@@ -8311,11 +8310,11 @@ function handleUp(event) {
       }
       switch(playMode[0]){
         case 1:
-          if(t>=10){
+          if(t>=1000){
             //クリア済みのカード
-            var T=Exlists[t-10][Exlists[t-10].length-1];
+            var T=Exlists[t-1000][Exlists[t-1000].length-1];
             createjs.Tween.get(T)
-            .to({x:50+(t-7)*(cardWidth+cardgapX),y:5},90)
+            .to({x:50+(t+3-1000)*(cardWidth+cardgapX),y:5},90)
             .call(endPhase);
             T.alpha=1;  
             return true; 
@@ -8394,9 +8393,9 @@ function handleUp(event) {
       .to({x:50+(TX+3)*(cardWidth+cardgapX),y:5},70)
       .call(endPhase);
       Exlists[TX].push(newCard);
-      newCard.addEventListener("mousedown", {card:10+TX,handleEvent:handleDown});
-      newCard.addEventListener("pressmove", {card:10+TX,handleEvent:handleMove});
-      newCard.addEventListener("pressup", {card:10+TX,handleEvent:handleUp});
+      newCard.addEventListener("mousedown", {card:1000+TX,handleEvent:handleDown});
+      newCard.addEventListener("pressmove", {card:1000+TX,handleEvent:handleMove});
+      newCard.addEventListener("pressup", {card:1000+TX,handleEvent:handleUp});
       if(from==0){
         //cardlistから消去
         deckmap.removeChild(T);
@@ -8404,13 +8403,13 @@ function handleUp(event) {
         decksNow-=1;
         decksNow2-=1
         deckfaces.pop();
-        duelLog.push({card:[X],from:-1,to:10+TX});
+        duelLog.push({card:[X],from:-1,to:1000+TX});
       }else{
         //cardlistから消去
         field.removeChild(T);
         Cardlists[I].splice(J,1);
         hands[I].splice(J,1);
-        duelLog.push({card:[C],from:I,to:10+TX});
+        duelLog.push({card:[Extras[TX]],from:I,to:1000+TX});
       }
       //クリア条件
       if(Extras[0]==13 && Extras[1]==26 && Extras[2]==39 && Extras[3]==52){
