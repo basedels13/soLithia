@@ -97,8 +97,8 @@ Invcursor.alpha=0;
 var dragPointX;
 var dragPointY;
 var mute="ON"
-var debugmode=true;//出荷時にfalseにする
-var titletext="v1.03/Click Card to START";
+var debugmode=false;//出荷時にfalseにする
+var titletext="v1.031/Click Card to START";
 var cLock=true;//true->操作可能
 var opLock=0;//漫然と使っている -1->gamestartまで 10->×ボタンを禁止する　その他いろいろ
 var mLock=true;//deckめくっている最中falseとする
@@ -782,6 +782,7 @@ const assembleA=new Array(1,2,3,4,7,8,9,11,12,13,16,17,28,48,59,61,64,65,67,68,7
 //戦闘
 const consumptionA=new Array(9,23,24,25,26,29,30,31,35,36,41,46,89,90,91,92,93,94,95,96,97,98,99,100,104,105,106,107,108,109,112,113,114,115,116,117,118,119,120,121,122,123,124,125,126,127,128,129,130,131,134,145,147,154,155,157);
 const medicineA=new Array(84,85,86,87,88,110,111);
+//const
 var vpronum=0;
 var vmatnameA=[]
 var vmatnumA=[]
@@ -4570,10 +4571,8 @@ if(this.type==0){
   achieveAry2.push(t);
   var T=achievepage[1];
   T.text=(achievepage[2]+1)+"/2";
-  if(InvID(7)==1){
   var T=achievepage[3];
   T.text=(achievepage[0]+1)+"/"+(1+Math.floor((achieve.length-1)/9));
-  }
   }};
 }else if(this.type==1){
   var Car6 = new createjs.Bitmap("Card_images/BackColor_Black.png");
