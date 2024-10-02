@@ -5693,7 +5693,14 @@ function Battle(Ev=-1){
         }else{
         StatusE[0]-=D;
         battleLog.push("damage");
-        battleLog.push(OPname+"に&"+D+"のダメージ！");
+        var D=Bufflist.findIndex(value=>value.name=="ジョイフルライト");
+        var A=Pbuff.indexOf(D);
+        if(A!==-1){
+          //表記だけ
+          battleLog.push(OPname+"に&"+(D*8)+"のダメージ！");
+        }else{
+          battleLog.push(OPname+"に&"+D+"のダメージ！");
+        }
         var B=Bufflist.findIndex(value=>value.name=="満身創痍")
         if(Ebuff.indexOf(B)!==-1){    
         battleLog.push(OPname+"は膝をついた！");
