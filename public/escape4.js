@@ -5693,8 +5693,8 @@ function Battle(Ev=-1){
         }else{
         StatusE[0]-=D;
         battleLog.push("damage");
-        var D=Bufflist.findIndex(value=>value.name=="ジョイフルライト");
-        var A=Pbuff.indexOf(D);
+        var AA=Bufflist.findIndex(value=>value.name=="ジョイフルライト");
+        var A=Pbuff.indexOf(AA);
         if(A!==-1){
           //表記だけ
           battleLog.push(OPname+"に&"+(D*8)+"のダメージ！");
