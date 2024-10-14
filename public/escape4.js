@@ -1,6 +1,6 @@
-// ver 1.03 上に上げたカードを降ろせるように
+// ver 1.034 ヒント、実績緩和
 // スポア-山札の枚数が増える？
-// ペットの攻撃の命中率　ED後のボタン出すタイミングをおくらせました
+// ペットの攻撃の命中率
 window.onload = function(){
 main();
 };
@@ -11792,7 +11792,7 @@ window.addEventListener("keyup", keyupHandler, false);
               jingle.play();
               createjs.Tween.get(Ct)
               .to({y:-5100},70000)
-              .wait(5000)
+              .wait(10000)
               .call(returnBt);
             }
             function returnBt(){
