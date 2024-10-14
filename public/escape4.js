@@ -98,7 +98,7 @@ var dragPointX;
 var dragPointY;
 var mute="ON"
 var debugmode=false;//出荷時にfalseにする
-var titletext="v1.033/Click Card to START";
+var titletext="v1.034/Click Card to START";
 var cLock=true;//true->操作可能
 var opLock=0;//漫然と使っている -1->gamestartまで 10->×ボタンを禁止する　その他いろいろ
 var mLock=true;//deckめくっている最中falseとする
@@ -14327,9 +14327,9 @@ return -1;
           }else{
           MsgAry.push(["リティア","そこの床に落ちてる羊皮紙、どう思う？&絶対、お宝のありかが書いてあると思うんだけど。",0,0,3,1]);
           MsgAry.push(["狭間","うーん。五線譜ってことは、楽譜なのかな。&このマーク、どこかで見たことがあるような……。",1])
-          MsgAry.push(["リティア","クロンダイクのスートと同じマークだから、&きっとクロンダイクと関係がありそう。"]);
+          MsgAry.push(["リティア","クロンダイクのスートと同じマークだから、&きっとクロンダイクと関係があるのよ。"]);
           MsgAry.push(["狭間","クロンダイクのトランプとなると、&なにかあるとしたらJ～Kの絵札だよね。",1])
-          MsgAry.push(["リティア","絵札の模様を注意して見てみようか。&全部似たような感じに見えるけどな……"]);
+          MsgAry.push(["リティア","絵札の中のマークの位置に注目してみようか。&全部似たような感じに見えたけど……。"]);
           MsgAry.push(["狭間","クロンダイクのソリティア中に&トランプを特定の配置に置いたら&何か起きるのかも。",1]);
           MsgAry.push(["リティア","いろいろ試してみよう。"]);
           MsgAry.push(["end"]);
