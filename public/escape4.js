@@ -1,6 +1,4 @@
-// ver 1.034 ヒント、実績緩和
-// スポア-山札の枚数が増える？
-// ペットの攻撃の命中率
+// ver 1.035 ヒント、実績緩和
 window.onload = function(){
 main();
 };
@@ -98,7 +96,7 @@ var dragPointX;
 var dragPointY;
 var mute="ON"
 var debugmode=false;//出荷時にfalseにする
-var titletext="v1.034/Click Card to START";
+var titletext="v1.035/Click Card to START";
 var cLock=true;//true->操作可能
 var opLock=0;//漫然と使っている -1->gamestartまで 10->×ボタンを禁止する　その他いろいろ
 var mLock=true;//deckめくっている最中falseとする
@@ -653,7 +651,7 @@ var itemA=[
   {name:"TYPE-Cコア",price:88,class:"その他資源",detail:"第三世代のナソードコア。&ディシオン採掘場の敵から手に入る。"},
   {name:"魔力草のジュース",price:135,class:"製造",detail:"魔力草を煮詰めて作ったジュース。&効能はその時の運次第。&HPをランダムに回復する。"},
   {name:"炎のスムージー",price:136,class:"製造",detail:"燃えるような赤色のジュース。&使うと凍結状態を回復する。"},
-  {name:"貪欲のメダル",price:111,class:"製造",detail:"持っているだけで&素材が集まってくる魔法のメダル。&持っているとアイテムドロップが2倍になる（自動消費）"},
+  {name:"貪欲のメダル",price:111,class:"製造",detail:"持っているだけで&素材が集まってくる魔法のメダル。&持っているとアイテムドロップが2倍になる"},
   {name:"茹でロブスター",price:75,class:"製造",detail:"茹で上がった金色ロブスター。&食べるのがもったいないほどの高級感だ。&HPが70回復する。"},
   {name:"アポカリプスピッケル",price:158,class:"製造",detail:"無限のエネルギーを秘めた武器。&持っていると攻撃力がアップする。"},
 ]
@@ -6129,7 +6127,7 @@ function Battle(Ev=-1){
         if(Mon>=0){
           var M=Enemylist.findIndex(value=>value.name==userPet[0])
           var atk=Enemylist[M].St[1];
-          var D=Damage(0,Mon,atk);
+          var D=Damage(0,Mon,atk,Skilllist[Mon].hitrate);
           battleLog.push("attack");
           if(Mon==0){
             battleLog.push(userPet[0]+"の攻撃だ！&　");            
@@ -7021,7 +7019,7 @@ function CardTurn(p=0){
   //カードめくり@スパイダー
       for(var i=0;i<Cardlists.length;i++){
         if(hands[i][hands[i].length-1]<0 && hands[i][hands[i].length-1]!==-100){
-          hands[i][hands[i].length-1]=-(hands[i][hands[i].length-1])
+        hands[i][hands[i].length-1]=-(hands[i][hands[i].length-1])
         var Ary=[hands[i][hands[i].length-1]];
         var T=Cardlists[i].pop();
         var newCard = new createjs.Bitmap(Card_src[hands[i][hands[i].length-1]]);
@@ -11012,7 +11010,7 @@ function Crisonaset(){
     }
   }
 };
-  function Damage(P=0,Sid=0,subatk=0,subpow=0){
+  function Damage(P=0,Sid=0,subatk=0,subpow=0,subhitrate=0){
     //P 0->こっちの攻撃　1->あいての攻撃 id->スキルid subpow->入力されている場合は威力欄でこちらを参照する
     //命中判定
     //var StatusP=[100,100,100];//HP,ATK,DEF
@@ -11029,17 +11027,25 @@ function Crisonaset(){
         R=Math.random()*70;
       }
       var Pow=Skilllist[Sid].power;
-      if(UserItem[158]>0){Pow*=1.5};
+      if(UserItem[158]>0){Pow+=25};
       if(subpow>0){Pow=subpow};
       if(Skilllist[Sid].sp>0 && Skilllist[Sid].sp==StatusE[3]){
         //特攻判定 必中
         Pow*=2;
         R=0;
       }
+      if(subhitrate>0){
+        //ペットの攻撃
+        if(subhitrat<R){
+          result=-1;
+          return result;
+        }
+      }else{
       if(Skilllist[Sid].hitrate<R){
         result=-1;
         return result;
       }
+    }
     var EE=Bufflist.findIndex(value=>value.name=="闘魂ドリンク")
     var E=Pbuff.indexOf(EE)
     if(E!==-1){ATK=ATK*1.5};
@@ -12711,6 +12717,7 @@ function Gameretry(t=0){
         var R=Math.floor(Math.random()*(decks.length-1));
         decks.splice(R,0,-100);
       }}
+      Decklists=[];
       Extras=[0,0,0,0];
       Exlists=[[],[],[],[]];
       if(cleared[0][1]>0 && cleared[1][1]>0 && cleared[1][1]%5==0 && melonList[1]==0){
@@ -12812,7 +12819,6 @@ function Gameretry(t=0){
       //エリアごとにモンスター数は変更予定
       var Nary=[3,3,3,4,4,5,5,4,0]
       var N=Nary[playMode[1]]
-      if(UserItem[156]>0){UserItem[156]-=1;}
       if(UserStatus[4]==86 && playMode[1]!==8){N=Math.ceil(Nary[playMode[1]]/(2+Math.floor(Math.random()*3)))}
       for(var i=0;i<N;i++){
         var M=1+Math.floor(Math.random()*(decks.length-2));
@@ -13216,7 +13222,7 @@ function rulepage(){
       cLock=false;
     };
     //配る
-    //console.log('spiderdeal',i,hands[i]);
+    if(debugmode){console.log('spiderdeal',i,hands[i])};
     if(!Decklists.length){
       cLock=true;
       var Ary=new Array(i).fill(0)
@@ -13289,7 +13295,7 @@ function rulepage(){
       for(var i=B;i<hands[A].length;i++){
         var T=Cardlists[A][i];
         if(hands[A][i]==-100){
-        var newCard = new createjs.Bitmap('Card_images/Card_Spore.png');
+        var newCard= new createjs.Bitmap('Card_images/Card_Spore.png');
         }else{
         var newCard= new createjs.Bitmap(Card_src[hands[A][i]]);
         }
@@ -13299,7 +13305,6 @@ function rulepage(){
         field.addChild(newCard);
         Cardlists[A].splice(i,1,newCard);
         var HashCard=A*100+i;
-        //console.log(HashCard);
         newCard.addEventListener("mousedown", {card:HashCard,handleEvent:handleDown});
         newCard.addEventListener("pressmove", {card:HashCard,handleEvent:handleMove});
         newCard.addEventListener("pressup", {card:HashCard,handleEvent:handleUp});
@@ -13307,7 +13312,7 @@ function rulepage(){
       .to({y:newCard.y-cardgapY*C},80);
       SpiderSet();
     }
-      }
+    }
     //A-Kまで揃ったら左下へ移動する
     var TM=0;
     var TR=-1;
